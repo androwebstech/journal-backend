@@ -24,7 +24,7 @@ class Auth extends RestController {
 		$this->load->model('UserModel');
 	}
 	public function token_get(){
-		echo password_hash('111111', PASSWORD_BCRYPT);
+		echo password_hash('password', PASSWORD_BCRYPT);
 	}
 	public function print_get(){
 		$this->load->view('print_records');
