@@ -21,10 +21,10 @@ class Auth extends RestController {
 		$this->load->library(['form_validation']);
 		$this->load->helper(['url','common_helper','security']);
 		$this->load->model(['Authentication_model']);
-		$this->load->model('Admin_model');
+		$this->load->model('UserModel');
 	}
 	public function token_get(){
-		echo password_hash($this->input->get('password'), PASSWORD_BCRYPT);
+		echo password_hash('111111', PASSWORD_BCRYPT);
 	}
 	public function print_get(){
 		$this->load->view('print_records');
@@ -33,45 +33,48 @@ class Auth extends RestController {
 
 	public function login_post()
 {	
-    $this->form_validation->set_rules('email','Email','trim|required|xss_clean');
-    $this->form_validation->set_rules('password','Password','trim|required');
+    $this->form_validation->set_rules('email', 'Email', 'trim|required|xss_clean');
+    $this->form_validation->set_rules('password', 'Password', 'trim|required');
+    $this->form_validation->set_rules('type', 'Type', 'trim|required|in_list['. implode(', ', USER_TYPE::ALL).']');
 
-    if($this->form_validation->run())
-    {	
+
+    if ($this->form_validation->run()) {	
         $email = $this->input->post('email');
         $password = $this->input->post('password');
+        $type = $this->input->post('type');
         
+ 
+
         // Call the validate_login function to check credentials
-        $res = $this->Authentication_model->validate_login($email, $password);
+        $res = $this->Authentication_model->validate_login($email, $password,$type);
         
-        if(!empty($res))
-        {
+        if (!empty($res)) {
             $this->load->library('Authorization_Token');
             $token_data = [];
-            $token_data['id'] =  $res['id'];
+            $token_data['id'] = $res['id'];
             $token_data['email'] = $res['email'];
+            $token_data['type'] = $res['type']; 
             
             // Add user image if available
-            if(!empty($res['image'])){
-                $token_data['image'] = base_url("/uploads/".$res['image']);
+            if (!empty($res['image'])) {
+                $token_data['image'] = base_url("/uploads/" . $res['image']);
             }
-
-            $token_data['name'] = $res['name'];
-            $token_data['email'] = $res['email'];
             
             // Generate and return the token
             $token = $this->authorization_token->generateToken($token_data);
-            $result = ['status' => 200, 'message' => 'Login Successful!', 'user' => $token_data, 'auth_token' => $token];
-        }
-        else
-        {
+            $result = [
+                'status' => 200,
+                'message' => 'Login Successful!',
+                'user' => $token_data,
+                'auth_token' => $token
+            ];
+        } else {
             $result = ['status' => 403, 'message' => 'Invalid Credentials'];
         }
-    }
-    else
-    {
+    } else {
         $result = ['status' => 400, 'message' => strip_tags(validation_errors())];
     }
+    
     $this->response($result, RestController::HTTP_OK);
 }
 
@@ -79,21 +82,16 @@ class Auth extends RestController {
 public function register_post()
 {   		
     $this->load->database();
-    $this->load->library('form_validation');
-    $type = $this->input->post('type');
-    $valid_tables = ['users', 'journals', 'reviewers'];
-
-    if (!in_array($type, $valid_tables)) {
-        $result = ['status' => 400, 'message' => 'Invalid user type!'];
-        $this->response($result, RestController::HTTP_OK);
-        return;
-    }
+    $this->load->library('Authorization_Token');
+    
 
     // Validation rules
     $this->form_validation->set_rules('name', 'Name', 'trim|required');
     $this->form_validation->set_rules('contact', 'Mobile No', 'trim|required');
     $this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email|is_unique[users.email]', array('is_unique' => 'This Email is already registered.'));
     $this->form_validation->set_rules('password', 'Password', 'trim|required|min_length[6]');
+    $this->form_validation->set_rules('type', 'Type', 'trim|required|in_list['. implode(', ', USER_TYPE::ALL).']');
+
 
     if ($this->form_validation->run()) {
         
@@ -106,19 +104,29 @@ public function register_post()
             'contact' => $this->input->post('contact'),
             'email' => $this->input->post('email'),
             'password' => $password, 
+            'type' => $this->input->post('type'),
         ];
 
-        $res = $this->Admin_model->register($data);
+        $res = $this->UserModel->register($data);
 
         
         if (!empty($res)) {
             $token_data = [
                 'id' => $res['id'],
-                'email' => $res['email'],
-                'name' => $res['name'],
-                'contact' => $res['contact'],
+                'email' => $res['email'],              
+                'type' => $res['type'],
             ];
 
+// Generate and return the token
+$token = $this->authorization_token->generateToken($token_data);
+$result = [
+    'status' => 200,
+    'message' => 'Register Successful!',
+    'user' => $token_data,
+    'auth_token' => $token
+];
+
+            
             $result = ['status' => 200, 'message' => 'Register Successfully!', 'user' => $token_data];
         } else {
             

@@ -9,9 +9,9 @@ class Authentication_model extends CI_model
 		$this->load->helper(['common_helper']);
 	}
 
-	function validate_login($email, $password) {
+	function validate_login($email, $password,$type) {
 		$user = $this->db->select('*')->where('email', $email)->get('users')->row_array();
-		if (!empty($user) && $user['password'] === $password) { // Compare plain text password
+		if (!empty($user) && password_verify($password,$user['password']) && $type==$user['type']) { // Compare plain text password
 			return $user; 
 		}
 		
