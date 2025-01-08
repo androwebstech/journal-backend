@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 07, 2025 at 06:35 PM
+-- Generation Time: Jan 08, 2025 at 04:10 PM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 7.4.33
 
@@ -34,6 +34,26 @@ CREATE TABLE `admin` (
   `contact` int(50) NOT NULL,
   `password` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `contact_table`
+--
+
+CREATE TABLE `contact_table` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `message` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `contact_table`
+--
+
+INSERT INTO `contact_table` (`id`, `name`, `email`, `message`) VALUES
+(1, 'arohi', 'neha@gmail.com', 'this is me arohi singh');
 
 -- --------------------------------------------------------
 
@@ -89,7 +109,8 @@ INSERT INTO `users` (`id`, `name`, `email`, `contact`, `password`, `type`) VALUE
 (13, 'User', 'useop@gmail.com', 2147483647, '$2y$10$NoI2fDHh8P0YDRvOZxIFN.vPY7rvtJrGHwZ77sLEbMX', ''),
 (14, 'neha', 'neha@gmail.com', 77777777, '$2y$10$xRvt2x7lFfIewmLgPoVnle/b7hx1FNGTShA9NJjDzxu', 'author'),
 (15, 'neha', 'na@gmail.com', 77777777, '$2y$10$4D4vyYolpR3SiAm.gizw8uYQOFy6LyoEKqVgxFSCd13yacP9fF7Xq', 'author'),
-(16, 'neha', 'nehasingh@gmail.com', 77777777, '$2y$10$D8pAaJIKmDs.L7PFx.D.wumv.vDeEYfkqnySUZojDhy8vI8EIT29S', 'author');
+(16, 'neha', 'nehasingh@gmail.com', 77777777, '$2y$10$D8pAaJIKmDs.L7PFx.D.wumv.vDeEYfkqnySUZojDhy8vI8EIT29S', 'author'),
+(17, 'neha', 'arohinehasingh@gmail.com', 77777777, '$2y$10$XCjvuwNBu5pDX7Zn661ncOFYWWWNSReOHDhtsZxKGxrt8jTKh8No.', 'author');
 
 --
 -- Indexes for dumped tables
@@ -99,6 +120,12 @@ INSERT INTO `users` (`id`, `name`, `email`, `contact`, `password`, `type`) VALUE
 -- Indexes for table `admin`
 --
 ALTER TABLE `admin`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `contact_table`
+--
+ALTER TABLE `contact_table`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -124,10 +151,16 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `contact_table`
+--
+ALTER TABLE `contact_table`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -17,17 +17,12 @@ class Authentication_model extends CI_model
 		
 		return false;
 	}
-	
 
+	// Function to insert contact data
+    function insert_contact($data)
+    {
+        return $this->db->insert('contact_table', $data);
+    }
 
-	// function validate_login() {
-	// 	$users = $this->db->select('*')->get('users')->result_array();
-	
-	// 	foreach ($users as $user) {
-	// 		$hashed_password = password_hash($user['password'], PASSWORD_BCRYPT);
-	// 		$this->db->where('id', $user['id'])->update('users', ['password' => $hashed_password]);
-	// 	}
-	// }
-	
 	
 }
