@@ -35,7 +35,7 @@ class Auth extends RestController {
 {	
     $this->form_validation->set_rules('email', 'Email', 'trim|required|xss_clean');
     $this->form_validation->set_rules('password', 'Password', 'trim|required');
-    $this->form_validation->set_rules('type', 'Type', 'trim|required|in_list['. implode(', ', USER_TYPE::ALL).']');
+    $this->form_validation->set_rules('type', 'Type', 'trim|required|in_list['. implode(',', USER_TYPE::ALL).']');
 
 
     if ($this->form_validation->run()) {	
@@ -90,7 +90,7 @@ public function register_post()
     $this->form_validation->set_rules('contact', 'Mobile No', 'trim|required');
     $this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email|is_unique[users.email]', array('is_unique' => 'This Email is already registered.'));
     $this->form_validation->set_rules('password', 'Password', 'trim|required|min_length[6]');
-    $this->form_validation->set_rules('type', 'Type', 'trim|required|in_list['. implode(', ', USER_TYPE::ALL).']');
+    $this->form_validation->set_rules('type', 'Type', 'trim|required|in_list['. implode(',', USER_TYPE::ALL).']');
 
 
     if ($this->form_validation->run()) {
