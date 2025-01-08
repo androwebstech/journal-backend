@@ -144,7 +144,48 @@ $result = [
     $this->response($result, RestController::HTTP_OK);
 }
 
+//contact api
 
-	
+public function contact_post()
+    {
+
+         $this->load->model('Admin_model');
+        $this->load->library('form_validation');
+        $this->load->helper('url');
+        // Validation rules
+        $this->form_validation->set_rules('name', 'Name', 'trim|required');
+        $this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');
+        $this->form_validation->set_rules('message', 'Message', 'trim|required');
+
+        if ($this->form_validation->run()) {
+            $data = [
+                'name' => $this->input->post('name'),
+                'email' => $this->input->post('email'),
+                'message' => $this->input->post('message'),
+            ];
+
+            $res = $this->Admin_model->insert_contact($data);
+
+            if ($res) {
+                $result = [
+                    'status' => 200,
+                    'message' => 'Message sent successfully!',
+                    'data' => [
+                        'id' => $res,
+                        'name' => $data['name'],
+                        'email' => $data['email'],
+                        'message' => $data['message'],
+                    ]
+                ];
+            } else {
+                $result = ['status' => 500, 'message' => 'Something went wrong!'];
+            }
+        } else {
+            $result = ['status' => 400, 'message' => strip_tags(validation_errors())];
+        }
+
+        // Return the response
+        $this->response($result, RestController::HTTP_OK);
+    }
 
 }
