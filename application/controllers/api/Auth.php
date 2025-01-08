@@ -122,12 +122,18 @@ $token = $this->authorization_token->generateToken($token_data);
 $result = [
     'status' => 200,
     'message' => 'Register Successful!',
-    'user' => $token_data,
+    'user' => [
+                    'id' => $res['id'],
+                    'name' => $res['name'],
+                    'contact' => $res['contact'],
+                    'email' => $res['email'],
+                    'type' => $res['type'],
+                ],
     'auth_token' => $token
 ];
 
             
-            $result = ['status' => 200, 'message' => 'Register Successfully!', 'user' => $token_data];
+            $result = ['status' => 200, 'message' => 'Register Successfully!', 'user' => $result];
         } else {
             
             $result = ['status' => 500, 'message' => 'Something Went Wrong!'];
