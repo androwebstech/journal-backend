@@ -132,8 +132,6 @@ $result = [
     'auth_token' => $token
 ];
 
-            
-            $result = ['status' => 200, 'message' => 'Register Successfully!', 'user' => $result];
         } else {
             
             $result = ['status' => 500, 'message' => 'Something Went Wrong!'];
