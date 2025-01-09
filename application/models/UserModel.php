@@ -17,5 +17,12 @@ class UserModel extends CI_model
     }
     return false;
 }
+public function get_all_journals()
+{
+	$query = $this->db->get('journal_table');
+	return $query->result_array();
+}
+
+
 
 }

@@ -179,7 +179,59 @@ public function update_journal_post()
     $this->response($result, RestController::HTTP_OK);
 }
 
+//-----------Get Jounal API------------------------------
 
+public function get_journal_get()
+{
+    $this->load->model('UserModel');
+
+    $journals = $this->UserModel->get_all_journals();
+
+    if ($journals) {
+        $result = [
+            'status' => 200,
+            'message' => 'Journals fetched successfully',
+            'data' => $journals
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No journals found',
+            'data' => []
+        ];
+    }
+
+    $this->response($result, RestController::HTTP_OK);
+}
+
+//-----------Delete Jounal API------------------------------
+
+public function delete_journal_delete()
+{
+    $this->load->database();
+    $id = $this->input->get('id'); 
+
+    if ($id) {
+        $query = $this->db->get_where('journal_table', ['id' => $id]);
+        
+        if ($query->num_rows() > 0) {
+
+            $this->db->where('id', $id)->delete('journal_table');
+            
+            if ($this->db->affected_rows() > 0) {
+                $result = ['status' => 200, 'message' => 'Journal deleted successfully!'];
+            } else {
+                $result = ['status' => 500, 'message' => 'Failed to delete the journal.'];
+            }
+        } else {
+            $result = ['status' => 404, 'message' => 'No Journal found with the provided ID.'];
+        }
+    } else {
+        $result = ['status' => 400, 'message' => 'ID is required.'];
+    }
+
+    $this->response($result, RestController::HTTP_OK);
+}
 
 
 
