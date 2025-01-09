@@ -27,4 +27,24 @@ public function insert_contact($data)
         return false;
     } 
 
+    public function insert_journal($data)
+    {
+        $this->db->insert('journal_table', $data);
+        if ($this->db->affected_rows() > 0) {
+            return $this->db->insert_id();
+        }
+        return false;
+    }
+    
+    public function update_journal($id, $data)
+    {
+        $this->db->where('id', $id);
+        $this->db->update('journal_table', $data);
+    
+        return $this->db->affected_rows() > 0;
+    }
+    
+
+
+
 }
