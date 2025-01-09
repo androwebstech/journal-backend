@@ -53,18 +53,18 @@ class User extends RestController {
         $this->form_validation->set_rules('eissn_no', 'E-ISSN', 'trim');
         $this->form_validation->set_rules('pissn_no', 'P-ISSN', 'trim');
         $this->form_validation->set_rules('first_volume', 'First Volume', 'trim|integer|required');
-        $this->form_validation->set_rules('number_of_issue_per_year', 'Number of Issues Per Year', 'trim|integer|required');
+        $this->form_validation->set_rules('number_of_issue_per_year', 'Number of Issues Per Year', 'trim|required|in_list[Monthly,Bimonthly,Yearly,Halfyearly,Quaterly]');
         $this->form_validation->set_rules('publisher_name', 'Publisher Name', 'trim|required');
         $this->form_validation->set_rules('broad_research_area', 'Broad Research Area', 'trim|required');
         $this->form_validation->set_rules('website_link', 'Website Link', 'trim|valid_url');
         $this->form_validation->set_rules('journal_submission_link', 'Submission Link', 'trim|valid_url');
         $this->form_validation->set_rules('indexing', 'Indexing', 'trim');
         $this->form_validation->set_rules('country', 'Country', 'trim|required|in_list[USA,India,UK,Canada,Australia]');
-        $this->form_validation->set_rules('state', 'State', 'trim|required|in_list[California,New York,Texas,Ontario,Queensland]');
-        $this->form_validation->set_rules('publication', 'Publication Frequency', 'trim|required|in_list[Monthly,Quarterly,Yearly]');
-        $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|decimal');
-        $this->form_validation->set_rules('review_type', 'Review Type', 'trim|required|in_list[Single-blind,Double-blind,Open Review,Editorial Review]');
-        $this->form_validation->set_rules('publication_link', 'Publication Link', 'trim|valid_url');
+        $this->form_validation->set_rules('state', 'State', 'trim|required');
+        $this->form_validation->set_rules('publication', 'Publication Frequency', 'trim|required|in_list[Free,Paid]');
+        $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|integer');
+        $this->form_validation->set_rules('review_type', 'Review Type', 'trim|required|in_list[Single-Blind,Double-Blind,Open Peer Review,Collaberative]');
+        $this->form_validation->set_rules('publication_link', 'Publication Link', 'trim');
     
         if ($this->form_validation->run()) {
             $data = [
@@ -179,114 +179,9 @@ public function update_journal_post()
     $this->response($result, RestController::HTTP_OK);
 }
 
-//-----------Get Jounal API------------------------------
 
-public function get_journal_get()
-{
-    $this->load->model('UserModel');
 
-    $journals = $this->UserModel->get_all_journals();
 
-    if ($journals) {
-        $result = [
-            'status' => 200,
-            'message' => 'Journals fetched successfully',
-            'data' => $journals
-        ];
-    } else {
-        $result = [
-            'status' => 404,
-            'message' => 'No journals found',
-            'data' => []
-        ];
-    }
-
-    $this->response($result, RestController::HTTP_OK);
-}
-
-//-----------Delete Jounal API------------------------------
-
-public function delete_journal_delete()
-{
-    $this->load->database();
-    $id = $this->input->get('id'); 
-
-    if ($id) {
-        $query = $this->db->get_where('journal_table', ['id' => $id]);
-        
-        if ($query->num_rows() > 0) {
-
-            $this->db->where('id', $id)->delete('journal_table');
-            
-            if ($this->db->affected_rows() > 0) {
-                $result = ['status' => 200, 'message' => 'Journal deleted successfully!'];
-            } else {
-                $result = ['status' => 500, 'message' => 'Failed to delete the journal.'];
-            }
-        } else {
-            $result = ['status' => 404, 'message' => 'No Journal found with the provided ID.'];
-        }
-    } else {
-        $result = ['status' => 400, 'message' => 'ID is required.'];
-    }
-
-    $this->response($result, RestController::HTTP_OK);
-}
-
-//-----------Update User API------------------------------
-
-public function update_user_post()
-{   
-    $this->load->database();
-    $this->load->library('upload');
-    $this->load->library('form_validation');
-
-    $this->form_validation->set_rules('id', 'ID', 'trim|required|numeric');
-    $this->form_validation->set_rules('name', 'Name', 'trim');
-    $this->form_validation->set_rules('contact', 'Mobile No', 'trim');
-    $this->form_validation->set_rules('password', 'Password', 'trim|min_length[6]');
-
-    if ($this->form_validation->run()) {
-        
-        $user_id = $this->input->post('id');
-        
-        $data = [];
-
-        if ($this->input->post('name')) {
-            $data['name'] = $this->input->post('name');
-        }
-        
-        if ($this->input->post('contact')) {
-            $data['contact'] = $this->input->post('contact');
-        }
-
-        if ($this->input->post('password')) {
-            $data['password'] = password_hash($this->input->post('password'), PASSWORD_BCRYPT);
-        }
-
-        if (empty($data)) {
-            $result = ['status' => 400, 'message' => 'No valid data to update.'];
-        } else {
-
-            $this->db->where('id', $user_id);
-            $update_status = $this->db->update('users', $data);
-
-            if ($update_status) {
-                $result = [
-                    'status' => 200,
-                    'message' => 'User updated successfully!',
-                    'updated_data' => $data,
-                ];
-            } else {
-                $result = ['status' => false, 'message' => 'Failed to update user!'];
-            }
-        }
-    } else {
-        $result = ['status' => 400, 'message' => strip_tags(validation_errors())];
-    }
-    
-    $this->response($result, RestController::HTTP_OK);
-}
 
 
 
