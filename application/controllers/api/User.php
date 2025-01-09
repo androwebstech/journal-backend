@@ -233,7 +233,60 @@ public function delete_journal_delete()
     $this->response($result, RestController::HTTP_OK);
 }
 
+//-----------Update User API------------------------------
 
+public function update_user_post()
+{   
+    $this->load->database();
+    $this->load->library('upload');
+    $this->load->library('form_validation');
+
+    $this->form_validation->set_rules('id', 'ID', 'trim|required|numeric');
+    $this->form_validation->set_rules('name', 'Name', 'trim');
+    $this->form_validation->set_rules('contact', 'Mobile No', 'trim');
+    $this->form_validation->set_rules('password', 'Password', 'trim|min_length[6]');
+
+    if ($this->form_validation->run()) {
+        
+        $user_id = $this->input->post('id');
+        
+        $data = [];
+
+        if ($this->input->post('name')) {
+            $data['name'] = $this->input->post('name');
+        }
+        
+        if ($this->input->post('contact')) {
+            $data['contact'] = $this->input->post('contact');
+        }
+
+        if ($this->input->post('password')) {
+            $data['password'] = password_hash($this->input->post('password'), PASSWORD_BCRYPT);
+        }
+
+        if (empty($data)) {
+            $result = ['status' => 400, 'message' => 'No valid data to update.'];
+        } else {
+
+            $this->db->where('id', $user_id);
+            $update_status = $this->db->update('users', $data);
+
+            if ($update_status) {
+                $result = [
+                    'status' => 200,
+                    'message' => 'User updated successfully!',
+                    'updated_data' => $data,
+                ];
+            } else {
+                $result = ['status' => false, 'message' => 'Failed to update user!'];
+            }
+        }
+    } else {
+        $result = ['status' => 400, 'message' => strip_tags(validation_errors())];
+    }
+    
+    $this->response($result, RestController::HTTP_OK);
+}
 
 
 
