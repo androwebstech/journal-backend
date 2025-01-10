@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 09, 2025 at 10:38 AM
+-- Generation Time: Jan 10, 2025 at 02:56 PM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 7.4.33
 
@@ -33,6 +33,23 @@ CREATE TABLE `admin` (
   `email` varchar(50) NOT NULL,
   `contact` int(50) NOT NULL,
   `password` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `authors`
+--
+
+CREATE TABLE `authors` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `profile_image` varchar(250) DEFAULT NULL,
+  `author_name` varchar(200) NOT NULL,
+  `author_details` text DEFAULT NULL,
+  `department` varchar(255) DEFAULT NULL,
+  `designation` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -103,7 +120,9 @@ CREATE TABLE `journal_table` (
 INSERT INTO `journal_table` (`id`, `journal_name`, `eissn_no`, `pissn_no`, `first_volume`, `number_of_issue_per_year`, `publisher_name`, `broad_research_area`, `website_link`, `journal_submission_link`, `indexing`, `country`, `state`, `publication`, `usd_publication_charge`, `review_type`, `publication_link`, `jounal_status`) VALUES
 (1, 'Arohi', '222534', '324', 233, 3, 'aarti', 'patna', 'http://localhost/journal-backend/api/auth/add_journal', 'http://localhost/journal-backend/api/auth/add_journal', '1', 'India', 'New York', 'Yearly', '4.50', 'Single-blind', 'http://localhost/journal-backend/api/auth/add_journal', '0'),
 (2, 'hey', '222534', '324', 233, 3, 'neha', 'gopalganj', 'http://localhost/journal-backend/api/auth/add_journal', 'http://localhost/journal-backend/api/auth/add_journal', '1', 'India', 'New York', 'Yearly', '4.50', 'Single-blind', 'http://localhost/journal-backend/api/auth/add_journal', '0'),
-(3, 'hey', '222534', '324', 233, 3, 'neha', 'gopalganj', 'http://localhost/journal-backend/api/auth/add_journal', 'http://localhost/journal-backend/api/auth/add_journal', '1', 'India', 'New York', 'Yearly', '4.50', 'Single-blind', 'http://localhost/journal-backend/api/auth/add_journal', '0');
+(3, 'hey', '222534', '324', 233, 3, 'neha', 'gopalganj', 'http://localhost/journal-backend/api/auth/add_journal', 'http://localhost/journal-backend/api/auth/add_journal', '1', 'India', 'New York', 'Yearly', '4.50', 'Single-blind', 'http://localhost/journal-backend/api/auth/add_journal', '0'),
+(4, 'hey', '222534', '324', 233, 3, 'neha', 'gopalganj', 'http://localhost/journal-backend/api/auth/add_journal', 'http://localhost/journal-backend/api/auth/add_journal', '1', 'India', 'New York', 'Yearly', '4.50', 'Single-blind', 'http://localhost/journal-backend/api/auth/add_journal', 'pending'),
+(5, 'hey', '222534', '324', 233, 3, 'neha', 'gopalganj', 'http://localhost/journal-backend/api/auth/add_journal', 'http://localhost/journal-backend/api/auth/add_journal', '1', 'India', 'New York', 'Yearly', '4.50', 'Single-blind', 'http://localhost/journal-backend/api/auth/add_journal', 'pending');
 
 -- --------------------------------------------------------
 
@@ -112,11 +131,13 @@ INSERT INTO `journal_table` (`id`, `journal_name`, `eissn_no`, `pissn_no`, `firs
 --
 
 CREATE TABLE `reviewers` (
-  `id` int(30) NOT NULL,
-  `name` varchar(50) NOT NULL,
-  `email` varchar(50) NOT NULL,
-  `contact` int(30) NOT NULL,
-  `password` varchar(50) NOT NULL
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `profile_image` varchar(255) DEFAULT NULL,
+  `reviewer_name` varchar(255) NOT NULL,
+  `reviewer_details` text DEFAULT NULL,
+  `approval_status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -139,14 +160,17 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `email`, `contact`, `password`, `type`) VALUES
-(1, 'aarti kumari', 'kaarti.kc@gmail.com', 2147483647, '$2y$10$./bRWmsJscKrQYxLUxJUxuDr1ERLd0P1R10C8PA4ksq', ''),
-(2, 'aarti kumari', 'kush@gmail.com', 6857493, '$2y$10$Ui9nBSoZQJjSIjaEzyKvz.WMwALRneGQo8YCnSyJ0XR', ''),
 (11, 'User', 'user@gmail.com', 2147483647, '111111', ''),
 (13, 'User', 'useop@gmail.com', 2147483647, '$2y$10$NoI2fDHh8P0YDRvOZxIFN.vPY7rvtJrGHwZ77sLEbMX', ''),
 (14, 'neha', 'neha@gmail.com', 77777777, '$2y$10$xRvt2x7lFfIewmLgPoVnle/b7hx1FNGTShA9NJjDzxu', 'author'),
 (15, 'neha', 'na@gmail.com', 77777777, '$2y$10$4D4vyYolpR3SiAm.gizw8uYQOFy6LyoEKqVgxFSCd13yacP9fF7Xq', 'author'),
 (16, 'neha', 'nehasingh@gmail.com', 77777777, '$2y$10$D8pAaJIKmDs.L7PFx.D.wumv.vDeEYfkqnySUZojDhy8vI8EIT29S', 'author'),
-(17, 'neha', 'arohinehasingh@gmail.com', 77777777, '$2y$10$XCjvuwNBu5pDX7Zn661ncOFYWWWNSReOHDhtsZxKGxrt8jTKh8No.', 'author');
+(17, 'neha', 'arohinehasingh@gmail.com', 77777777, '$2y$10$XCjvuwNBu5pDX7Zn661ncOFYWWWNSReOHDhtsZxKGxrt8jTKh8No.', 'author'),
+(18, 'supriya', 'supriyaSignh@gmail.com', 2147483647, '$2y$10$uMeBxMyH66OlgG68kgV5POcHIQolObUOKUkQHVSpTdakoePwt.Xem', 'publisher'),
+(19, 'supriya', 'ksupriya@gmail.com', 2147483647, '$2y$10$RLbWfwGuT9/uTgZb1ascLOOj988fSZfqyy1PetdWXUALLUQBnxNc2', 'reviewer'),
+(20, 'Aarti Kumari', 'kaarti.kc@gmail.com', 2147483647, '$2y$10$hxLKK6rTMthYetjI4EfBkeWc5IBj2Ky/FI0eefcPT.MPDJsDP.sUC', 'author'),
+(21, 'guptaAarti', 'gupta@gmail.com', 2147483647, '$2y$10$Wby/TFAJqgkzaIpERKVfR.L9tjujTZ30yHJaqqr1hi9Yuj..90F/2', 'publisher'),
+(22, 'Aarti gupta', 'kaarti.kc9@gmail.com', 2147483647, '$2y$10$nTxNZSe27XtZtjhv6DlGEOP7QQx8Ul4YcmzLFXH7Y192/YSVE9/Ym', 'reviewer');
 
 --
 -- Indexes for dumped tables
@@ -156,6 +180,12 @@ INSERT INTO `users` (`id`, `name`, `email`, `contact`, `password`, `type`) VALUE
 -- Indexes for table `admin`
 --
 ALTER TABLE `admin`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `authors`
+--
+ALTER TABLE `authors`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -193,6 +223,12 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `authors`
+--
+ALTER TABLE `authors`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `contact_table`
 --
 ALTER TABLE `contact_table`
@@ -202,13 +238,19 @@ ALTER TABLE `contact_table`
 -- AUTO_INCREMENT for table `journal_table`
 --
 ALTER TABLE `journal_table`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `reviewers`
+--
+ALTER TABLE `reviewers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

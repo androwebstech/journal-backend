@@ -234,6 +234,82 @@ public function delete_journal_delete()
 }
 
 
+public function get_personal_details_get()
+{
+    $this->load->model('AuthorModel');
+    $this->load->model('ReviewerModel');
+    $this->load->library('Authorization_Token'); 
+
+   
+    $token = $this->input->get_request_header('Authorization');
+    if (!$token) {
+        $result = [
+            'status' => 400,
+            'message' => 'Token header missing',
+            'data' => []
+        ];
+        $this->response($result, RestController::HTTP_BAD_REQUEST);
+        return;
+    }
+
+    
+    $decoded_token = $this->authorization_token->validateToken($token);
+    if (!$decoded_token['status']) {
+        $result = [
+            'status' => 401,
+            'message' => 'Invalid or expired token',
+            'data' => []
+        ];
+        $this->response($result, RestController::HTTP_UNAUTHORIZED);
+        return;
+    }
+
+    $entity_id = $decoded_token['data']->id; 
+    $entity_type = $decoded_token['data']->type; 
+
+    $personal_details = [];
+
+    switch (strtolower($entity_type)) {
+        case 'author':
+            $personal_details = $this->AuthorModel->get_personal_details($entity_id);
+            break;
+
+        case 'reviewer':
+            $personal_details = $this->ReviewerModel->get_personal_details($entity_id);
+            break;
+
+        case 'publisher':
+            
+            $personal_details = [];
+            break;
+
+        default:
+            $result = [
+                'status' => 400,
+                'message' => 'Invalid entity type',
+                'data' => []
+            ];
+            $this->response($result, RestController::HTTP_BAD_REQUEST);
+            return;
+    }
+
+    if ($personal_details || $entity_type === 'publisher') {
+        $result = [
+            'status' => 200,
+            'message' => 'Personal details fetched successfully',
+            'data' => $personal_details
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No personal details found',
+            'data' => []
+        ];
+    }
+
+    $this->response($result, RestController::HTTP_OK);
+}
+
 
 
 
