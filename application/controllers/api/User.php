@@ -110,14 +110,14 @@ class User extends RestController {
 //-----------Update Jounal API------------------------------
     
     
-public function update_journal_post()
+public function update_journal_post($id=0)
 {
     $this->load->model('Admin_model');
     $this->load->library('form_validation');
     $this->load->helper('url');
 
     // Validation rules
-    $this->form_validation->set_rules('id', 'Journal ID', 'trim|required|integer');
+     // $this->form_validation->set_rules('id', 'Journal ID', 'trim|required|integer');
     $this->form_validation->set_rules('journal_name', 'Journal Name', 'trim');
     $this->form_validation->set_rules('eissn_no', 'E-ISSN', 'trim');
     $this->form_validation->set_rules('pissn_no', 'P-ISSN', 'trim');
@@ -136,7 +136,7 @@ public function update_journal_post()
     $this->form_validation->set_rules('publication_link', 'Publication Link', 'trim|valid_url');
 
     if ($this->form_validation->run()) {
-        $id = $this->input->post('id');
+        // $id = $this->input->post('id');
         $update_data = array_filter([
             'journal_name' => $this->input->post('journal_name'),
             'eissn_no' => $this->input->post('eissn_no'),
