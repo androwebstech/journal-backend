@@ -53,18 +53,18 @@ class User extends RestController {
         $this->form_validation->set_rules('eissn_no', 'E-ISSN', 'trim');
         $this->form_validation->set_rules('pissn_no', 'P-ISSN', 'trim');
         $this->form_validation->set_rules('first_volume', 'First Volume', 'trim|integer|required');
-        $this->form_validation->set_rules('number_of_issue_per_year', 'Number of Issues Per Year', 'trim|integer|required');
+        $this->form_validation->set_rules('number_of_issue_per_year', 'Number of Issues Per Year', 'trim|required|in_list[Monthly,Bimonthly,Yearly,Halfyearly,Quaterly]');
         $this->form_validation->set_rules('publisher_name', 'Publisher Name', 'trim|required');
         $this->form_validation->set_rules('broad_research_area', 'Broad Research Area', 'trim|required');
         $this->form_validation->set_rules('website_link', 'Website Link', 'trim|valid_url');
         $this->form_validation->set_rules('journal_submission_link', 'Submission Link', 'trim|valid_url');
         $this->form_validation->set_rules('indexing', 'Indexing', 'trim');
         $this->form_validation->set_rules('country', 'Country', 'trim|required|in_list[USA,India,UK,Canada,Australia]');
-        $this->form_validation->set_rules('state', 'State', 'trim|required|in_list[California,New York,Texas,Ontario,Queensland]');
-        $this->form_validation->set_rules('publication', 'Publication Frequency', 'trim|required|in_list[Monthly,Quarterly,Yearly]');
-        $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|decimal');
-        $this->form_validation->set_rules('review_type', 'Review Type', 'trim|required|in_list[Single-blind,Double-blind,Open Review,Editorial Review]');
-        $this->form_validation->set_rules('publication_link', 'Publication Link', 'trim|valid_url');
+        $this->form_validation->set_rules('state', 'State', 'trim|required');
+        $this->form_validation->set_rules('publication', 'Publication Frequency', 'trim|required|in_list[Free,Paid]');
+        $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|integer');
+        $this->form_validation->set_rules('review_type', 'Review Type', 'trim|required|in_list[Single-Blind,Double-Blind,Open Peer Review,Collaberative]');
+        $this->form_validation->set_rules('publication_link', 'Publication Link', 'trim');
     
         if ($this->form_validation->run()) {
             $data = [
@@ -181,6 +181,82 @@ public function update_journal_post($id=0)
 
 
 
+
+public function get_personal_details_get()
+{
+    $this->load->model('AuthorModel');
+    $this->load->model('ReviewerModel');
+    $this->load->library('Authorization_Token'); 
+
+   
+    $token = $this->input->get_request_header('Authorization');
+    if (!$token) {
+        $result = [
+            'status' => 400,
+            'message' => 'Token header missing',
+            'data' => []
+        ];
+        $this->response($result, RestController::HTTP_BAD_REQUEST);
+        return;
+    }
+
+    
+    $decoded_token = $this->authorization_token->validateToken($token);
+    if (!$decoded_token['status']) {
+        $result = [
+            'status' => 401,
+            'message' => 'Invalid or expired token',
+            'data' => []
+        ];
+        $this->response($result, RestController::HTTP_UNAUTHORIZED);
+        return;
+    }
+
+    $entity_id = $decoded_token['data']->id; 
+    $entity_type = $decoded_token['data']->type; 
+
+    $personal_details = [];
+
+    switch (strtolower($entity_type)) {
+        case 'author':
+            $personal_details = $this->AuthorModel->get_personal_details($entity_id);
+            break;
+
+        case 'reviewer':
+            $personal_details = $this->ReviewerModel->get_personal_details($entity_id);
+            break;
+
+        case 'publisher':
+            
+            $personal_details = [];
+            break;
+
+        default:
+            $result = [
+                'status' => 400,
+                'message' => 'Invalid entity type',
+                'data' => []
+            ];
+            $this->response($result, RestController::HTTP_BAD_REQUEST);
+            return;
+    }
+
+    if ($personal_details || $entity_type === 'publisher') {
+        $result = [
+            'status' => 200,
+            'message' => 'Personal details fetched successfully',
+            'data' => $personal_details
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No personal details found',
+            'data' => []
+        ];
+    }
+
+    $this->response($result, RestController::HTTP_OK);
+}
 
 
 
