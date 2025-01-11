@@ -19,41 +19,6 @@ class Admin_model extends CI_model
 // }
 
 
-public function register($user_data, $profile_data)
-{
-    $this->db->trans_start(); // Start transaction
-
-    // Insert only id, email, and type into the users table
-    $user_entry = [
-        'email' => $user_data['email'],
-        'type' => $user_data['type'],
-    ];
-    $this->db->insert('users', $user_entry);
-
-    if ($this->db->affected_rows() > 0) {
-        $inserted_id = $this->db->insert_id();
-        $profile_data['user_id'] = $inserted_id;
-
-        // Insert remaining data into the respective table
-        if ($user_data['type'] === 'author') {
-            $this->db->insert('authors', $profile_data);
-        } elseif ($user_data['type'] === 'reviewer') {
-            $this->db->insert('reviewers', $profile_data);
-        }
-
-        $this->db->trans_complete(); // Complete transaction
-
-        if ($this->db->trans_status() === false) {
-            return false; // Transaction failed
-        }
-
-        // Return the minimal user information from the users table
-        return $this->db->where('id', $inserted_id)->get('users')->row_array();
-    }
-
-    return false; // User registration failed
-}
-
 
 
 
