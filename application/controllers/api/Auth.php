@@ -50,6 +50,9 @@ class Auth extends RestController {
         
         if (!empty($res)) {
             $this->load->library('Authorization_Token');
+            $profile = $this->Authentication_model->getProfileByType($res['id'], $type); 
+            $user_with_profile = array_merge($res, $profile);
+
             $token_data = [];
             $token_data['id'] = $res['id'];
             $token_data['email'] = $res['email'];
@@ -65,7 +68,7 @@ class Auth extends RestController {
             $result = [
                 'status' => 200,
                 'message' => 'Login Successful!',
-                'user' => $token_data,
+                'user' =>  $user_with_profile,
                 'auth_token' => $token
             ];
         } else {
@@ -84,8 +87,8 @@ public function register_post()
     $this->load->library('Authorization_Token');
 
     // Validation rules
-    //$this->form_validation->set_rules('name', 'Name', 'trim|required');
-   // $this->form_validation->set_rules('contact', 'Mobile No', 'trim|required');
+    $this->form_validation->set_rules('name', 'Name', 'trim|required');
+    $this->form_validation->set_rules('contact', 'Mobile No', 'trim|required');
     $this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email|is_unique[users.email]', array('is_unique' => 'This Email is already registered.'));
     $this->form_validation->set_rules('password', 'Password', 'trim|required|min_length[6]');
     $this->form_validation->set_rules('type', 'Type', 'trim|required|in_list[' . implode(',', USER_TYPE::ALL) . ']');
@@ -100,11 +103,35 @@ public function register_post()
             'type' => $this->input->post('type'),
         ];
 
+
+           $profile_data = [];
         // Data to store in authors or reviewers table
+
+         if ($user_data['type'] === 'author') {
+            $profile_data = [
+                'author_name' => $this->input->post('author_name'),
+                'author_details' => $this->input->post('author_details'),
+                'department' => $this->input->post('department'),
+                'designation' => $this->input->post('designation'),
+            ];
+        } elseif ($user_data['type'] === 'reviewer') {
+            $profile_data = [
+                'reviewer_name' => $this->input->post('reviewer_name') ?: 'Anonymous Reviewer', 
+                'profile_image' => $this->input->post('profile_image'),
+                'reviewer_details' => $this->input->post('reviewer_details'),
+                
+            ];
+        }
        
         $res = $this->UserModel->register($user_data, $profile_data);
 
         if (!empty($res)) {
+
+              $type = $res['type'];
+            $profile = $this->UserModel->getProfileByType($res['id'], $type);
+
+            // Combine user data with profile data
+            $user_with_profile = array_merge($res, $profile);
             $token_data = [
                 'id' => $res['id'],
                 'email' => $res['email'],
@@ -115,11 +142,7 @@ public function register_post()
             $result = [
                 'status' => 200,
                 'message' => 'Register Successful!',
-                'user' => [
-                    'id' => $res['id'],
-                    'email' => $res['email'],
-                    'type' => $res['type'],
-                ],
+                'user' => $user_with_profile,
                 'auth_token' => $token,
             ];
         } else {

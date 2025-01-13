@@ -18,6 +18,17 @@ class Authentication_model extends CI_model
 		return false;
 	}
 
+
+	public function getProfileByType($user_id, $type) {
+    if ($type === 'author') {
+        return $this->db->get_where('authors', ['user_id' => $user_id])->row_array();
+    } elseif ($type === 'reviewer') {
+        return $this->db->get_where('reviewers', ['user_id' => $user_id])->row_array();
+    }
+    return [];
+}
+
+
 	// Function to insert contact data
     function insert_contact($data)
     {

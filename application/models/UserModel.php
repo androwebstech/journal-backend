@@ -24,40 +24,54 @@ public function get_all_journals()
 }
 
 
-
 public function register($user_data, $profile_data)
 {
-    $this->db->trans_start(); // Start transaction
-
-    // Insert only id, email, and type into the users table
-    $user_entry = [
-        'email' => $user_data['email'],
-        'type' => $user_data['type'],
-    ];
+    $this->db->trans_start();
+    
+    // Insert into `users` table
     $this->db->insert('users', $user_data);
+    $user_id = $this->db->insert_id();
 
-    if ($this->db->affected_rows() > 0) {
-        $inserted_id = $this->db->insert_id();
-        $profile_data['user_id'] = $inserted_id;
-
-        // Insert remaining data into the respective table
-        if ($user_data['type'] === 'author') {
-            $this->db->insert('authors', $profile_data);
-        } elseif ($user_data['type'] === 'reviewer') {
-            $this->db->insert('reviewers', $profile_data);
-        }
-
-        $this->db->trans_complete(); // Complete transaction
-
-        if ($this->db->trans_status() === false) {
-            return false; // Transaction failed
-        }
-
-        // Return the minimal user information from the users table
-        return $this->db->where('id', $inserted_id)->get('users')->row_array();
+    if ($user_data['type'] === 'author') {
+        $profile_data['user_id'] = $user_id;
+        $this->db->insert('authors', $profile_data);
+    } elseif ($user_data['type'] === 'reviewer') {
+        $profile_data['user_id'] = $user_id;
+        $this->db->insert('reviewers', $profile_data);
     }
 
-    return false; // User registration failed
+    $this->db->trans_complete();
+
+    if ($this->db->trans_status() === FALSE) {
+        return false;
+    }
+
+    $user_data['id'] = $user_id;
+    return $user_data;
+}
+
+
+
+
+
+public function getProfileByType($user_id, $type)
+{
+    if ($type === 'author') {
+        $this->db->select('authors.author_name, authors.author_details, authors.department, authors.designation');
+        $this->db->from('users');
+        $this->db->join('authors', 'users.id = authors.user_id');
+    } elseif ($type === 'reviewer') {
+        $this->db->select('reviewers.reviewer_name, reviewers.profile_image, reviewers.reviewer_details, reviewers.approval_status');
+        $this->db->from('users');
+        $this->db->join('reviewers', 'users.id = reviewers.user_id');
+    } else {
+        return [];
+    }
+
+    $this->db->where('users.id', $user_id);
+    $query = $this->db->get();
+
+    return $query->row_array() ?? [];
 }
 
 
