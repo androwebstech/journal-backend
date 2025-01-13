@@ -30,6 +30,7 @@ class User extends RestController {
 			$decodedToken = $this->authorization_token->validateToken($headers['Authorization']);
 			if($decodedToken['status']){
 				$this->user = (array)$decodedToken['data'];
+
 			}else{
 				$this->response(['status'=>401,'message'=>$decodedToken['message']], RestController::HTTP_UNAUTHORIZED);
 			}
@@ -110,14 +111,15 @@ class User extends RestController {
 //-----------Update Jounal API------------------------------
     
     
-public function update_journal_post($id=0)
+public function update_journal_post($id = null)
+
 {
     $this->load->model('Admin_model');
     $this->load->library('form_validation');
     $this->load->helper('url');
 
     // Validation rules
-     // $this->form_validation->set_rules('id', 'Journal ID', 'trim|required|integer');
+    
     $this->form_validation->set_rules('journal_name', 'Journal Name', 'trim');
     $this->form_validation->set_rules('eissn_no', 'E-ISSN', 'trim');
     $this->form_validation->set_rules('pissn_no', 'P-ISSN', 'trim');
@@ -136,7 +138,7 @@ public function update_journal_post($id=0)
     $this->form_validation->set_rules('publication_link', 'Publication Link', 'trim|valid_url');
 
     if ($this->form_validation->run()) {
-        // $id = $this->input->post('id');
+       
         $update_data = array_filter([
             'journal_name' => $this->input->post('journal_name'),
             'eissn_no' => $this->input->post('eissn_no'),
@@ -182,38 +184,70 @@ public function update_journal_post($id=0)
 
 
 
+
+
+//-----------Get Jounal API------------------------------
+
+public function get_journal_get()
+{
+    $this->load->model('UserModel');
+    $journals = $this->UserModel->get_all_journals();
+    if ($journals) {
+        $result = [
+            'status' => 200,
+            'message' => 'Journals fetched successfully',
+            'data' => $journals
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No journals found',
+            'data' => []
+        ];
+    }
+    $this->response($result, RestController::HTTP_OK);
+}
+
+
+//-----------Delete Jounal API------------------------------
+public function delete_journal_delete()
+{
+    $this->load->database();
+    $id = $this->input->get('id'); 
+    if ($id) {
+        $query = $this->db->get_where('journal_table', ['id' => $id]);
+        
+        if ($query->num_rows() > 0) {
+            $this->db->where('id', $id)->delete('journal_table');
+            
+            if ($this->db->affected_rows() > 0) {
+                $result = ['status' => 200, 'message' => 'Journal deleted successfully!'];
+            } else {
+                $result = ['status' => 500, 'message' => 'Failed to delete the journal.'];
+            }
+        } else {
+            $result = ['status' => 404, 'message' => 'No Journal found with the provided ID.'];
+        }
+    } else {
+        $result = ['status' => 400, 'message' => 'ID is required.'];
+    }
+    $this->response($result, RestController::HTTP_OK);
+}
+
+
+
+
+
 public function get_personal_details_get()
 {
     $this->load->model('AuthorModel');
     $this->load->model('ReviewerModel');
-    $this->load->library('Authorization_Token'); 
-
    
-    $token = $this->input->get_request_header('Authorization');
-    if (!$token) {
-        $result = [
-            'status' => 400,
-            'message' => 'Token header missing',
-            'data' => []
-        ];
-        $this->response($result, RestController::HTTP_BAD_REQUEST);
-        return;
-    }
+$entity_type= $this->user['type'];
+$entity_id= $this->user['id'];
+   
+ 
 
-    
-    $decoded_token = $this->authorization_token->validateToken($token);
-    if (!$decoded_token['status']) {
-        $result = [
-            'status' => 401,
-            'message' => 'Invalid or expired token',
-            'data' => []
-        ];
-        $this->response($result, RestController::HTTP_UNAUTHORIZED);
-        return;
-    }
-
-    $entity_id = $decoded_token['data']->id; 
-    $entity_type = $decoded_token['data']->type; 
 
     $personal_details = [];
 

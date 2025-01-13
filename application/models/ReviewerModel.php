@@ -1,6 +1,6 @@
 <?php
 defined('BASEPATH') or exit('No Access');
-class UserModel extends CI_model
+class ReviewerModel  extends CI_model
 {
 	function __construct()
 	{
@@ -10,7 +10,7 @@ class UserModel extends CI_model
 	}
 public function get_personal_details($id)
 {
-    return $this->db->get_where('reviewer', ['id' => $id])->row_array();
+    return $this->db->get_where('reviewers', ['id' => $id])->row_array();
 }
 
 
