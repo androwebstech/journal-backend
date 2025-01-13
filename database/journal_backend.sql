@@ -2,8 +2,8 @@
 -- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Jan 11, 2025 at 05:11 PM
+-- Host: localhost
+-- Generation Time: Jan 13, 2025 at 06:19 PM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 7.4.33
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `journal-db`
+-- Database: `journal_backend`
 --
 
 -- --------------------------------------------------------
@@ -45,12 +45,20 @@ CREATE TABLE `admin` (
 CREATE TABLE `authors` (
   `user_id` int(11) NOT NULL,
   `profile_image` varchar(250) DEFAULT NULL,
+  `contact` varchar(15) NOT NULL,
   `author_name` varchar(200) NOT NULL,
-  `author_details` text DEFAULT NULL,
   `department` varchar(255) DEFAULT NULL,
   `designation` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `authors`
+--
+
+INSERT INTO `authors` (`user_id`, `profile_image`, `contact`, `author_name`, `department`, `designation`, `created_at`) VALUES
+(23, NULL, '8888888888', 'shivam', NULL, NULL, '2025-01-13 16:39:33'),
+(24, NULL, '8888888888', 'shivam', NULL, NULL, '2025-01-13 16:41:13');
 
 -- --------------------------------------------------------
 
@@ -177,11 +185,20 @@ CREATE TABLE `research_papers` (
 CREATE TABLE `reviewers` (
   `user_id` int(11) NOT NULL,
   `profile_image` varchar(255) DEFAULT NULL,
+  `contact` varchar(15) NOT NULL,
   `reviewer_name` varchar(255) NOT NULL,
-  `reviewer_details` text DEFAULT NULL,
   `approval_status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `reviewers`
+--
+
+INSERT INTO `reviewers` (`user_id`, `profile_image`, `contact`, `reviewer_name`, `approval_status`, `created_at`) VALUES
+(26, NULL, '8888888888', 'shivam', 'pending', '2025-01-13 16:42:11'),
+(27, NULL, '8888888888', 'reviewer2', 'pending', '2025-01-13 16:50:21'),
+(28, NULL, '8888888888', 'reviewer2', 'pending', '2025-01-13 16:51:00');
 
 -- --------------------------------------------------------
 
@@ -212,7 +229,13 @@ INSERT INTO `users` (`id`, `email`, `password`, `type`, `created_at`) VALUES
 (19, 'supriya', '$2y$10$RLbWfwGuT9/uTgZb1ascLOOj988fSZfqyy1PetdWXUALLUQBnxNc2', 'reviewer', '2025-01-11 13:34:31'),
 (20, 'Aarti Kumari', '$2y$10$hxLKK6rTMthYetjI4EfBkeWc5IBj2Ky/FI0eefcPT.MPDJsDP.sUC', 'author', '2025-01-11 13:34:31'),
 (21, 'guptaAarti', '$2y$10$Wby/TFAJqgkzaIpERKVfR.L9tjujTZ30yHJaqqr1hi9Yuj..90F/2', 'publisher', '2025-01-11 13:34:31'),
-(22, 'Aarti gupta', '$2y$10$nTxNZSe27XtZtjhv6DlGEOP7QQx8Ul4YcmzLFXH7Y192/YSVE9/Ym', 'reviewer', '2025-01-11 13:34:31');
+(22, 'Aarti gupta', '$2y$10$nTxNZSe27XtZtjhv6DlGEOP7QQx8Ul4YcmzLFXH7Y192/YSVE9/Ym', 'reviewer', '2025-01-11 13:34:31'),
+(23, 'shivam@gmail.com', '$2y$10$kjjbtFA9jnqi7kXruUvVuOWpzzKWeEH0chmDMuSb4G0zfa7lTjU6S', 'author', '2025-01-13 16:39:33'),
+(24, 'shivam1@gmail.com', '$2y$10$CYycCHanG1hDbFzrJuCkguvrzkGlkUFKVwcXhd0ZQal6ucXeoA4iK', 'author', '2025-01-13 16:41:13'),
+(25, 'publisher@gmail.com', '$2y$10$LFBZ5cQQPCOUBjc4jzE9rOh1alzO3QViV3bL4QOSCwjVUNAYNLVA.', 'publisher', '2025-01-13 16:41:52'),
+(26, 'reviewer@gmail.com', '$2y$10$FVxS1FCSPNUFNfEtgfsFAO3jM3yW2TiW/6SuAgz7C2Cj4kclSqDJa', 'reviewer', '2025-01-13 16:42:11'),
+(27, 'reviewer2@gmail.com', '$2y$10$ylPHphbBZvSdxfYEjRnX5ejNToyIA1heR7s.RMGw.JtryYt51RA8K', 'reviewer', '2025-01-13 16:50:21'),
+(28, 'reviewer3@gmail.com', '$2y$10$yaUGkqX75GgYunpwlX64keyG9j172FjhFAaWliCw8ZVC0lsIm/LO2', 'reviewer', '2025-01-13 16:51:00');
 
 --
 -- Indexes for dumped tables
@@ -304,7 +327,7 @@ ALTER TABLE `published_papers`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- Constraints for dumped tables
