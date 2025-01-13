@@ -78,71 +78,60 @@ class Auth extends RestController {
     $this->response($result, RestController::HTTP_OK);
 }
 
-
 public function register_post()
-{   		
+{
     $this->load->database();
     $this->load->library('Authorization_Token');
-    
 
     // Validation rules
     //$this->form_validation->set_rules('name', 'Name', 'trim|required');
    // $this->form_validation->set_rules('contact', 'Mobile No', 'trim|required');
     $this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email|is_unique[users.email]', array('is_unique' => 'This Email is already registered.'));
     $this->form_validation->set_rules('password', 'Password', 'trim|required|min_length[6]');
-    $this->form_validation->set_rules('type', 'Type', 'trim|required|in_list['. implode(',', USER_TYPE::ALL).']');
-
+    $this->form_validation->set_rules('type', 'Type', 'trim|required|in_list[' . implode(',', USER_TYPE::ALL) . ']');
 
     if ($this->form_validation->run()) {
-        
         $password = password_hash($this->input->post('password'), PASSWORD_BCRYPT);
 
-        
-      
-        $data = [
-            //'name' => $this->input->post('name'),
-            //'contact' => $this->input->post('contact'),
+        // Data to store in the users table
+        $user_data = [
             'email' => $this->input->post('email'),
-            'password' => $password, 
+            'password' => $password,
             'type' => $this->input->post('type'),
         ];
 
-        $res = $this->UserModel->register($data);
+        // Data to store in authors or reviewers table
+       
+        $res = $this->UserModel->register($user_data, $profile_data);
 
-        
         if (!empty($res)) {
             $token_data = [
                 'id' => $res['id'],
-                'email' => $res['email'],              
+                'email' => $res['email'],
                 'type' => $res['type'],
             ];
 
-// Generate and return the token
-$token = $this->authorization_token->generateToken($token_data);
-$result = [
-    'status' => 200,
-    'message' => 'Register Successful!',
-    'user' => [
+            $token = $this->authorization_token->generateToken($token_data);
+            $result = [
+                'status' => 200,
+                'message' => 'Register Successful!',
+                'user' => [
                     'id' => $res['id'],
-                    //'name' => $res['name'],
-                   // 'contact' => $res['contact'],
                     'email' => $res['email'],
                     'type' => $res['type'],
                 ],
-    'auth_token' => $token
-];
-
+                'auth_token' => $token,
+            ];
         } else {
-            
             $result = ['status' => 500, 'message' => 'Something Went Wrong!'];
         }
     } else {
-        
         $result = ['status' => 400, 'message' => strip_tags(validation_errors())];
     }
 
     $this->response($result, RestController::HTTP_OK);
 }
+
 
 //contact api
 

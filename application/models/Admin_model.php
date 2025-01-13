@@ -8,15 +8,19 @@ class Admin_model extends CI_model
 		$this->load->database();
 		$this->load->helper(['common_helper']);
 	}
-	public function register($data)
-{
-    $this->db->insert('users', $data);
-    if ($this->db->affected_rows()>0) {
-        $inserted_id = $this->db->insert_id();
-        return $this->db->where('id', $this->db->insert_id())->get('users')->row_array();
-    }
-    return false;
-}
+// 	public function register($data)
+// {
+//     $this->db->insert('users', $data);
+//     if ($this->db->affected_rows()>0) {
+//         $inserted_id = $this->db->insert_id();
+//         return $this->db->where('id', $this->db->insert_id())->get('users')->row_array();
+//     }
+//     return false;
+// }
+
+
+
+
 
 public function insert_contact($data)
     {

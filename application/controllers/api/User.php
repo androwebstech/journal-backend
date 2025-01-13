@@ -112,7 +112,8 @@ class User extends RestController {
 //-----------Update Jounal API------------------------------
     
     
-public function update_journal_post($journal_id = null)
+public function update_journal_post($id = null)
+
 {
     $this->load->model('Admin_model');
     $this->load->library('form_validation');
