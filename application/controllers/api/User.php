@@ -46,7 +46,6 @@ class User extends RestController {
     public function add_journal_post()
     {
         $this->load->model('Admin_model');
-        $this->load->library('form_validation');
         $this->load->helper('url');
     
         // Validation rules
@@ -85,7 +84,7 @@ class User extends RestController {
                 'usd_publication_charge' => $this->input->post('usd_publication_charge'),
                 'review_type' => $this->input->post('review_type'),
                 'publication_link' => $this->input->post('publication_link'),
-                'user_id' => $this->session->userdata('user_id'),
+                'user_id' => $this->user['id'],
                 'jounal_status' => 0, // Default pending status
             ];
     
@@ -116,7 +115,6 @@ public function update_journal_post($id = null)
 
 {
     $this->load->model('Admin_model');
-    $this->load->library('form_validation');
     $this->load->helper('url');
 
        if (empty($journal_id)) {

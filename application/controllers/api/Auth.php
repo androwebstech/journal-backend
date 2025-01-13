@@ -19,6 +19,7 @@ class Auth extends RestController {
 			die();
 		}
 		$this->load->library(['form_validation']);
+        $this->load->library('Authorization_Token');
 		$this->load->helper(['url','common_helper','security']);
 		$this->load->model(['Authentication_model']);
 		$this->load->model('UserModel');
@@ -43,32 +44,27 @@ class Auth extends RestController {
         $password = $this->input->post('password');
         $type = $this->input->post('type');
         
- 
-
-        // Call the validate_login function to check credentials
-        $res = $this->Authentication_model->validate_login($email, $password,$type);
+        $res = $this->Authentication_model->validate_login($email, $password, $type);
         
         if (!empty($res)) {
-            $this->load->library('Authorization_Token');
-            $profile = $this->Authentication_model->getProfileByType($res['id'], $type); 
-            $user_with_profile = array_merge($res, $profile);
+            $token = $this->authorization_token->generateToken($res);
 
-            $token_data = [];
-            $token_data['id'] = $res['id'];
-            $token_data['email'] = $res['email'];
-            $token_data['type'] = $res['type']; 
-            
+            $profile = $this->UserModel->getProfileByType($res['id'], $type); 
+           if(!empty($profile))
+            $res['profile'] = $profile;
+
+
             // Add user image if available
-            if (!empty($res['image'])) {
-                $token_data['image'] = base_url("/uploads/" . $res['image']);
-            }
+            // if (!empty($res['image'])) {
+            //     $token_data['image'] = base_url("/uploads/" . $res['image']);
+            // }
             
             // Generate and return the token
-            $token = $this->authorization_token->generateToken($token_data);
+            
             $result = [
                 'status' => 200,
                 'message' => 'Login Successful!',
-                'user' =>  $user_with_profile,
+                'user' =>  $res,
                 'auth_token' => $token
             ];
         } else {
@@ -84,7 +80,6 @@ class Auth extends RestController {
 public function register_post()
 {
     $this->load->database();
-    $this->load->library('Authorization_Token');
 
     // Validation rules
     $this->form_validation->set_rules('name', 'Name', 'trim|required');
@@ -96,53 +91,26 @@ public function register_post()
     if ($this->form_validation->run()) {
         $password = password_hash($this->input->post('password'), PASSWORD_BCRYPT);
 
-        // Data to store in the users table
         $user_data = [
+            'name'=>$this->input->post('name'),
+            'contact'=>$this->input->post('contact'),
             'email' => $this->input->post('email'),
             'password' => $password,
             'type' => $this->input->post('type'),
         ];
 
-
-           $profile_data = [];
-        // Data to store in authors or reviewers table
-
-         if ($user_data['type'] === 'author') {
-            $profile_data = [
-                'author_name' => $this->input->post('author_name'),
-                'author_details' => $this->input->post('author_details'),
-                'department' => $this->input->post('department'),
-                'designation' => $this->input->post('designation'),
-            ];
-        } elseif ($user_data['type'] === 'reviewer') {
-            $profile_data = [
-                'reviewer_name' => $this->input->post('reviewer_name') ?: 'Anonymous Reviewer', 
-                'profile_image' => $this->input->post('profile_image'),
-                'reviewer_details' => $this->input->post('reviewer_details'),
-                
-            ];
-        }
-       
-        $res = $this->UserModel->register($user_data, $profile_data);
+        $res = $this->UserModel->register($user_data);
 
         if (!empty($res)) {
+            $token = $this->authorization_token->generateToken($res);
+            $profile = $this->UserModel->getProfileByType($res['id'], $res['type']);
+            if(!empty($profile))
+                $res['profile'] =  $profile;
 
-              $type = $res['type'];
-            $profile = $this->UserModel->getProfileByType($res['id'], $type);
-
-            // Combine user data with profile data
-            $user_with_profile = array_merge($res, $profile);
-            $token_data = [
-                'id' => $res['id'],
-                'email' => $res['email'],
-                'type' => $res['type'],
-            ];
-
-            $token = $this->authorization_token->generateToken($token_data);
             $result = [
                 'status' => 200,
                 'message' => 'Register Successful!',
-                'user' => $user_with_profile,
+                'user' => $res,
                 'auth_token' => $token,
             ];
         } else {

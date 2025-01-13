@@ -8,15 +8,6 @@ class UserModel extends CI_model
 		$this->load->database();
 		$this->load->helper(['common_helper']);
 	}
-// 	public function register($data)
-// {
-//     $this->db->insert('users', $data);
-//     if ($this->db->affected_rows()>0) {
-//         $inserted_id = $this->db->insert_id();
-//         return $this->db->where('id', $this->db->insert_id())->get('users')->row_array();
-//     }
-//     return false;
-// }
 public function get_all_journals()
 {
 	$query = $this->db->get('journals');
@@ -24,54 +15,54 @@ public function get_all_journals()
 }
 
 
-public function register($user_data, $profile_data)
+public function register($user)
 {
     $this->db->trans_start();
-    
-    // Insert into `users` table
-    $this->db->insert('users', $user_data);
+
+    $users_entry =[
+        'email'=>$user['email'],
+        'password'=>$user['password'],
+        'type'=>$user['type'],
+    ];
+    $this->db->insert('users', $users_entry);
+
     $user_id = $this->db->insert_id();
 
-    if ($user_data['type'] === 'author') {
-        $profile_data['user_id'] = $user_id;
-        $this->db->insert('authors', $profile_data);
-    } elseif ($user_data['type'] === 'reviewer') {
-        $profile_data['user_id'] = $user_id;
-        $this->db->insert('reviewers', $profile_data);
+    if ($user['type'] === USER_TYPE::AUTHOR) {
+        $author = [
+            'user_id'=>$user_id,
+            'author_name' => $user['name'],
+            'contact'=>$user['contact'],
+        ];
+        $this->db->insert('authors', $author);
+    } elseif ($user['type'] === USER_TYPE::REVIEWER) {
+        $reviewer = [
+            'user_id'=>$user_id,
+            'reviewer_name' => $user['name'], 
+            'contact'=>$user['contact'],
+            'approval_status'=> APPROVAL_STATUS::PENDING  
+        ];
+        $this->db->insert('reviewers', $reviewer);
     }
-
     $this->db->trans_complete();
 
     if ($this->db->trans_status() === FALSE) {
         return false;
     }
-
-    $user_data['id'] = $user_id;
-    return $user_data;
+    $users_entry['id'] = $user_id;
+    unset($users_entry['password']);
+    return $users_entry;
 }
-
-
-
-
 
 public function getProfileByType($user_id, $type)
 {
-    if ($type === 'author') {
-        $this->db->select('authors.author_name, authors.author_details, authors.department, authors.designation');
-        $this->db->from('users');
-        $this->db->join('authors', 'users.id = authors.user_id');
-    } elseif ($type === 'reviewer') {
-        $this->db->select('reviewers.reviewer_name, reviewers.profile_image, reviewers.reviewer_details, reviewers.approval_status');
-        $this->db->from('users');
-        $this->db->join('reviewers', 'users.id = reviewers.user_id');
+    if ($type === USER_TYPE::AUTHOR) {
+        return $this->db->where('user_id',$user_id)->get('authors')->row_array();
+    } elseif ($type === USER_TYPE::REVIEWER) {
+        return $this->db->where('user_id',$user_id)->get('reviewers')->row_array();
     } else {
         return [];
     }
-
-    $this->db->where('users.id', $user_id);
-    $query = $this->db->get();
-
-    return $query->row_array() ?? [];
 }
 
 
