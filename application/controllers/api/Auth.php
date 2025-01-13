@@ -96,19 +96,12 @@ public function register_post()
         // Data to store in the users table
         $user_data = [
             'email' => $this->input->post('email'),
+            'password' => $password,
             'type' => $this->input->post('type'),
         ];
 
         // Data to store in authors or reviewers table
-        $profile_data = [
-            'name' => $this->input->post('name'),
-            'contact' => $this->input->post('contact'),
-            'password' => $password,
-            'profile_image' => $this->input->post('profile_image'),
-            'address' => $this->input->post('address'),
-            // Add any additional fields specific to authors/reviewers here
-        ];
-
+       
         $res = $this->UserModel->register($user_data, $profile_data);
 
         if (!empty($res)) {

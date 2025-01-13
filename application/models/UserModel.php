@@ -34,7 +34,7 @@ public function register($user_data, $profile_data)
         'email' => $user_data['email'],
         'type' => $user_data['type'],
     ];
-    $this->db->insert('users', $user_entry);
+    $this->db->insert('users', $user_data);
 
     if ($this->db->affected_rows() > 0) {
         $inserted_id = $this->db->insert_id();
