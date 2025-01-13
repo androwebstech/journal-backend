@@ -19,7 +19,7 @@ class UserModel extends CI_model
 }
 public function get_all_journals()
 {
-	$query = $this->db->get('journal_table');
+	$query = $this->db->get('journals');
 	return $query->result_array();
 }
 

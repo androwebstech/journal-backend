@@ -86,8 +86,8 @@ public function register_post()
     
 
     // Validation rules
-    $this->form_validation->set_rules('name', 'Name', 'trim|required');
-    $this->form_validation->set_rules('contact', 'Mobile No', 'trim|required');
+    //$this->form_validation->set_rules('name', 'Name', 'trim|required');
+   // $this->form_validation->set_rules('contact', 'Mobile No', 'trim|required');
     $this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email|is_unique[users.email]', array('is_unique' => 'This Email is already registered.'));
     $this->form_validation->set_rules('password', 'Password', 'trim|required|min_length[6]');
     $this->form_validation->set_rules('type', 'Type', 'trim|required|in_list['. implode(',', USER_TYPE::ALL).']');
@@ -100,8 +100,8 @@ public function register_post()
         
       
         $data = [
-            'name' => $this->input->post('name'),
-            'contact' => $this->input->post('contact'),
+            //'name' => $this->input->post('name'),
+            //'contact' => $this->input->post('contact'),
             'email' => $this->input->post('email'),
             'password' => $password, 
             'type' => $this->input->post('type'),
@@ -124,8 +124,8 @@ $result = [
     'message' => 'Register Successful!',
     'user' => [
                     'id' => $res['id'],
-                    'name' => $res['name'],
-                    'contact' => $res['contact'],
+                    //'name' => $res['name'],
+                   // 'contact' => $res['contact'],
                     'email' => $res['email'],
                     'type' => $res['type'],
                 ],

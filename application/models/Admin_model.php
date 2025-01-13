@@ -29,17 +29,17 @@ public function insert_contact($data)
 
     public function insert_journal($data)
     {
-        $this->db->insert('journal_table', $data);
+        $this->db->insert('journals', $data);
         if ($this->db->affected_rows() > 0) {
             return $this->db->insert_id();
         }
         return false;
     }
     
-    public function update_journal($id, $data)
+    public function update_journal($journal_id, $update_data)
     {
-        $this->db->where('id', $id);
-        $this->db->update('journal_table', $data);
+        $this->db->where('journal_id', $journal_id);
+        $this->db->update('journals', $update_data);
     
         return $this->db->affected_rows() > 0;
     }

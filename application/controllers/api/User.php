@@ -85,6 +85,7 @@ class User extends RestController {
                 'usd_publication_charge' => $this->input->post('usd_publication_charge'),
                 'review_type' => $this->input->post('review_type'),
                 'publication_link' => $this->input->post('publication_link'),
+                'user_id' => $this->session->userdata('user_id'),
                 'jounal_status' => 0, // Default pending status
             ];
     
@@ -111,11 +112,17 @@ class User extends RestController {
 //-----------Update Jounal API------------------------------
     
     
-public function update_journal_post($id = null)
+public function update_journal_post($journal_id = null)
 {
     $this->load->model('Admin_model');
     $this->load->library('form_validation');
     $this->load->helper('url');
+
+       if (empty($journal_id)) {
+        $result = ['status' => 400, 'message' => 'Invalid Journal ID.'];
+        $this->response($result, RestController::HTTP_BAD_REQUEST);
+        return;
+    }
 
     // Validation rules
     
@@ -158,13 +165,13 @@ public function update_journal_post($id = null)
         ]);
 
         if (!empty($update_data)) {
-            $updated = $this->Admin_model->update_journal($id, $update_data);
+            $updated = $this->Admin_model->update_journal($journal_id, $update_data);
 
             if ($updated) {
                 $result = [
                     'status' => 200,
                     'message' => 'Journal updated successfully!',
-                    'data' => array_merge(['id' => $id], $update_data),
+                    'data' => array_merge(['journal_id' => $journal_id], $update_data),
                 ];
             } else {
                 $result = ['status' => 500, 'message' => 'Failed to update the journal.'];
