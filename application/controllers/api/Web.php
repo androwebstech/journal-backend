@@ -66,4 +66,39 @@ class Web extends RestController {
 
 
 
+
+    public function journal_search_post()
+    {
+        // $this->load->database();
+        $this->load->library('form_validation');
+    
+        $this->form_validation->set_rules('name', 'Name', 'trim');
+    
+        if (!$this->form_validation->run()) {
+            $this->response([
+                'status' => 400,
+                'message' => strip_tags(validation_errors()),
+            ], RestController::HTTP_BAD_REQUEST);
+            return;
+        }
+    
+        $name = $this->input->post('name', true);
+
+        $journals = $this->UserModel->searchJournalsByName($name);
+    
+        if (!empty($journals)) {
+            $this->response([
+                'status' => 200,
+                'message' => 'Journals found.',
+                'data' => $journals,
+            ], RestController::HTTP_OK);
+        } else {
+            $this->response([
+                'status' => 404,
+                'message' => 'No journals found matching the given name.',
+            ], RestController::HTTP_NOT_FOUND);
+        }
+    }
+
+
 }

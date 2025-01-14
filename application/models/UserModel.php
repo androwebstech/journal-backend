@@ -108,4 +108,13 @@ public function get_journal_by_id($id)
 }
 
 
+public function searchJournalsByName($name)
+    {
+        $this->db->like('journal_name', $name);
+        $query = $this->db->get('journals');
+
+        return $query->result_array();
+    }
+
+
 }
