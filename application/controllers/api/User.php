@@ -111,7 +111,7 @@ class User extends RestController {
 //-----------Update Jounal API------------------------------
     
     
-public function update_journal_post($id = null)
+public function update_journal_post($journal_id = null)
 
 {
     $this->load->model('Admin_model');
@@ -214,6 +214,44 @@ public function get_journals_get()
 }
 
 
+public function get_journal_by_id_get($id = null)
+{
+   
+    $this->load->model('UserModel');
+
+   
+    if (!$id) {
+        $result = [
+            'status' => 400,
+            'message' => 'Journal ID is required',
+            'data' => null
+        ];
+        return $this->response($result, RestController::HTTP_BAD_REQUEST);
+    }
+
+    
+    $journal = $this->UserModel->get_journal_by_id($id);
+
+  
+    if ($journal) {
+        $result = [
+            'status' => 200,
+            'message' => 'Journal fetched successfully',
+            'data' => $journal
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No journal found with the given ID',
+            'data' => null
+        ];
+    }
+
+   
+    return $this->response($result, RestController::HTTP_OK);
+}
+
+
 //-----------Delete Jounal API------------------------------
 public function delete_journal_get($id = 0)
 {
@@ -226,6 +264,8 @@ public function delete_journal_get($id = 0)
     } else {
         $result = ['status' => 400, 'message' => 'Valid ID is required.'];
     }
+
+   
     $this->response($result, RestController::HTTP_OK);
 }
 

@@ -96,5 +96,16 @@ public function getProfileByType($user_id, $type)
 }
 
 
+public function get_journal_by_id($id)
+{
+    $this->db->where('journal_id', $id);
+    $query = $this->db->get('journals'); 
+    if ($query->num_rows() > 0) {
+        return $query->row_array(); 
+    }
+
+    return null; 
+}
+
 
 }

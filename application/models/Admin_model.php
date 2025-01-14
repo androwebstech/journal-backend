@@ -40,13 +40,21 @@ public function insert_contact($data)
         return false;
     }
     
-    public function update_journal($journal_id, $update_data)
-    {
+public function update_journal($journal_id, $update_data)
+{
+    
+    if ($journal_id && !empty($update_data)) {
+      
         $this->db->where('journal_id', $journal_id);
         $this->db->update('journals', $update_data);
-    
+
+       
         return $this->db->affected_rows() > 0;
     }
+
+    return false;
+}
+
     
 
 
