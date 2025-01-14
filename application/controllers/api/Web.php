@@ -33,18 +33,7 @@ class Web extends RestController {
 
     public function reviewer_search_post()
     {
-        // $this->load->database();
         $this->load->library('form_validation');
-    
-        $this->form_validation->set_rules('name', 'Name', 'trim');
-    
-        if (!$this->form_validation->run()) {
-            $this->response([
-                'status' => 400,
-                'message' => strip_tags(validation_errors()),
-            ], RestController::HTTP_BAD_REQUEST);
-            return;
-        }
     
         $name = $this->input->post('name', true);
 
