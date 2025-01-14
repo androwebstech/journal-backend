@@ -31,55 +31,38 @@ class Web extends RestController {
 	}
 
 
-public function reviewer_search_post()
-{
-    $this->load->database();
-    $this->load->library('form_validation');
-
-    $this->form_validation->set_rules('name', 'Name', 'trim|required');
-
-    if (!$this->form_validation->run()) {
-        $this->response([
-            'status' => 400,
-            'message' => strip_tags(validation_errors()),
-        ], RestController::HTTP_BAD_REQUEST);
-        return;
-    }
-
-    $name = $this->input->post('name', true);
-
-    // Filter reviewers by name
-    $this->db->like('name', $name);
-    $query = $this->db->get('reviewers');
-    $reviewers = $query->result_array();
-
-    // Prepare the response data
-    $data = [];
-    if (!empty($reviewers)) {
-        foreach ($reviewers as $reviewer) {
-            $data[] = [
-                'id' => $reviewer['id'],
-                'name' => $reviewer['name'],
-                'email' => $reviewer['email'],
-                'contact' => $reviewer['contact'],
-            ];
+    public function reviewer_search_post()
+    {
+        // $this->load->database();
+        $this->load->library('form_validation');
+    
+        $this->form_validation->set_rules('name', 'Name', 'trim');
+    
+        if (!$this->form_validation->run()) {
+            $this->response([
+                'status' => 400,
+                'message' => strip_tags(validation_errors()),
+            ], RestController::HTTP_BAD_REQUEST);
+            return;
         }
-        $this->response([
-            'status' => 200,
-            'message' => 'Reviewers found.',
-            'data' => $data,
-        ], RestController::HTTP_OK);
-    } else {
-        $this->response([
-            'status' => 404,
-            'message' => 'No reviewers found matching the given name.',
-        ], RestController::HTTP_NOT_FOUND);
+    
+        $name = $this->input->post('name', true);
+
+        $reviewers = $this->UserModel->searchReviewersByName($name);
+    
+        if (!empty($reviewers)) {
+            $this->response([
+                'status' => 200,
+                'message' => 'Reviewers found.',
+                'data' => $reviewers,
+            ], RestController::HTTP_OK);
+        } else {
+            $this->response([
+                'status' => 404,
+                'message' => 'No reviewers found matching the given name.',
+            ], RestController::HTTP_NOT_FOUND);
+        }
     }
-}
-
-
-	
-
 
 
 
