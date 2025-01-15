@@ -9,6 +9,25 @@ class UserModel extends CI_model
 		$this->load->helper(['common_helper']);
 	}
 
+    public function getReviewers($filters = [], $limit = 500, $offset = 0){
+
+        $filterColumns = ['name','department','designation','country','state','research_area'];
+
+        if(!empty($filters) &&  is_array($filters)){
+            foreach($filters as $key => $value){
+                if(!in_array($key, $filterColumns)) continue;
+                if(is_numeric($value))
+                    $this->db->where($key, $value);
+                else if(is_string($value))
+                    $this->db->like($key, $value);
+            }
+        }
+        $this->db->select('*,"" as password,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name');
+        // $this->db->join('')
+        $this->db->limit($limit, $offset);
+        return $this->db->where('type',USER_TYPE::REVIEWER)->get('users')->result_array();
+    }
+
     public function getJournalsByUserId($user_id)
     {
         $this->db->where("user_id",$user_id);
@@ -76,7 +95,6 @@ class UserModel extends CI_model
         return null; 
     }
 
-
     public function searchJournalsByName($name)
     {
         $this->db->like('journal_name', $name);
@@ -85,5 +103,13 @@ class UserModel extends CI_model
         return $query->result_array();
     }
 
+
+    public function getCountries(){
+        return $this->db->get('countries')->result_array();
+    }
+    public function getStates($countryId){
+        $countryId = intval($countryId);
+        return $this->db->where('country_id',$countryId)->get('states')->result_array();
+    }
 
 }

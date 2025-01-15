@@ -30,6 +30,19 @@ class Web extends RestController {
 		$this->load->view('print_records');
 	}
 
+    public function reviewers_search_get($limit = 10, $offset = 0 ){
+        $filters = $this->input->get() ?? [];
+        $limit = intval($limit);
+        $offset = intval($offset);
+        $res = $this->UserModel->getReviewers($filters, $limit, $offset);
+        // echo $this->db->last_query();exit;
+        $this->response([
+            'status' => 200,
+            'message' => 'Success',
+            'data' => $res,
+        ], RestController::HTTP_OK);
+    }
+
 
     public function reviewer_search_post()
     {
@@ -52,9 +65,6 @@ class Web extends RestController {
             ], RestController::HTTP_NOT_FOUND);
         }
     }
-
-
-
 
     public function journal_search_post()
     {
@@ -89,5 +99,32 @@ class Web extends RestController {
         }
     }
 
+    public function get_countries_get(){
+        $countries = $this->UserModel->getCountries();
+        $this->response([
+            'status' => 200,
+            'message' => 'Success',
+            'data' => $countries,
+        ], RestController::HTTP_OK);
+    }
+
+    public function get_states_get($country_id = 0){
+        
+        $country_id = intval($country_id);
+        if(!empty($country_id)){
+            $states = $this->UserModel->getStates($country_id);
+            $this->response([
+                'status' => 200,
+                'message' => 'Success',
+                'data' => $states,
+            ], RestController::HTTP_OK);
+        }else{
+            $this->response([
+                'status' => 400,
+                'message' => 'Country Id missing',
+            ], RestController::HTTP_OK);
+        }
+        
+    }
 
 }
