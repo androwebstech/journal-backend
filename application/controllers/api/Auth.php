@@ -47,20 +47,9 @@ class Auth extends RestController {
         $res = $this->Authentication_model->validate_login($email, $password, $type);
         
         if (!empty($res)) {
-            $token = $this->authorization_token->generateToken($res);
-
-            $profile = $this->UserModel->getProfileByType($res['id'], $type); 
-           if(!empty($profile))
-            $res['profile'] = $profile;
-
-
-            // Add user image if available
-            // if (!empty($res['image'])) {
-            //     $token_data['image'] = base_url("/uploads/" . $res['image']);
-            // }
-            
-            // Generate and return the token
-            
+            $tokenData = get_token_data($res);
+            $token = $this->authorization_token->generateToken($tokenData);
+        
             $result = [
                 'status' => 200,
                 'message' => 'Login Successful!',
@@ -102,11 +91,8 @@ public function register_post()
         $res = $this->UserModel->register($user_data);
 
         if (!empty($res)) {
-            $token = $this->authorization_token->generateToken($res);
-            $profile = $this->UserModel->getProfileByType($res['id'], $res['type']);
-            if(!empty($profile))
-                $res['profile'] =  $profile;
-
+            $tokenData = get_token_data($res);
+            $token = $this->authorization_token->generateToken($tokenData);
             $result = [
                 'status' => 200,
                 'message' => 'Register Successful!',
