@@ -110,7 +110,7 @@ class User extends RestController {
 //-----------Update Jounal API------------------------------
     
     
-public function update_journal_post($id = null)
+public function update_journal_post($journal_id = null)
 
 {
     $this->load->model('Admin_model');
@@ -192,10 +192,10 @@ public function update_journal_post($id = null)
 
 //-----------Get Jounal API------------------------------
 
-public function get_journal_get()
+public function get_journals_get()
 {
     $this->load->model('UserModel');
-    $journals = $this->UserModel->get_all_journals();
+    $journals = $this->UserModel->getJournalsByUserId($this->user['id']);
     if ($journals) {
         $result = [
             'status' => 200,
@@ -213,28 +213,58 @@ public function get_journal_get()
 }
 
 
-//-----------Delete Jounal API------------------------------
-public function delete_journal_delete()
+public function get_journal_by_id_get($id = null)
 {
-    $this->load->database();
-    $id = $this->input->get('id'); 
-    if ($id) {
-        $query = $this->db->get_where('journal_table', ['id' => $id]);
-        
-        if ($query->num_rows() > 0) {
-            $this->db->where('id', $id)->delete('journal_table');
-            
-            if ($this->db->affected_rows() > 0) {
-                $result = ['status' => 200, 'message' => 'Journal deleted successfully!'];
-            } else {
-                $result = ['status' => 500, 'message' => 'Failed to delete the journal.'];
-            }
-        } else {
-            $result = ['status' => 404, 'message' => 'No Journal found with the provided ID.'];
-        }
-    } else {
-        $result = ['status' => 400, 'message' => 'ID is required.'];
+   
+    $this->load->model('UserModel');
+
+   
+    if (!$id) {
+        $result = [
+            'status' => 400,
+            'message' => 'Journal ID is required',
+            'data' => null
+        ];
+        return $this->response($result, RestController::HTTP_BAD_REQUEST);
     }
+
+    
+    $journal = $this->UserModel->get_journal_by_id($id);
+
+  
+    if ($journal) {
+        $result = [
+            'status' => 200,
+            'message' => 'Journal fetched successfully',
+            'data' => $journal
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No journal found with the given ID',
+            'data' => null
+        ];
+    }
+
+   
+    return $this->response($result, RestController::HTTP_OK);
+}
+
+
+//-----------Delete Jounal API------------------------------
+public function delete_journal_get($id = 0)
+{
+    // $this->load->database();
+    $this->load->model('UserModel');
+
+    $id = intval($id);
+    if ($id > 0) {
+        $result = $this->UserModel->deleteJournalById($id, $this->user['id']);
+    } else {
+        $result = ['status' => 400, 'message' => 'Valid ID is required.'];
+    }
+
+   
     $this->response($result, RestController::HTTP_OK);
 }
 
