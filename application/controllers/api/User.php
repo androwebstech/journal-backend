@@ -22,8 +22,7 @@ class User extends RestController {
 		$this->load->library('Authorization_Token');
 		$this->load->library(['form_validation']);
 		$this->load->helper(['url','common']);
-		$this->load->model('Authentication_model');
-		$this->load->model('Admin_model');
+		$this->load->model(['Authentication_model','UserModel','Admin_model']);
         
 		$headers = $this->input->request_headers(); 
 		if (isset($headers['Authorization'])) {
@@ -269,52 +268,15 @@ public function delete_journal_get($id = 0)
     $this->response($result, RestController::HTTP_OK);
 }
 
-
-
-
-
 public function get_personal_details_get()
 {
-    $this->load->model('AuthorModel');
-    $this->load->model('ReviewerModel');
-   
-$entity_type= $this->user['type'];
-$entity_id= $this->user['id'];
-   
- 
-
-
-    $personal_details = [];
-
-    switch (strtolower($entity_type)) {
-        case 'author':
-            $personal_details = $this->AuthorModel->get_personal_details($entity_id);
-            break;
-
-        case 'reviewer':
-            $personal_details = $this->ReviewerModel->get_personal_details($entity_id);
-            break;
-
-        case 'publisher':
-            
-            $personal_details = [];
-            break;
-
-        default:
-            $result = [
-                'status' => 400,
-                'message' => 'Invalid entity type',
-                'data' => []
-            ];
-            $this->response($result, RestController::HTTP_BAD_REQUEST);
-            return;
-    }
-
-    if ($personal_details || $entity_type === 'publisher') {
+    $user = $this->UserModel->getUserById($this->user['id']);
+    
+    if (!empty($user)) {
         $result = [
             'status' => 200,
-            'message' => 'Personal details fetched successfully',
-            'data' => $personal_details
+            'message' => 'Success',
+            'data' => $user
         ];
     } else {
         $result = [
@@ -326,8 +288,5 @@ $entity_id= $this->user['id'];
 
     $this->response($result, RestController::HTTP_OK);
 }
-
-
-
 
 }

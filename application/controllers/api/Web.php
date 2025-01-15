@@ -30,21 +30,23 @@ class Web extends RestController {
 		$this->load->view('print_records');
 	}
 
+    public function reviewers_search_get($limit = 10, $offset = 0 ){
+        $filters = $this->input->get() ?? [];
+        $limit = intval($limit);
+        $offset = intval($offset);
+        $res = $this->UserModel->getReviewers($filters, $limit, $offset);
+        // echo $this->db->last_query();exit;
+        $this->response([
+            'status' => 200,
+            'message' => 'Success',
+            'data' => $res,
+        ], RestController::HTTP_OK);
+    }
+
 
     public function reviewer_search_post()
     {
-        // $this->load->database();
         $this->load->library('form_validation');
-    
-        $this->form_validation->set_rules('name', 'Name', 'trim');
-    
-        if (!$this->form_validation->run()) {
-            $this->response([
-                'status' => 400,
-                'message' => strip_tags(validation_errors()),
-            ], RestController::HTTP_BAD_REQUEST);
-            return;
-        }
     
         $name = $this->input->post('name', true);
 
@@ -64,6 +66,65 @@ class Web extends RestController {
         }
     }
 
+    public function journal_search_post()
+    {
+        // $this->load->database();
+        $this->load->library('form_validation');
+    
+        $this->form_validation->set_rules('name', 'Name', 'trim');
+    
+        if (!$this->form_validation->run()) {
+            $this->response([
+                'status' => 400,
+                'message' => strip_tags(validation_errors()),
+            ], RestController::HTTP_BAD_REQUEST);
+            return;
+        }
+    
+        $name = $this->input->post('name', true);
 
+        $journals = $this->UserModel->searchJournalsByName($name);
+    
+        if (!empty($journals)) {
+            $this->response([
+                'status' => 200,
+                'message' => 'Journals found.',
+                'data' => $journals,
+            ], RestController::HTTP_OK);
+        } else {
+            $this->response([
+                'status' => 404,
+                'message' => 'No journals found matching the given name.',
+            ], RestController::HTTP_NOT_FOUND);
+        }
+    }
+
+    public function get_countries_get(){
+        $countries = $this->UserModel->getCountries();
+        $this->response([
+            'status' => 200,
+            'message' => 'Success',
+            'data' => $countries,
+        ], RestController::HTTP_OK);
+    }
+
+    public function get_states_get($country_id = 0){
+        
+        $country_id = intval($country_id);
+        if(!empty($country_id)){
+            $states = $this->UserModel->getStates($country_id);
+            $this->response([
+                'status' => 200,
+                'message' => 'Success',
+                'data' => $states,
+            ], RestController::HTTP_OK);
+        }else{
+            $this->response([
+                'status' => 400,
+                'message' => 'Country Id missing',
+            ], RestController::HTTP_OK);
+        }
+        
+    }
 
 }

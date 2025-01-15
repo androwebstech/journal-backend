@@ -1,51 +1,17 @@
 <?php
 defined('BASEPATH') or exit('No Access');
 
+function get_token_data($user){
+	return [
+		'id'=>$user['id'],
+		'email'=>$user['email'],
+		'type'=>$user['type'],
+	];
+}
 function get_hash($str)
 {
 	return hash_hmac('md5',$str, '@caproject#');
 }
-function token_to_userid($token = false){
-	$CI = &get_instance();
-	$token = $token ? $token : $CI->session->userdata('auth_token');
-	if(!empty($token)){
-		$user = $CI->db->where('auth_token',$token)
-						->where('status','1')
-						->order_by('auth_id','desc')
-						->get('auth_table')
-						->row_array();
-		if(!empty($user)){
-			return $user['user_id'];
-		}
-	}
-	return 0;
-}
-function get_userdata($uid)
-{
-	$CI = &get_instance();
-	$user = $CI->db->where('id',$uid)->get('users')->row_array();
-	$user['cart'] = $CI->db->where('user_id',$uid)->get('cart')->result_array();
-	return $user;
-}
-
-function get_cart_with_data($uid)
-{
-	if(!empty($uid)){
-		$CI = &get_instance();
-		$cart = $CI->db->select('cart.*,plans.*')
-						->from('cart')
-						->join('plans','plans.plans_id=cart.product_id','left')
-						->where('cart.user_id',$uid)
-						->get();
-						
-		$data = $cart->result_array();
-		return $data;
-	}
-	else
-	return [];
-
-}
-
 function default_image($for)
 {
 	switch ($for) {

@@ -8,35 +8,55 @@ class UserModel extends CI_model
 		$this->load->database();
 		$this->load->helper(['common_helper']);
 	}
-public function getJournalsByUserId($user_id)
-{
-    $this->db->where("user_id",$user_id);
-	$query = $this->db->get('journals');
-	return $query->result_array();
-}
 
-public function deleteJournalById($id, $user_id)
-{
-    $this->db->where('journal_id', $id);
-    $this->db->where('user_id', $user_id);
-    $query = $this->db->get('journals');
+    public function getReviewers($filters = [], $limit = 500, $offset = 0){
 
-    if ($query->num_rows() > 0) {
+        $filterColumns = ['name','department','designation','country','state','research_area'];
+
+        if(!empty($filters) &&  is_array($filters)){
+            foreach($filters as $key => $value){
+                if(!in_array($key, $filterColumns)) continue;
+                if(is_numeric($value))
+                    $this->db->where($key, $value);
+                else if(is_string($value))
+                    $this->db->like($key, $value);
+            }
+        }
+        $this->db->select('*,"" as password,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name');
+        // $this->db->join('')
+        $this->db->limit($limit, $offset);
+        return $this->db->where('type',USER_TYPE::REVIEWER)->get('users')->result_array();
+    }
+
+    public function getJournalsByUserId($user_id)
+    {
+        $this->db->where("user_id",$user_id);
+        $query = $this->db->get('journals');
+        return $query->result_array();
+    }
+
+    public function deleteJournalById($id, $user_id)
+    {
         $this->db->where('journal_id', $id);
         $this->db->where('user_id', $user_id);
-        $this->db->delete('journals');
+        $query = $this->db->get('journals');
 
-        if ($this->db->affected_rows() > 0) {
-            return ['status' => 200, 'message' => 'Journal deleted successfully!'];
+        if ($query->num_rows() > 0) {
+            $this->db->where('journal_id', $id);
+            $this->db->where('user_id', $user_id);
+            $this->db->delete('journals');
+
+            if ($this->db->affected_rows() > 0) {
+                return ['status' => 200, 'message' => 'Journal deleted successfully!'];
+            } else {
+                return ['status' => 500, 'message' => 'Failed to delete the journal.'];
+            }
         } else {
-            return ['status' => 500, 'message' => 'Failed to delete the journal.'];
+            return ['status' => 404, 'message' => 'No Journal found with the provided ID and User ID.'];
         }
-    } else {
-        return ['status' => 404, 'message' => 'No Journal found with the provided ID and User ID.'];
     }
-}
 
-public function searchReviewersByName($name)
+    public function searchReviewersByName($name)
     {
         $this->db->like('reviewer_name', $name);
         $query = $this->db->get('reviewers');
@@ -45,67 +65,51 @@ public function searchReviewersByName($name)
     }
 
 
-public function register($user)
-{
-    $this->db->trans_start();
-
-    $users_entry =[
-        'email'=>$user['email'],
-        'password'=>$user['password'],
-        'type'=>$user['type'],
-    ];
-    $this->db->insert('users', $users_entry);
-
-    $user_id = $this->db->insert_id();
-
-    if ($user['type'] === USER_TYPE::AUTHOR) {
-        $author = [
-            'user_id'=>$user_id,
-            'author_name' => $user['name'],
-            'contact'=>$user['contact'],
-        ];
-        $this->db->insert('authors', $author);
-    } elseif ($user['type'] === USER_TYPE::REVIEWER) {
-        $reviewer = [
-            'user_id'=>$user_id,
-            'reviewer_name' => $user['name'], 
-            'contact'=>$user['contact'],
-            'approval_status'=> APPROVAL_STATUS::PENDING  
-        ];
-        $this->db->insert('reviewers', $reviewer);
-    }
-    $this->db->trans_complete();
-
-    if ($this->db->trans_status() === FALSE) {
+    public function register($user)
+    {
+        if($this->db->insert('users', $user)){
+            $new = $this->db->where('id',$this->db->insert_id())->get('users')->row_array();
+            unset($new['password']);
+            return $new;
+        }
         return false;
     }
-    $users_entry['id'] = $user_id;
-    unset($users_entry['password']);
-    return $users_entry;
-}
 
-public function getProfileByType($user_id, $type)
-{
-    if ($type === USER_TYPE::AUTHOR) {
-        return $this->db->where('user_id',$user_id)->get('authors')->row_array();
-    } elseif ($type === USER_TYPE::REVIEWER) {
-        return $this->db->where('user_id',$user_id)->get('reviewers')->row_array();
-    } else {
-        return [];
-    }
-}
-
-
-public function get_journal_by_id($id)
-{
-    $this->db->where('journal_id', $id);
-    $query = $this->db->get('journals'); 
-    if ($query->num_rows() > 0) {
-        return $query->row_array(); 
+    public function getUserById($id)
+    {
+        $user = $this->db->where('id', $id)->get('users')->row_array();
+        if(isset($user['password']))
+            unset($user['password']);
+        return $user;
     }
 
-    return null; 
-}
 
+    public function get_journal_by_id($id)
+    {
+        $this->db->where('journal_id', $id);
+        $query = $this->db->get('journals'); 
+        if ($query->num_rows() > 0) {
+            return $query->row_array(); 
+        }
+
+        return null; 
+    }
+
+    public function searchJournalsByName($name)
+    {
+        $this->db->like('journal_name', $name);
+        $query = $this->db->get('journals');
+
+        return $query->result_array();
+    }
+
+
+    public function getCountries(){
+        return $this->db->get('countries')->result_array();
+    }
+    public function getStates($countryId){
+        $countryId = intval($countryId);
+        return $this->db->where('country_id',$countryId)->get('states')->result_array();
+    }
 
 }
