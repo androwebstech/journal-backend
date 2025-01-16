@@ -30,16 +30,22 @@ class Web extends RestController {
 		$this->load->view('print_records');
 	}
 
-    public function reviewers_search_get($limit = 10, $offset = 0 ){
+    public function reviewers_search_get($limit = 10, $page = 1){
         $filters = $this->input->get() ?? [];
-        $limit = intval($limit);
-        $offset = intval($offset);
-        $res = $this->UserModel->getReviewers($filters, $limit, $offset);
-        // echo $this->db->last_query();exit;
+        $searchString = $this->input->get('search',true) ?? '';
+        $limit = abs($limit) < 1 ? 10 : abs($limit) ;
+        $page = abs($page) < 1 ? 1 : abs($page);
+
+        $offset = ($page - 1) * $limit;
+        $res = $this->UserModel->getReviewers($filters, $limit, $offset, $searchString);
+        $count = $this->UserModel->getReviewersCount($filters, $searchString);
+        
         $this->response([
             'status' => 200,
             'message' => 'Success',
             'data' => $res,
+            'totalPages' => ceil($count / $limit),
+            'currentPage'=> $page,
         ], RestController::HTTP_OK);
     }
 
@@ -60,27 +66,27 @@ class Web extends RestController {
 
 
 
-    public function reviewer_search_post()
-    {
-        $this->load->library('form_validation');
+    // public function reviewer_search_post()
+    // {
+    //     $this->load->library('form_validation');
     
-        $name = $this->input->post('name', true);
+    //     $name = $this->input->post('name', true);
 
-        $reviewers = $this->UserModel->searchReviewersByName($name);
+    //     $reviewers = $this->UserModel->searchReviewersByName($name);
     
-        if (!empty($reviewers)) {
-            $this->response([
-                'status' => 200,
-                'message' => 'Reviewers found.',
-                'data' => $reviewers,
-            ], RestController::HTTP_OK);
-        } else {
-            $this->response([
-                'status' => 404,
-                'message' => 'No reviewers found matching the given name.',
-            ], RestController::HTTP_NOT_FOUND);
-        }
-    }
+    //     if (!empty($reviewers)) {
+    //         $this->response([
+    //             'status' => 200,
+    //             'message' => 'Reviewers found.',
+    //             'data' => $reviewers,
+    //         ], RestController::HTTP_OK);
+    //     } else {
+    //         $this->response([
+    //             'status' => 404,
+    //             'message' => 'No reviewers found matching the given name.',
+    //         ], RestController::HTTP_NOT_FOUND);
+    //     }
+    // }
 
     public function journal_search_post()
     {
