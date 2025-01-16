@@ -60,10 +60,10 @@ class User extends RestController {
         $this->form_validation->set_rules('indexing', 'Indexing', 'trim');
         $this->form_validation->set_rules('country', 'Country', 'trim|required|in_list[USA,India,UK,Canada,Australia]');
         $this->form_validation->set_rules('state', 'State', 'trim|required');
-        $this->form_validation->set_rules('publication_type', 'Publication Frequency', 'trim|required|in_list[Free,Paid]');
+        $this->form_validation->set_rules('publication_type', 'Publication', 'trim|required|in_list[Free,Paid]');
         $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|integer');
         $this->form_validation->set_rules('review_type', 'Review Type', 'trim|required|in_list[Single-Blind,Double-Blind,Open Peer Review,Collaborative]');
-        $this->form_validation->set_rules('publication_time', 'Publication Time', 'trim');
+        $this->form_validation->set_rules('review_time', 'Review Time', 'trim');
 
         if ($this->form_validation->run()) {
             $data = [
@@ -82,7 +82,7 @@ class User extends RestController {
                 'publication_type' => $this->input->post('publication_type'),
                 'usd_publication_charge' => $this->input->post('usd_publication_charge'),
                 'review_type' => $this->input->post('review_type'),
-                'publication_time' => $this->input->post('publication_time'),
+                'review_time' => $this->input->post('review_time'),
                 'user_id' => $this->user['id'], // Ensure $this->user is properly set
                 'approval_status' => 0, // Default pending status
             ];
@@ -134,12 +134,12 @@ public function update_journal_post($journal_id = null)
     $this->form_validation->set_rules('website_link', 'Website Link', 'trim|valid_url');
     $this->form_validation->set_rules('journal_submission_link', 'Submission Link', 'trim|valid_url');
     $this->form_validation->set_rules('indexing', 'Indexing', 'trim');
-    $this->form_validation->set_rules('country', 'Country', 'trim|in_list[USA,India,UK,Canada,Australia]');
+    $this->form_validation->set_rules('country', 'Country', 'trim');
     $this->form_validation->set_rules('state', 'State', 'trim');
     $this->form_validation->set_rules('publication_type', 'Publication Frequency', 'trim|in_list[Free,Paid]');
-    $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|decimal');
+    $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|integer');
     $this->form_validation->set_rules('review_type', 'Review Type', 'trim|in_list[Single-Blind,Double-Blind,Open Peer Review,Collaborative]');
-    $this->form_validation->set_rules('publication_time', 'Publication Time', 'trim|valid_url');
+    $this->form_validation->set_rules('review_time', 'Review Time', 'trim|valid_url');
 
     if ($this->form_validation->run()) {
        
@@ -159,7 +159,7 @@ public function update_journal_post($journal_id = null)
             'publication_type' => $this->input->post('publication_type'),
             'usd_publication_charge' => $this->input->post('usd_publication_charge'),
             'review_type' => $this->input->post('review_type'),
-            'publication_time' => $this->input->post('publication_time'),
+            'review_time' => $this->input->post('review_time'),
         ]);
 
         if (!empty($update_data)) {
