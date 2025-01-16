@@ -44,9 +44,9 @@ class User extends RestController {
 
     public function add_journal_post()
     {
-        $this->load->model('Admin_model');
+        $this->load->model('UserModel');
         $this->load->helper('url');
-    
+
         // Validation rules
         $this->form_validation->set_rules('journal_name', 'Journal Name', 'trim|required');
         $this->form_validation->set_rules('eissn_no', 'E-ISSN', 'trim');
@@ -60,11 +60,11 @@ class User extends RestController {
         $this->form_validation->set_rules('indexing', 'Indexing', 'trim');
         $this->form_validation->set_rules('country', 'Country', 'trim|required|in_list[USA,India,UK,Canada,Australia]');
         $this->form_validation->set_rules('state', 'State', 'trim|required');
-        $this->form_validation->set_rules('publication', 'Publication Frequency', 'trim|required|in_list[Free,Paid]');
+        $this->form_validation->set_rules('publication_type', 'Publication Frequency', 'trim|required|in_list[Free,Paid]');
         $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|integer');
-        $this->form_validation->set_rules('review_type', 'Review Type', 'trim|required|in_list[Single-Blind,Double-Blind,Open Peer Review,Collaberative]');
-        $this->form_validation->set_rules('publication_link', 'Publication Link', 'trim');
-    
+        $this->form_validation->set_rules('review_type', 'Review Type', 'trim|required|in_list[Single-Blind,Double-Blind,Open Peer Review,Collaborative]');
+        $this->form_validation->set_rules('publication_time', 'Publication Time', 'trim');
+
         if ($this->form_validation->run()) {
             $data = [
                 'journal_name' => $this->input->post('journal_name'),
@@ -79,16 +79,16 @@ class User extends RestController {
                 'indexing' => $this->input->post('indexing'),
                 'country' => $this->input->post('country'),
                 'state' => $this->input->post('state'),
-                'publication' => $this->input->post('publication'),
+                'publication_type' => $this->input->post('publication_type'),
                 'usd_publication_charge' => $this->input->post('usd_publication_charge'),
                 'review_type' => $this->input->post('review_type'),
-                'publication_link' => $this->input->post('publication_link'),
-                'user_id' => $this->user['id'],
-                'jounal_status' => 0, // Default pending status
+                'publication_time' => $this->input->post('publication_time'),
+                'user_id' => $this->user['id'], // Ensure $this->user is properly set
+                'approval_status' => 0, // Default pending status
             ];
-    
-            $res = $this->Admin_model->insert_journal($data);
-    
+
+            $res = $this->UserModel->insert_journal($data);
+
             if ($res) {
                 $result = [
                     'status' => 200,
@@ -101,7 +101,7 @@ class User extends RestController {
         } else {
             $result = ['status' => 400, 'message' => strip_tags(validation_errors())];
         }
-    
+
         // Return the response
         $this->response($result, RestController::HTTP_OK);
     }
@@ -113,7 +113,7 @@ class User extends RestController {
 public function update_journal_post($journal_id = null)
 
 {
-    $this->load->model('Admin_model');
+    $this->load->model('UserModel');
     $this->load->helper('url');
 
        if (empty($journal_id)) {
@@ -128,18 +128,18 @@ public function update_journal_post($journal_id = null)
     $this->form_validation->set_rules('eissn_no', 'E-ISSN', 'trim');
     $this->form_validation->set_rules('pissn_no', 'P-ISSN', 'trim');
     $this->form_validation->set_rules('first_volume', 'First Volume', 'trim|integer');
-    $this->form_validation->set_rules('number_of_issue_per_year', 'Number of Issues Per Year', 'trim|integer');
+    $this->form_validation->set_rules('number_of_issue_per_year', 'Number of Issues Per Year', 'trim|in_list[Monthly,Bimonthly,Yearly,Halfyearly,Quaterly]');
     $this->form_validation->set_rules('publisher_name', 'Publisher Name', 'trim');
     $this->form_validation->set_rules('broad_research_area', 'Broad Research Area', 'trim');
     $this->form_validation->set_rules('website_link', 'Website Link', 'trim|valid_url');
     $this->form_validation->set_rules('journal_submission_link', 'Submission Link', 'trim|valid_url');
     $this->form_validation->set_rules('indexing', 'Indexing', 'trim');
     $this->form_validation->set_rules('country', 'Country', 'trim|in_list[USA,India,UK,Canada,Australia]');
-    $this->form_validation->set_rules('state', 'State', 'trim|in_list[California,New York,Texas,Ontario,Queensland]');
-    $this->form_validation->set_rules('publication', 'Publication Frequency', 'trim|in_list[Monthly,Quarterly,Yearly]');
+    $this->form_validation->set_rules('state', 'State', 'trim');
+    $this->form_validation->set_rules('publication_type', 'Publication Frequency', 'trim|in_list[Free,Paid]');
     $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|decimal');
-    $this->form_validation->set_rules('review_type', 'Review Type', 'trim|in_list[Single-blind,Double-blind,Open Review,Editorial Review]');
-    $this->form_validation->set_rules('publication_link', 'Publication Link', 'trim|valid_url');
+    $this->form_validation->set_rules('review_type', 'Review Type', 'trim|in_list[Single-Blind,Double-Blind,Open Peer Review,Collaborative]');
+    $this->form_validation->set_rules('publication_time', 'Publication Time', 'trim|valid_url');
 
     if ($this->form_validation->run()) {
        
@@ -156,14 +156,14 @@ public function update_journal_post($journal_id = null)
             'indexing' => $this->input->post('indexing'),
             'country' => $this->input->post('country'),
             'state' => $this->input->post('state'),
-            'publication' => $this->input->post('publication'),
+            'publication_type' => $this->input->post('publication_type'),
             'usd_publication_charge' => $this->input->post('usd_publication_charge'),
             'review_type' => $this->input->post('review_type'),
-            'publication_link' => $this->input->post('publication_link'),
+            'publication_time' => $this->input->post('publication_time'),
         ]);
 
         if (!empty($update_data)) {
-            $updated = $this->Admin_model->update_journal($journal_id, $update_data);
+            $updated = $this->UserModel->update_journal($journal_id, $update_data);
 
             if ($updated) {
                 $result = [
@@ -288,5 +288,39 @@ public function get_personal_details_get()
 
     $this->response($result, RestController::HTTP_OK);
 }
+
+
+
+public function update_personal_details_post()
+{
+    $id = $this->user['id']; // Assuming the logged-in user's ID is available here
+    $data = $this->input->post(); // Retrieve input data
+
+    if (!empty($data)) {
+        // Update user details
+        $update = $this->UserModel->updateUserById($id, $data);
+
+        if ($update) {
+            $result = [
+                'status' => 200,
+                'message' => 'User details updated successfully'
+            ];
+        } else {
+            $result = [
+                'status' => 500,
+                'message' => 'Failed to update user details'
+            ];
+        }
+    } else {
+        $result = [
+            'status' => 400,
+            'message' => 'Invalid data provided'
+        ];
+    }
+
+    $this->response($result, RestController::HTTP_OK);
+}
+
+
 
 }

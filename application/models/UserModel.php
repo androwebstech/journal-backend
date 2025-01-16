@@ -103,6 +103,17 @@ class UserModel extends CI_model
     }
 
 
+    public function updateUserById($id, $data)
+    {
+        // Exclude sensitive or non-updatable fields
+        unset($data['email'], $data['created_at'], $data['password']);
+    
+        // Update user details in the database
+        $this->db->where('id', $id);
+        return $this->db->update('users', $data);
+    }
+    
+
     public function get_journal_by_id($id)
     {
         $this->db->where('journal_id', $id);
@@ -130,5 +141,34 @@ class UserModel extends CI_model
         $countryId = intval($countryId);
         return $this->db->where('country_id',$countryId)->get('states')->result_array();
     }
+
+
+
+
+
+public function insert_journal($data)
+{
+    $this->db->insert('journals', $data);
+    if ($this->db->affected_rows() > 0) {
+        return $this->db->insert_id();
+    }
+    return false;
+}
+
+public function update_journal($journal_id, $update_data)
+{
+
+if ($journal_id && !empty($update_data)) {
+  
+    $this->db->where('journal_id', $journal_id);
+    $this->db->update('journals', $update_data);
+
+   
+    return $this->db->affected_rows() > 0;
+}
+
+return false;
+}
+
 
 }
