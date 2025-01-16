@@ -2,8 +2,8 @@
 -- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Jan 15, 2025 at 04:56 PM
+-- Host: 127.0.0.1
+-- Generation Time: Jan 16, 2025 at 12:01 PM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 7.4.33
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `journal_backend`
+-- Database: `journal-db`
 --
 
 -- --------------------------------------------------------
@@ -4541,7 +4541,7 @@ CREATE TABLE `users` (
   `profile_image` varchar(250) DEFAULT NULL,
   `contact` varchar(15) NOT NULL,
   `name` varchar(200) NOT NULL,
-  `department` varchar(255) DEFAULT NULL,
+  `department` varchar(255) NOT NULL,
   `designation` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `maximum_qualification` varchar(100) NOT NULL,
@@ -4558,10 +4558,19 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `email`, `password`, `type`, `profile_image`, `contact`, `name`, `department`, `designation`, `created_at`, `maximum_qualification`, `country`, `state`, `profile_link`, `research_area`, `dob`, `about`) VALUES
-(1, 'author@gmail.com', '$2y$10$IbF7fl9fsAgQrZ0rRClcOu7I4LewAoVE7KVLVsQYU4GPI3hy9yYfq', 'author', NULL, '8888888888', 'reviewer4', NULL, NULL, '2025-01-15 11:01:30', '', 0, 0, '', '', '0000-00-00', ''),
-(2, 'reviewer@gmail.com', '$2y$10$Tr7fcAxauIbOeGXd8fXjTuxYrdESxNCavgtnLvhRL.KYS3Ugg7rLq', 'reviewer', NULL, '8888888888', 'reviewer4', NULL, NULL, '2025-01-15 11:01:45', '', 0, 0, '', '', '0000-00-00', ''),
-(3, 'publisher@gmail.com', '$2y$10$W92EBKQtJErjt6UCMjfbKuGl6GM9nEgyPslGRNh5e7IiEXZ05BLRK', 'publisher', NULL, '8888888888', 'publisher', NULL, NULL, '2025-01-15 11:02:00', '', 0, 0, '', '', '0000-00-00', ''),
-(4, 'reviewer1@gmail.com', '$2y$10$um/qpnORWp9j8iML/TljrOhQNjopugEo4LSDPElqZK/x3jynL.PZu', 'reviewer', NULL, '8888888888', 'new reviewer', NULL, NULL, '2025-01-15 12:33:50', '', 1, 0, '', '', '0000-00-00', '');
+(1, 'author@gmail.com', '$2y$10$IbF7fl9fsAgQrZ0rRClcOu7I4LewAoVE7KVLVsQYU4GPI3hy9yYfq', 'author', NULL, '8888888888', 'reviewer4', '', NULL, '2025-01-15 11:01:30', '', 0, 0, '', '', '0000-00-00', ''),
+(2, 'reviewer@gmail.com', '$2y$10$Tr7fcAxauIbOeGXd8fXjTuxYrdESxNCavgtnLvhRL.KYS3Ugg7rLq', 'reviewer', NULL, '8888888888', 'reviewer4', 'Science, Technology and Innovation Policy', 'Assistant Professor', '2025-01-15 11:01:45', '', 2, 0, '', 'Hindi language and literature', '0000-00-00', ''),
+(3, 'publisher@gmail.com', '$2y$10$W92EBKQtJErjt6UCMjfbKuGl6GM9nEgyPslGRNh5e7IiEXZ05BLRK', 'publisher', NULL, '8888888888', 'publisher', '', NULL, '2025-01-15 11:02:00', '', 0, 0, '', '', '0000-00-00', ''),
+(4, 'reviewer1@gmail.com', '$2y$10$um/qpnORWp9j8iML/TljrOhQNjopugEo4LSDPElqZK/x3jynL.PZu', 'reviewer', NULL, '8888888888', 'new reviewer', 'Literature', 'Assistant Professor', '2025-01-15 12:33:50', '', 1, 0, '', 'hindi Language', '0000-00-00', ''),
+(5, 'admin@gmail.com', '$2y$10$OUOokLvXvhdK5RDIoBopIeXlfy8U3rfHoTmKHB2Kqm8pzeso06bFG', 'reviewer', NULL, '7082760377', 'Sahil Luthra', '', NULL, '2025-01-15 20:51:47', '', 0, 0, '', '', '0000-00-00', ''),
+(6, 'admin1@gmail.com', '$2y$10$kjMr8leYoj7RLIFHVVdHZOFhUcufWzICOYc02GvjiGr.Yo/q9pNEC', 'reviewer', NULL, '4848151658', 'Tanav Mahendru', '', NULL, '2025-01-15 20:52:35', '', 0, 0, '', '', '0000-00-00', ''),
+(7, 'reviewer2@gmail.com', '$2y$10$6ZzH.uSjLcZNjZJZ09G2TeYZGGW2Iq/mY1qtRkTT9vs6Vmoo1i/pG', 'reviewer', NULL, '1234567890', 'reviewer1', '', NULL, '2025-01-16 09:53:16', '', 0, 0, '', '', '0000-00-00', ''),
+(8, 'reviewer3@gmail.com', '$2y$10$EsfMsBUzSAGE8s13J6Q6TekJw4JhUzVmT/gVhnVEG3x0AOEvJTbmO', 'reviewer', NULL, '1234567890', 'reviewer2', '', NULL, '2025-01-16 09:53:57', '', 0, 0, '', '', '0000-00-00', ''),
+(9, 'reviewer4@gmail.com', '$2y$10$ohCi4iiKDvjypaIeDXIiR.a4eqAfJ/Y4Lh6blntCVLnGLqCNr08U6', 'reviewer', NULL, '1234567890', 'reviewer3', '', NULL, '2025-01-16 09:54:35', '', 0, 0, '', '', '0000-00-00', ''),
+(10, 'reviewer6@gmail.com', '$2y$10$BWNiuR4E12rO2H620QBVOuIh0vJ1Iba39.F8OjQhafv0.Ax7ht/ie', 'reviewer', NULL, '1234567890', 'reviewer5', '', NULL, '2025-01-16 09:55:20', '', 0, 0, '', '', '0000-00-00', ''),
+(11, 'reviewer5@gmail.com', '$2y$10$5bP30L09tAeZrUrvolyF2OFlxFJMen7kvjvVydq9aBCFo/Ulp2dsW', 'reviewer', NULL, '1234567890', 'rereviewer4', '', NULL, '2025-01-16 09:55:57', '', 0, 0, '', '', '0000-00-00', ''),
+(12, 'reviewer7@gmail.com', '$2y$10$DwQqm6H7Vv0IynbsoyBwnOUdAe0zuepv0fqHsdKDyqA6cKRJMZwru', 'reviewer', NULL, '1234567890', 'reviewer6', '', NULL, '2025-01-16 09:56:47', '', 0, 0, '', '', '0000-00-00', ''),
+(13, 'reviewer9@gmail.com', '$2y$10$zTTFkVEwMQJ/8fIWmgFKAeSDhjwRWjJY4tDTFySxX0I44birBafr2', 'reviewer', NULL, '1234567890', 'reviewer8', '', NULL, '2025-01-16 09:57:27', '', 0, 0, '', '', '0000-00-00', '');
 
 --
 -- Indexes for dumped tables
@@ -4635,7 +4644,7 @@ ALTER TABLE `states`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
