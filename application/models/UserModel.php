@@ -9,9 +9,25 @@ class UserModel extends CI_model
 		$this->load->helper(['common_helper']);
 	}
 
-    public function getReviewers($filters = [], $limit = 500, $offset = 0){
+    public function getReviewers($filters = [], $limit = 500, $offset = 0, $searchString = ''){
 
-        $filterColumns = ['name','department','designation','country','state','research_area'];
+        $this->applyReviewerSearchFilter($filters, $searchString);
+
+        $this->db->select('*,"" as password,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name');
+        $this->db->limit($limit, $offset);
+        return $this->db->get('users')->result_array();
+    }
+    public function applyReviewerSearchFilter($filters = [], $searchString = '') {
+        $searchColumns = ['name','research_area'];
+        $filterColumns = ['department','designation','country','state'];
+
+        if(!empty($searchString)){
+            $this->db->or_group_start();
+            foreach($searchColumns as $column){
+                $this->db->or_like($column, $searchString);
+            }
+            $this->db->group_end();
+        }
 
         if(!empty($filters) &&  is_array($filters)){
             foreach($filters as $key => $value){
@@ -22,11 +38,14 @@ class UserModel extends CI_model
                     $this->db->like($key, $value);
             }
         }
-        $this->db->select('*,"" as password,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name');
-        // $this->db->join('')
-        $this->db->limit($limit, $offset);
-        return $this->db->where('type',USER_TYPE::REVIEWER)->get('users')->result_array();
+
+        $this->db->where('type',USER_TYPE::REVIEWER);
     }
+    public function getReviewersCount($filters = [], $searchString = '') {
+        $this->applyReviewerSearchFilter($filters, $searchString);
+        return $this->db->count_all_results('users');
+    }
+
 
     public function getJournalsByUserId($user_id)
     {
