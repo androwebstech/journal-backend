@@ -139,7 +139,7 @@ public function update_journal_post($journal_id = null)
     $this->form_validation->set_rules('publication_type', 'Publication Frequency', 'trim|in_list[Free,Paid]');
     $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|integer');
     $this->form_validation->set_rules('review_type', 'Review Type', 'trim|in_list[Single-Blind,Double-Blind,Open Peer Review,Collaborative]');
-    $this->form_validation->set_rules('review_time', 'Review Time', 'trim|valid_url');
+    $this->form_validation->set_rules('review_time', 'Review Time', 'trim');
 
     if ($this->form_validation->run()) {
        
