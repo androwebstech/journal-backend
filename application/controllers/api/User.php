@@ -296,6 +296,30 @@ public function update_personal_details_post()
     $id = $this->user['id']; // Assuming the logged-in user's ID is available here
     $data = $this->input->post(); // Retrieve input data
 
+    // Handle profile image upload if provided
+    if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
+        // Define upload configuration
+        $config['upload_path'] = './uploads/profile_images/';
+        $config['allowed_types'] = 'jpg|jpeg|png|gif';
+        $config['max_size'] = 2048; // 2MB limit
+        $config['file_name'] = 'profile_' . $id . '_' . time();
+
+        // Load upload library and initialize the config
+        $this->load->library('upload', $config);
+
+        if ($this->upload->do_upload('profile_image')) {
+            // Get uploaded file data
+            $uploadData = $this->upload->data();
+            $data['profile_image'] = 'uploads/profile_images/' . $uploadData['file_name'];
+        } else {
+            $result = [
+                'status' => 400,
+                'message' => 'Profile image upload failed: ' . $this->upload->display_errors('', '')
+            ];
+            return $this->response($result, RestController::HTTP_OK);
+        }
+    }
+
     if (!empty($data)) {
         // Update user details
         $update = $this->UserModel->updateUserById($id, $data);
@@ -320,7 +344,6 @@ public function update_personal_details_post()
 
     $this->response($result, RestController::HTTP_OK);
 }
-
 
 
 }
