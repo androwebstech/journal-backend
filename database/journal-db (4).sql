@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 16, 2025 at 12:01 PM
+-- Generation Time: Jan 17, 2025 at 11:34 AM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 7.4.33
 
@@ -332,25 +332,33 @@ CREATE TABLE `journals` (
   `user_id` int(11) NOT NULL,
   `journal_name` varchar(255) NOT NULL,
   `status` enum('pending','approved','rejected') NOT NULL,
-  `paid` tinyint(1) NOT NULL,
   `eissn_no` varchar(20) DEFAULT NULL,
   `pissn_no` varchar(20) DEFAULT NULL,
   `first_volume` int(11) DEFAULT NULL,
-  `number_of_issue_per_year` int(11) DEFAULT NULL,
+  `number_of_issue_per_year` enum('Monthl','Bimonthly','Yearly','Halfyearly','Quaterly') DEFAULT NULL,
   `publisher_name` varchar(255) DEFAULT NULL,
   `broad_research_area` varchar(255) DEFAULT NULL,
   `website_link` varchar(255) DEFAULT NULL,
   `journal_submission_link` varchar(255) DEFAULT NULL,
   `indexing` varchar(255) DEFAULT NULL,
-  `country` enum('USA','India','UK','Canada','Australia') NOT NULL,
-  `state` enum('California','New York','Texas','Ontario','Queensland') NOT NULL,
-  `publication` enum('Monthly','Quarterly','Yearly') NOT NULL,
-  `usd_publication_charge` decimal(10,2) DEFAULT NULL,
-  `review_type` enum('Single-blind','Double-blind','Open Review','Editorial Review') NOT NULL,
-  `publication_link` varchar(255) DEFAULT NULL,
-  `jounal_status` varchar(50) NOT NULL,
+  `country` varchar(50) NOT NULL,
+  `state` varchar(50) NOT NULL,
+  `publication_type` enum('Free','Paid') NOT NULL,
+  `usd_publication_charge` varchar(100) DEFAULT NULL,
+  `review_type` enum('Single-Blind','Double-Blind','Open Peer Review','Collaborative') NOT NULL,
+  `review_time` varchar(255) DEFAULT NULL,
+  `approval_status` varchar(50) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `journals`
+--
+
+INSERT INTO `journals` (`journal_id`, `user_id`, `journal_name`, `status`, `eissn_no`, `pissn_no`, `first_volume`, `number_of_issue_per_year`, `publisher_name`, `broad_research_area`, `website_link`, `journal_submission_link`, `indexing`, `country`, `state`, `publication_type`, `usd_publication_charge`, `review_type`, `review_time`, `approval_status`, `created_at`) VALUES
+(1, 5, 'hey', 'pending', '222534', '324', 233, 'Yearly', 'neha', 'gopalganj', 'http://localhost/journal-backend/api/auth/add_journal', 'http://localhost/journal-backend/api/auth/add_journal', '1', 'India', 'New York', 'Free', '20', 'Single-Blind', '3', '0', '2025-01-15 18:32:11'),
+(2, 3, 'Sahil', 'pending', '1234-5678', '1234-5678', 5, 'Yearly', 'sgcshg', 'cs', 'http://localhost:3000/create-journal', 'http://localhost:3000/create-journal', 'hsbchjb', 'UK', 'svchv', 'Paid', '0', 'Double-Blind', '55', '0', '2025-01-16 14:38:01'),
+(3, 3, 'Sahil', 'pending', '1111-1111', '1234-5678', 5, 'Yearly', 'hvschv', 'vs chvh', 'http://localhost:3000/create-journal', 'http://localhost:3000/create-journal', 'hscv', 'UK', 'jbsjcb', 'Free', '0', 'Double-Blind', '555', '0', '2025-01-16 14:33:02');
 
 -- --------------------------------------------------------
 
@@ -4559,18 +4567,10 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `email`, `password`, `type`, `profile_image`, `contact`, `name`, `department`, `designation`, `created_at`, `maximum_qualification`, `country`, `state`, `profile_link`, `research_area`, `dob`, `about`) VALUES
 (1, 'author@gmail.com', '$2y$10$IbF7fl9fsAgQrZ0rRClcOu7I4LewAoVE7KVLVsQYU4GPI3hy9yYfq', 'author', NULL, '8888888888', 'reviewer4', '', NULL, '2025-01-15 11:01:30', '', 0, 0, '', '', '0000-00-00', ''),
-(2, 'reviewer@gmail.com', '$2y$10$Tr7fcAxauIbOeGXd8fXjTuxYrdESxNCavgtnLvhRL.KYS3Ugg7rLq', 'reviewer', NULL, '8888888888', 'reviewer4', 'Science, Technology and Innovation Policy', 'Assistant Professor', '2025-01-15 11:01:45', '', 2, 0, '', 'Hindi language and literature', '0000-00-00', ''),
+(2, 'reviewer@gmail.com', '$2y$10$Tr7fcAxauIbOeGXd8fXjTuxYrdESxNCavgtnLvhRL.KYS3Ugg7rLq', 'reviewer', NULL, '8888888888', 'reviewer4', '', NULL, '2025-01-15 11:01:45', '', 0, 0, '', '', '0000-00-00', ''),
 (3, 'publisher@gmail.com', '$2y$10$W92EBKQtJErjt6UCMjfbKuGl6GM9nEgyPslGRNh5e7IiEXZ05BLRK', 'publisher', NULL, '8888888888', 'publisher', '', NULL, '2025-01-15 11:02:00', '', 0, 0, '', '', '0000-00-00', ''),
-(4, 'reviewer1@gmail.com', '$2y$10$um/qpnORWp9j8iML/TljrOhQNjopugEo4LSDPElqZK/x3jynL.PZu', 'reviewer', NULL, '8888888888', 'new reviewer', 'Literature', 'Assistant Professor', '2025-01-15 12:33:50', '', 1, 0, '', 'hindi Language', '0000-00-00', ''),
-(5, 'admin@gmail.com', '$2y$10$OUOokLvXvhdK5RDIoBopIeXlfy8U3rfHoTmKHB2Kqm8pzeso06bFG', 'reviewer', NULL, '7082760377', 'Sahil Luthra', '', NULL, '2025-01-15 20:51:47', '', 0, 0, '', '', '0000-00-00', ''),
-(6, 'admin1@gmail.com', '$2y$10$kjMr8leYoj7RLIFHVVdHZOFhUcufWzICOYc02GvjiGr.Yo/q9pNEC', 'reviewer', NULL, '4848151658', 'Tanav Mahendru', '', NULL, '2025-01-15 20:52:35', '', 0, 0, '', '', '0000-00-00', ''),
-(7, 'reviewer2@gmail.com', '$2y$10$6ZzH.uSjLcZNjZJZ09G2TeYZGGW2Iq/mY1qtRkTT9vs6Vmoo1i/pG', 'reviewer', NULL, '1234567890', 'reviewer1', '', NULL, '2025-01-16 09:53:16', '', 0, 0, '', '', '0000-00-00', ''),
-(8, 'reviewer3@gmail.com', '$2y$10$EsfMsBUzSAGE8s13J6Q6TekJw4JhUzVmT/gVhnVEG3x0AOEvJTbmO', 'reviewer', NULL, '1234567890', 'reviewer2', '', NULL, '2025-01-16 09:53:57', '', 0, 0, '', '', '0000-00-00', ''),
-(9, 'reviewer4@gmail.com', '$2y$10$ohCi4iiKDvjypaIeDXIiR.a4eqAfJ/Y4Lh6blntCVLnGLqCNr08U6', 'reviewer', NULL, '1234567890', 'reviewer3', '', NULL, '2025-01-16 09:54:35', '', 0, 0, '', '', '0000-00-00', ''),
-(10, 'reviewer6@gmail.com', '$2y$10$BWNiuR4E12rO2H620QBVOuIh0vJ1Iba39.F8OjQhafv0.Ax7ht/ie', 'reviewer', NULL, '1234567890', 'reviewer5', '', NULL, '2025-01-16 09:55:20', '', 0, 0, '', '', '0000-00-00', ''),
-(11, 'reviewer5@gmail.com', '$2y$10$5bP30L09tAeZrUrvolyF2OFlxFJMen7kvjvVydq9aBCFo/Ulp2dsW', 'reviewer', NULL, '1234567890', 'rereviewer4', '', NULL, '2025-01-16 09:55:57', '', 0, 0, '', '', '0000-00-00', ''),
-(12, 'reviewer7@gmail.com', '$2y$10$DwQqm6H7Vv0IynbsoyBwnOUdAe0zuepv0fqHsdKDyqA6cKRJMZwru', 'reviewer', NULL, '1234567890', 'reviewer6', '', NULL, '2025-01-16 09:56:47', '', 0, 0, '', '', '0000-00-00', ''),
-(13, 'reviewer9@gmail.com', '$2y$10$zTTFkVEwMQJ/8fIWmgFKAeSDhjwRWjJY4tDTFySxX0I44birBafr2', 'reviewer', NULL, '1234567890', 'reviewer8', '', NULL, '2025-01-16 09:57:27', '', 0, 0, '', '', '0000-00-00', '');
+(4, 'reviewer1@gmail.com', '$2y$10$um/qpnORWp9j8iML/TljrOhQNjopugEo4LSDPElqZK/x3jynL.PZu', 'reviewer', NULL, '8888888888', 'new reviewer', '', NULL, '2025-01-15 12:33:50', '', 1, 0, '', '', '0000-00-00', ''),
+(5, 'niaa@gmail.com', '$2y$10$k5vNVIUNRyogr1WwFb0bEOwTDSH3cv/kqVENi7rOUMtJce5sZPwEG', 'author', NULL, '4555555555', 'neha', '', NULL, '2025-01-15 18:26:48', '', 0, 0, '', '', '0000-00-00', '');
 
 --
 -- Indexes for dumped tables
@@ -4635,6 +4635,12 @@ ALTER TABLE `countries`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=249;
 
 --
+-- AUTO_INCREMENT for table `journals`
+--
+ALTER TABLE `journals`
+  MODIFY `journal_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT for table `states`
 --
 ALTER TABLE `states`
@@ -4644,7 +4650,7 @@ ALTER TABLE `states`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
