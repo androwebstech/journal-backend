@@ -172,6 +172,42 @@ class Web extends RestController {
     return $this->response($result, RestController::HTTP_OK);
 }
 
+public function get_reviewer_by_id_get($id = null)
+{
+   
+    $this->load->model('UserModel');
+
+   
+    if (!$id) {
+        $result = [
+            'status' => 400,
+            'message' => 'reviewer ID is required',
+            'data' => null
+        ];
+        return $this->response($result, RestController::HTTP_BAD_REQUEST);
+    }
+
+    
+    $reviewer = $this->UserModel->get_reviewer_by_id($id);
+
+  
+    if ($reviewer) {
+        $result = [
+            'status' => 200,
+            'message' => 'reviewer fetched successfully',
+            'data' => $reviewer
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No reviewer found with the given ID',
+            'data' => null
+        ];
+    }
+
+   
+    return $this->response($result, RestController::HTTP_OK);
+}
 
 
 }
