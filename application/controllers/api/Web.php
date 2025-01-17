@@ -50,6 +50,22 @@ class Web extends RestController {
     }
 
 
+
+    public function journal_search_get($limit = 10, $offset = 0 ){
+        $filters = $this->input->get() ?? [];
+        $limit = intval($limit);
+        $offset = intval($offset);
+        $res = $this->UserModel->getJournals($filters, $limit, $offset);
+        // echo $this->db->last_query();exit;
+        $this->response([
+            'status' => 200,
+            'message' => 'Success',
+            'data' => $res,
+        ], RestController::HTTP_OK);
+    }
+
+
+
     // public function reviewer_search_post()
     // {
     //     $this->load->library('form_validation');

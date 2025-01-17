@@ -9,6 +9,30 @@ class UserModel extends CI_model
 		$this->load->helper(['common_helper']);
 	}
 
+    public function getJournals($filters = [], $limit = 500, $offset = 0){
+
+        $filterColumns = ['journal_name','publisher_name','country','state'];
+
+        if(!empty($filters) &&  is_array($filters)){
+            foreach($filters as $key => $value){
+                if(!in_array($key, $filterColumns)) continue;
+                if(is_numeric($value))
+                    $this->db->where($key, $value);
+                else if(is_string($value))
+                    $this->db->like($key, $value);
+            }
+        }
+        $this->db->select('*,"" as password,(SELECT name from countries where id = journals.country) as country_name, (SELECT name from states where id = journals.state) as state_name');
+        // $this->db->join('')
+        $this->db->limit($limit, $offset);
+        // return $this->db->where('type',USER_TYPE::REVIEWER)->get('users')->result_array();
+        $query = $this->db->get('journals');
+
+        return $query->result_array();
+    }
+    
+
+    
     public function getReviewers($filters = [], $limit = 500, $offset = 0, $searchString = ''){
 
         $this->applyReviewerSearchFilter($filters, $searchString);
@@ -45,6 +69,9 @@ class UserModel extends CI_model
         $this->applyReviewerSearchFilter($filters, $searchString);
         return $this->db->count_all_results('users');
     }
+
+
+
 
 
     public function getJournalsByUserId($user_id)
@@ -141,8 +168,8 @@ public function get_reviewer_by_id($id)
         $this->db->like('journal_name', $name);
         $query = $this->db->get('journals');
 
-        return $query->result_array();
-    }
+    //     return $query->result_array();
+    // }
 
 
     public function getCountries(){
