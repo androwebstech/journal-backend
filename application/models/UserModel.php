@@ -164,7 +164,7 @@ if ($journal_id && !empty($update_data)) {
     $this->db->update('journals', $update_data);
 
    
-    return $this->db->affected_rows() > 0;
+    return true;
 }
 
 return false;
