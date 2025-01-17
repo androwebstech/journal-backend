@@ -167,7 +167,7 @@ public function get_reviewer_by_id($id)
     {
         $this->db->like('journal_name', $name);
         $query = $this->db->get('journals');
-
+    }
     //     return $query->result_array();
     // }
 
