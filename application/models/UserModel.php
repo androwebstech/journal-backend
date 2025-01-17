@@ -154,12 +154,23 @@ class UserModel extends CI_model
 
         return null; 
     }
+public function get_reviewer_by_id($id)
+    {
+        $this->db->where('id', $id);
+        $this->db->where('type', 'reviewer');
+        $this->db->select('*, "" as password');
+        $query = $this->db->get('users'); 
+        if ($query->num_rows() > 0) {
+            return $query->row_array(); 
+        }
 
-    // public function searchJournalsByName($name)
-    // {
-    //     $this->db->like('journal_name', $name);
-    //     $query = $this->db->get('journals');
-
+        return null; 
+    }
+    public function searchJournalsByName($name)
+    {
+        $this->db->like('journal_name', $name);
+        $query = $this->db->get('journals');
+    }
     //     return $query->result_array();
     // }
 
