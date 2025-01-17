@@ -126,6 +126,8 @@ class UserModel extends CI_model
         $user = $this->db->where('id', $id)->get('users')->row_array();
         if(isset($user['password']))
             unset($user['password']);
+        if(!empty($user['profile_image']))
+              $user['profile_image'] = base_url($user['profile_image']);
         return $user;
     }
 
@@ -137,7 +139,8 @@ class UserModel extends CI_model
     
         // Update user details in the database
         $this->db->where('id', $id);
-        return $this->db->update('users', $data);
+         $this->db->update('users', $data);
+        return $this->getUserById( $id);
     }
     
 

@@ -299,7 +299,7 @@ public function update_personal_details_post()
     // Handle profile image upload if provided
     if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
         // Define upload configuration
-        $config['upload_path'] = './uploads/profile_images/';
+        $config['upload_path'] = './uploads/';
         $config['allowed_types'] = 'jpg|jpeg|png|gif';
         $config['max_size'] = 2048; // 2MB limit
         $config['file_name'] = 'profile_' . $id . '_' . time();
@@ -310,7 +310,7 @@ public function update_personal_details_post()
         if ($this->upload->do_upload('profile_image')) {
             // Get uploaded file data
             $uploadData = $this->upload->data();
-            $data['profile_image'] = 'uploads/profile_images/' . $uploadData['file_name'];
+            $data['profile_image'] = 'uploads/' . $uploadData['file_name'];
         } else {
             $result = [
                 'status' => 400,
@@ -327,7 +327,8 @@ public function update_personal_details_post()
         if ($update) {
             $result = [
                 'status' => 200,
-                'message' => 'User details updated successfully'
+                'message' => 'User details updated successfully',
+                'data'=> $update,
             ];
         } else {
             $result = [
