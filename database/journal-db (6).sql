@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 17, 2025 at 11:34 AM
+-- Generation Time: Jan 17, 2025 at 05:25 PM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 7.4.33
 
@@ -358,7 +358,8 @@ CREATE TABLE `journals` (
 INSERT INTO `journals` (`journal_id`, `user_id`, `journal_name`, `status`, `eissn_no`, `pissn_no`, `first_volume`, `number_of_issue_per_year`, `publisher_name`, `broad_research_area`, `website_link`, `journal_submission_link`, `indexing`, `country`, `state`, `publication_type`, `usd_publication_charge`, `review_type`, `review_time`, `approval_status`, `created_at`) VALUES
 (1, 5, 'hey', 'pending', '222534', '324', 233, 'Yearly', 'neha', 'gopalganj', 'http://localhost/journal-backend/api/auth/add_journal', 'http://localhost/journal-backend/api/auth/add_journal', '1', 'India', 'New York', 'Free', '20', 'Single-Blind', '3', '0', '2025-01-15 18:32:11'),
 (2, 3, 'Sahil', 'pending', '1234-5678', '1234-5678', 5, 'Yearly', 'sgcshg', 'cs', 'http://localhost:3000/create-journal', 'http://localhost:3000/create-journal', 'hsbchjb', 'UK', 'svchv', 'Paid', '0', 'Double-Blind', '55', '0', '2025-01-16 14:38:01'),
-(3, 3, 'Sahil', 'pending', '1111-1111', '1234-5678', 5, 'Yearly', 'hvschv', 'vs chvh', 'http://localhost:3000/create-journal', 'http://localhost:3000/create-journal', 'hscv', 'UK', 'jbsjcb', 'Free', '0', 'Double-Blind', '555', '0', '2025-01-16 14:33:02');
+(3, 3, 'Sahil', 'pending', '1111-1111', '1234-5678', 5, 'Yearly', 'hvschv', 'vs chvh', 'http://localhost:3000/create-journal', 'http://localhost:3000/create-journal', 'hscv', 'UK', 'jbsjcb', 'Free', '0', 'Double-Blind', '555', '0', '2025-01-16 14:33:02'),
+(4, 3, 'Aarti technolo6666666', 'pending', '989782222222222', '8765999999', 2147483647, 'Yearly', 'Aarti Gupta kumari', 'Information technology', 'http://localhost/journal-backend/api/auth/add_journal', 'http://localhost/closest', 'dark web', 'UK', 'Chhattisgarhyegf7777', 'Paid', '9', 'Double-Blind', '6', '0', '2025-01-16 16:48:01');
 
 -- --------------------------------------------------------
 
@@ -4549,7 +4550,8 @@ CREATE TABLE `users` (
   `profile_image` varchar(250) DEFAULT NULL,
   `contact` varchar(15) NOT NULL,
   `name` varchar(200) NOT NULL,
-  `department` varchar(255) NOT NULL,
+  `department` varchar(255) DEFAULT NULL,
+  `university` varchar(255) NOT NULL,
   `designation` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `maximum_qualification` varchar(100) NOT NULL,
@@ -4565,12 +4567,14 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `email`, `password`, `type`, `profile_image`, `contact`, `name`, `department`, `designation`, `created_at`, `maximum_qualification`, `country`, `state`, `profile_link`, `research_area`, `dob`, `about`) VALUES
-(1, 'author@gmail.com', '$2y$10$IbF7fl9fsAgQrZ0rRClcOu7I4LewAoVE7KVLVsQYU4GPI3hy9yYfq', 'author', NULL, '8888888888', 'reviewer4', '', NULL, '2025-01-15 11:01:30', '', 0, 0, '', '', '0000-00-00', ''),
-(2, 'reviewer@gmail.com', '$2y$10$Tr7fcAxauIbOeGXd8fXjTuxYrdESxNCavgtnLvhRL.KYS3Ugg7rLq', 'reviewer', NULL, '8888888888', 'reviewer4', '', NULL, '2025-01-15 11:01:45', '', 0, 0, '', '', '0000-00-00', ''),
-(3, 'publisher@gmail.com', '$2y$10$W92EBKQtJErjt6UCMjfbKuGl6GM9nEgyPslGRNh5e7IiEXZ05BLRK', 'publisher', NULL, '8888888888', 'publisher', '', NULL, '2025-01-15 11:02:00', '', 0, 0, '', '', '0000-00-00', ''),
-(4, 'reviewer1@gmail.com', '$2y$10$um/qpnORWp9j8iML/TljrOhQNjopugEo4LSDPElqZK/x3jynL.PZu', 'reviewer', NULL, '8888888888', 'new reviewer', '', NULL, '2025-01-15 12:33:50', '', 1, 0, '', '', '0000-00-00', ''),
-(5, 'niaa@gmail.com', '$2y$10$k5vNVIUNRyogr1WwFb0bEOwTDSH3cv/kqVENi7rOUMtJce5sZPwEG', 'author', NULL, '4555555555', 'neha', '', NULL, '2025-01-15 18:26:48', '', 0, 0, '', '', '0000-00-00', '');
+INSERT INTO `users` (`id`, `email`, `password`, `type`, `profile_image`, `contact`, `name`, `department`, `university`, `designation`, `created_at`, `maximum_qualification`, `country`, `state`, `profile_link`, `research_area`, `dob`, `about`) VALUES
+(2, 'reviewer@gmail.com', '$2y$10$Tr7fcAxauIbOeGXd8fXjTuxYrdESxNCavgtnLvhRL.KYS3Ugg7rLq', 'reviewer', NULL, '8888888888', 'reviewer4', NULL, '', NULL, '2025-01-15 11:01:45', '', 0, 0, '', '', '0000-00-00', ''),
+(3, 'publisher@gmail.com', '$2y$10$W92EBKQtJErjt6UCMjfbKuGl6GM9nEgyPslGRNh5e7IiEXZ05BLRK', 'publisher', 'uploads/profile_3_1737130041.png', '9876543298', 'aarti', NULL, '', NULL, '2025-01-15 11:02:00', '', 0, 0, '', '', '0000-00-00', ''),
+(4, 'reviewer1@gmail.com', '$2y$10$um/qpnORWp9j8iML/TljrOhQNjopugEo4LSDPElqZK/x3jynL.PZu', 'reviewer', NULL, '8888888888', 'new reviewer', NULL, '', NULL, '2025-01-15 12:33:50', '', 1, 0, '', '', '0000-00-00', ''),
+(5, 'niaa@gmail.com', '$2y$10$k5vNVIUNRyogr1WwFb0bEOwTDSH3cv/kqVENi7rOUMtJce5sZPwEG', 'author', NULL, '4555555555', 'neha', NULL, '', NULL, '2025-01-15 18:26:48', '', 0, 0, '', '', '0000-00-00', ''),
+(6, 'author3@gmail.com', '$2y$10$/nEQRLvi8D5eSTcuBq5q3Ocs9TH.rCgiETHcJG1sLfX3yVmEo6Lza', 'author', 'C:\\fakepath\\WhatsApp Image 2025-01-02 at 1.12.18 PM.jpeg', '9934707519', 'Aarti Kumari gupta', 'Computer Science', 'central university', 'Professor', '2025-01-16 17:35:53', 'PostDoc', 0, 0, 'https://google.com', 'research', '2002-03-17', 'bbbbbbbbbbbbbbbbbbbbb'),
+(7, 'anuj@gmail.com', '$2y$10$2izeIMFE2eeh4Cb/zoJT6eJ/I8josW1BkkviRev4USlmpDFJbNGNa', 'author', NULL, '6206510871', 'anuj', NULL, '', NULL, '2025-01-16 20:12:39', '', 0, 0, '', '', '0000-00-00', ''),
+(10, 'chandan@gmail.com', '$2y$10$ieVqOq.SMclTnTiPbMm.oeq1EXEjjqyDP/esPZ1jbu7qF/Gg7GjGa', 'author', 'http://localhost/journal-backend/http://localhost/journal-backend/C:\\fakepath\\WhatsApp Image 2025-01-02 at 12.50.36 PM.jpeg', '7654327890', 'chandan kumar honeywell', 'Information technology  Amog lila', 'central university ﻿namaste ', 'Lecturer', '2025-01-17 12:13:25', 'Bachelor', 0, 0, 'https://google.com', 'research for Firewall', '2006-03-17', 'looking like am a dedicated and enthusiastic bachelor\'s student pursuing [Your Field of Study] at [Your University]. With a strong passion for [specific interest or field, e.g., technology, design, research], I am committed to expanding my knowledge and applying it to real-world challenges. My coursework, combined with hands-on projects and internships, has provided me with a solid foundation in [specific skills, e.g., programming, data analysis, creative design].kkkkkkkkkkkkkkkkkkkkkkkkk\r\n');
 
 --
 -- Indexes for dumped tables
@@ -4638,7 +4642,7 @@ ALTER TABLE `countries`
 -- AUTO_INCREMENT for table `journals`
 --
 ALTER TABLE `journals`
-  MODIFY `journal_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `journal_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `states`
@@ -4650,7 +4654,7 @@ ALTER TABLE `states`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
