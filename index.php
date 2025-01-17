@@ -118,7 +118,7 @@ switch (ENVIRONMENT)
  * NO TRAILING SLASH!
  */
 	$application_folder = 'application';
-	require_once __DIR__.'/'.$application_folder.'/enums/Enums.php';
+	require_once __DIR__.'/'.$application_folder.'/enums/enums.php';
 /*
  *---------------------------------------------------------------
  * VIEW DIRECTORY NAME
