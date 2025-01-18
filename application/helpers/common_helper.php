@@ -12,18 +12,12 @@ function get_hash($str)
 {
 	return hash_hmac('md5',$str, '@caproject#');
 }
-function default_image($for)
+function safe_image($path)
 {
-	switch ($for) {
-		case 'category':
-			return 'admin_assets/noimage.png';
-		case 'plans':
-			return 'admin_assets/noimage.png';
-		case 'events':
-			return 'admin_assets/noimage.png';
-		default:
-			return '';
-	}
+	if(!empty($path))
+		return base_url($path);
+	else
+		return base_url('/assets/no-user.jpg');
 }
 function get_datetime()
 {
