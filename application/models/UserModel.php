@@ -9,27 +9,27 @@ class UserModel extends CI_model
 		$this->load->helper(['common_helper']);
 	}
 
-    public function getJournals($filters = [], $limit = 500, $offset = 0){
+    // public function getJournals($filters = [], $limit = 500, $offset = 0){
 
-        $filterColumns = ['journal_name','publisher_name','country','state'];
+    //     $filterColumns = ['journal_name','publisher_name','country','state'];
 
-        if(!empty($filters) &&  is_array($filters)){
-            foreach($filters as $key => $value){
-                if(!in_array($key, $filterColumns)) continue;
-                if(is_numeric($value))
-                    $this->db->where($key, $value);
-                else if(is_string($value))
-                    $this->db->like($key, $value);
-            }
-        }
-        $this->db->select('*,"" as password,(SELECT name from countries where id = journals.country) as country_name, (SELECT name from states where id = journals.state) as state_name');
-        // $this->db->join('')
-        $this->db->limit($limit, $offset);
-        // return $this->db->where('type',USER_TYPE::REVIEWER)->get('users')->result_array();
-        $query = $this->db->get('journals');
+    //     if(!empty($filters) &&  is_array($filters)){
+    //         foreach($filters as $key => $value){
+    //             if(!in_array($key, $filterColumns)) continue;
+    //             if(is_numeric($value))
+    //                 $this->db->where($key, $value);
+    //             else if(is_string($value))
+    //                 $this->db->like($key, $value);
+    //         }
+    //     }
+    //     $this->db->select('*,"" as password,(SELECT name from countries where id = journals.country) as country_name, (SELECT name from states where id = journals.state) as state_name');
+    //     // $this->db->join('')
+    //     $this->db->limit($limit, $offset);
+    //     // return $this->db->where('type',USER_TYPE::REVIEWER)->get('users')->result_array();
+    //     $query = $this->db->get('journals');
 
-        return $query->result_array();
-    }
+    //     return $query->result_array();
+    // }
     
 
     
@@ -72,6 +72,47 @@ class UserModel extends CI_model
 
 
 
+    public function getJournals($filters = [], $limit = 500, $offset = 0, $searchString = ''){
+
+        $this->applyJournalSearchFilter($filters, $searchString);
+
+        $this->db->select('*,"" as password,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name');
+        $this->db->limit($limit, $offset);
+        return $this->db->get('users')->result_array();
+    }
+    public function applyJournalSearchFilter($filters = [], $searchString = '') {
+        $searchColumns = ['journal_name'];
+        $filterColumns = ['journal_name','publisher_name','country','state'];
+
+        if(!empty($searchString)){
+            $this->db->or_group_start();
+            foreach($searchColumns as $column){
+                $this->db->or_like($column, $searchString);
+            }
+            $this->db->group_end();
+        }
+
+        if(!empty($filters) &&  is_array($filters)){
+            foreach($filters as $key => $value){
+                if(!in_array($key, $filterColumns)) continue;
+                if(is_numeric($value))
+                    $this->db->where($key, $value);
+                else if(is_string($value))
+                    $this->db->like($key, $value);
+            }
+        }
+
+        // $this->db->where('type',USER_TYPE::REVIEWER);
+        $query = $this->db->get('journals');
+
+       return $query->result_array();
+    }
+    public function getJournalsCount($filters = [], $searchString = '') {
+        $this->applyJournalSearchFilter($filters, $searchString);
+        return $this->db->count_all_results('users');
+    }
+
+
 
 
     public function getJournalsByUserId($user_id)
@@ -102,13 +143,13 @@ class UserModel extends CI_model
         }
     }
 
-    public function searchReviewersByName($name)
-    {
-        $this->db->like('reviewer_name', $name);
-        $query = $this->db->get('reviewers');
+    // public function searchReviewersByName($name)
+    // {
+    //     $this->db->like('reviewer_name', $name);
+    //     $query = $this->db->get('reviewers');
 
-        return $query->result_array();
-    }
+    //     return $query->result_array();
+    // }
 
 
     public function register($user)
@@ -166,11 +207,11 @@ public function get_reviewer_by_id($id)
 
         return null; 
     }
-    public function searchJournalsByName($name)
-    {
-        $this->db->like('journal_name', $name);
-        $query = $this->db->get('journals');
-    }
+    // public function searchJournalsByName($name)
+    // {
+    //     $this->db->like('journal_name', $name);
+    //     $query = $this->db->get('journals');
+    // }
     //     return $query->result_array();
     // }
 

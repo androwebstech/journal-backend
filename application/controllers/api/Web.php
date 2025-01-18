@@ -50,19 +50,41 @@ class Web extends RestController {
     }
 
 
-
-    public function journal_search_get($limit = 10, $offset = 0 ){
+    public function journals_search_get($limit = 10, $page = 1){
         $filters = $this->input->get() ?? [];
-        $limit = intval($limit);
-        $offset = intval($offset);
-        $res = $this->UserModel->getJournals($filters, $limit, $offset);
-        // echo $this->db->last_query();exit;
+        $searchString = $this->input->get('search',true) ?? '';
+        $limit = abs($limit) < 1 ? 10 : abs($limit) ;
+        $page = abs($page) < 1 ? 1 : abs($page);
+
+        $offset = ($page - 1) * $limit;
+        $res = $this->UserModel->getJournals($filters, $limit, $offset, $searchString);
+        $count = $this->UserModel->getJournalsCount($filters, $searchString);
+        
         $this->response([
             'status' => 200,
             'message' => 'Success',
             'data' => $res,
+            'totalPages' => ceil($count / $limit),
+            'currentPage'=> $page,
         ], RestController::HTTP_OK);
     }
+
+
+
+
+
+    // public function journal_search_get($limit = 10, $offset = 0 ){
+    //     $filters = $this->input->get() ?? [];
+    //     $limit = intval($limit);
+    //     $offset = intval($offset);
+    //     $res = $this->UserModel->getJournals($filters, $limit, $offset);
+    //     // echo $this->db->last_query();exit;
+    //     $this->response([
+    //         'status' => 200,
+    //         'message' => 'Success',
+    //         'data' => $res,
+    //     ], RestController::HTTP_OK);
+    // }
 
 
 
@@ -88,38 +110,38 @@ class Web extends RestController {
     //     }
     // }
 
-    public function journal_search_post()
-    {
-        // $this->load->database();
-        $this->load->library('form_validation');
+    // public function journal_search_post()
+    // {
+    //     // $this->load->database();
+    //     $this->load->library('form_validation');
     
-        $this->form_validation->set_rules('name', 'Name', 'trim');
+    //     $this->form_validation->set_rules('name', 'Name', 'trim');
     
-        if (!$this->form_validation->run()) {
-            $this->response([
-                'status' => 400,
-                'message' => strip_tags(validation_errors()),
-            ], RestController::HTTP_BAD_REQUEST);
-            return;
-        }
+    //     if (!$this->form_validation->run()) {
+    //         $this->response([
+    //             'status' => 400,
+    //             'message' => strip_tags(validation_errors()),
+    //         ], RestController::HTTP_BAD_REQUEST);
+    //         return;
+    //     }
     
-        $name = $this->input->post('name', true);
+    //     $name = $this->input->post('name', true);
 
-        $journals = $this->UserModel->searchJournalsByName($name);
+    //     $journals = $this->UserModel->searchJournalsByName($name);
     
-        if (!empty($journals)) {
-            $this->response([
-                'status' => 200,
-                'message' => 'Journals found.',
-                'data' => $journals,
-            ], RestController::HTTP_OK);
-        } else {
-            $this->response([
-                'status' => 404,
-                'message' => 'No journals found matching the given name.',
-            ], RestController::HTTP_NOT_FOUND);
-        }
-    }
+    //     if (!empty($journals)) {
+    //         $this->response([
+    //             'status' => 200,
+    //             'message' => 'Journals found.',
+    //             'data' => $journals,
+    //         ], RestController::HTTP_OK);
+    //     } else {
+    //         $this->response([
+    //             'status' => 404,
+    //             'message' => 'No journals found matching the given name.',
+    //         ], RestController::HTTP_NOT_FOUND);
+    //     }
+    // }
 
     public function get_countries_get(){
         $countries = $this->UserModel->getCountries();
