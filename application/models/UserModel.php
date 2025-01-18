@@ -167,8 +167,7 @@ class UserModel extends CI_model
         $user = $this->db->where('id', $id)->get('users')->row_array();
         if(isset($user['password']))
             unset($user['password']);
-        if(!empty($user['profile_image']))
-              $user['profile_image'] = base_url($user['profile_image']);
+        $user['profile_image'] =  safe_image($user['profile_image']);
         return $user;
     }
 
