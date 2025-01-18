@@ -76,13 +76,13 @@ class UserModel extends CI_model
 
         $this->applyJournalSearchFilter($filters, $searchString);
 
-        $this->db->select('*,"" as password,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name');
+        $this->db->select('*,"" as password,(SELECT name from countries where id = journals.country) as country_name, (SELECT name from states where id = journals.state) as state_name');
         $this->db->limit($limit, $offset);
-        return $this->db->get('users')->result_array();
+        return $this->db->get('journals')->result_array();
     }
     public function applyJournalSearchFilter($filters = [], $searchString = '') {
-        $searchColumns = ['journal_name'];
-        $filterColumns = ['journal_name','publisher_name','country','state'];
+        $searchColumns = ['journal_name','publisher_name','broad_research_area','eissn_no','pissn_no',];
+        $filterColumns = ['country','state','publication_type','review_type','review_time'];
 
         if(!empty($searchString)){
             $this->db->or_group_start();
@@ -103,13 +103,13 @@ class UserModel extends CI_model
         }
 
         // $this->db->where('type',USER_TYPE::REVIEWER);
-        $query = $this->db->get('journals');
+    //     $query = $this->db->get('journals');
 
-       return $query->result_array();
+    //    return $query->result_array();
     }
     public function getJournalsCount($filters = [], $searchString = '') {
         $this->applyJournalSearchFilter($filters, $searchString);
-        return $this->db->count_all_results('users');
+        return $this->db->count_all_results('journals');
     }
 
 
