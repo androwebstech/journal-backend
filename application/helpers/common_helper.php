@@ -14,7 +14,7 @@ function get_hash($str)
 }
 function safe_image($path)
 {
-	if(!empty($path))
+	if(!empty($path) && file_exists(FCPATH . $path))
 		return base_url($path);
 	else
 		return base_url('/assets/no-user.jpg');

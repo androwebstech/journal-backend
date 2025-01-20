@@ -28,9 +28,6 @@ class Auth extends RestController {
 	public function token_get(){
 		echo password_hash('password', PASSWORD_BCRYPT);
 	}
-	public function print_get(){
-		$this->load->view('print_records');
-	}
 
 
 	public function login_post()
@@ -179,7 +176,7 @@ public function contact_post()
 				$token_data['role'] = "admin";
 
 				if(!empty($res['image'])){
-                $token_data['image']= base_url("/uploads/".$res['image']); 
+                $token_data['image']=  safe_image("/uploads/".$res['image']); 
 				}
 				$token = $this->authorization_token->generateToken($token_data);
 				$result = ['status'=>200,'message'=>'Login Successfully!','user'=>$token_data,'auth_token'=>$token];

@@ -143,7 +143,7 @@ public function update_journal_post($journal_id = null)
 
     if ($this->form_validation->run()) {
        
-        $update_data = array_filter([
+        $update_data = [
             'journal_name' => $this->input->post('journal_name'),
             'eissn_no' => $this->input->post('eissn_no'),
             'pissn_no' => $this->input->post('pissn_no'),
@@ -160,7 +160,7 @@ public function update_journal_post($journal_id = null)
             'usd_publication_charge' => $this->input->post('usd_publication_charge'),
             'review_type' => $this->input->post('review_type'),
             'review_time' => $this->input->post('review_time'),
-        ]);
+        ];
 
         if (!empty($update_data)) {
             $updated = $this->UserModel->update_journal($journal_id, $update_data);
