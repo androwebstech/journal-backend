@@ -55,7 +55,7 @@ class UserModel extends CI_model
 
         if(!empty($filters) &&  is_array($filters)){
             foreach($filters as $key => $value){
-                if(!in_array($key, $filterColumns)) continue;
+                if(!in_array($key, $filterColumns) || empty($value)) continue;
                 if(is_numeric($value))
                     $this->db->where($key, $value);
                 else if(is_string($value))
