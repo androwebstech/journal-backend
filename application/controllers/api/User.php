@@ -128,7 +128,7 @@ public function update_journal_post($journal_id = null)
     $this->form_validation->set_rules('eissn_no', 'E-ISSN', 'trim');
     $this->form_validation->set_rules('pissn_no', 'P-ISSN', 'trim');
     $this->form_validation->set_rules('first_volume', 'First Volume', 'trim|integer');
-    $this->form_validation->set_rules('number_of_issue_per_year', 'Number of Issues Per Year', 'trim|in_list[Monthly,Bimonthly,Yearly,Halfyearly,Quaterly]');
+    $this->form_validation->set_rules('number_of_issue_per_year', 'Number of Issues Per Year', 'trim|in_list[Monthly,Bimonthly,Yearly,Halfyearly,Quarterly]');
     $this->form_validation->set_rules('publisher_name', 'Publisher Name', 'trim');
     $this->form_validation->set_rules('broad_research_area', 'Broad Research Area', 'trim');
     $this->form_validation->set_rules('website_link', 'Website Link', 'trim|valid_url');
