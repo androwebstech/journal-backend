@@ -256,6 +256,9 @@ return false;
 public function insert_research_submission($data)
 {
     $this->db->insert('research_papers', $data);
+public function insert_publication($data)
+{
+    $this->db->insert('published_papers', $data);
     if ($this->db->affected_rows() > 0) {
         return $this->db->insert_id();
     }
@@ -265,6 +268,56 @@ public function insert_research_submission($data)
 
 
 
+public function getPublicationByUserId($id)
+{
+    $this->db->where('user_id', $id);
+    $query = $this->db->get('published_papers'); 
+    if ($query->num_rows() > 0) {
+        return $query->result_array(); 
+    }
+
+    return false; 
+}
+
+public function deletePublicationById($id, $user_id)
+{
+    $this->db->where('ppuid', $id);
+    $this->db->where('user_id', $user_id);
+    $query = $this->db->get('published_papers');
+
+    if ($query->num_rows() > 0) {
+        $this->db->where('ppuid', $id);
+        $this->db->where('user_id', $user_id);
+        $this->db->delete('published_papers');
+
+        if ($this->db->affected_rows() > 0) {
+            return ['status' => 200, 'message' => 'Publication deleted successfully!'];
+        } else {
+            return ['status' => 500, 'message' => 'Failed to delete the Publication.'];
+        }
+    } else {
+        return ['status' => 404, 'message' => 'No Publication found with the provided ID and User ID.'];
+    }
+}
+
+public function update_publication($id, $update_data)
+{
+
+    if ($id && !empty($update_data)) {
+        $this->db->select('ppuid');
+        $this->db->from('published_papers');
+        $this->db->where('ppuid', $id);
+        $query = $this->db->get();
+    
+        if ($query->num_rows() > 0) {
+            $this->db->where('ppuid', $id);
+            $this->db->update('published_papers', $update_data);
+            return true;
+        }
+        return false;
+    }
+    return false;
+}    
 
 
 }
