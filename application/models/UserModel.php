@@ -252,4 +252,19 @@ return false;
 }
 
 
+
+public function insert_research_submission($data)
+{
+    $this->db->insert('research_papers', $data);
+    if ($this->db->affected_rows() > 0) {
+        return $this->db->insert_id();
+    }
+    return false;
+}
+
+
+
+
+
+
 }

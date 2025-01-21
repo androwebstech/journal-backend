@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 20, 2025 at 11:39 AM
+-- Generation Time: Jan 21, 2025 at 07:18 PM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 7.4.33
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `journal_db`
+-- Database: `journal-db`
 --
 
 -- --------------------------------------------------------
@@ -29,29 +29,12 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `admin` (
   `admin_id` int(30) NOT NULL,
-  `image` varchar(50) NOT NULL,
+  `profile_image` varchar(50) NOT NULL,
   `role` enum('super_admin','admin') NOT NULL,
-  `email` varchar(50) NOT NULL,
-  `password` varchar(100) NOT NULL,
+  `user_name` varchar(50) NOT NULL,
+  `password` varchar(50) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `admin`
---
-
-INSERT INTO `admin` (`admin_id`, `image`, `role`, `email`, `password`, `created_at`) VALUES
-(1, '4275377ab4db3825178f7387725107b9.png', 'admin', 'admin@gmail.com', '$2y$10$q4FFAy1z877EzZhFmFet.uUdKeIFZdq.DoPI8gb2beSpC7iMXPJzO', '2025-01-20 10:23:10'),
-(2, 'bdeb9047cdbaa6635656ceeaf5427160.png', 'admin', 'admin@gmail.com', '$2y$10$s9ENZjZ0zSceH7xDqfsPfe/GfZj0egAOeALXM30exsWoL5PB13kS6', '2025-01-20 10:23:28'),
-(3, '50384946711ea9c17682fad03bbaeb4a.png', 'admin', 'admin@gmail.com', '$2y$10$5CSCXMGuOQVFVq6L0ZjuI.oWPLj/GfbeNbCJIVWoYr4o1NynVjvcC', '2025-01-20 10:23:37'),
-(4, 'a0ed743e80b45dac78f124ff6974e248.png', 'admin', 'admin@gmail.com', '$2y$10$AGUEGYPF7dHOJ5Netqx9SuVTQxNwkO4lwp0oFO9CiDA17gWOjaT2a', '2025-01-20 10:23:41'),
-(5, 'c3390367f429517f8b37edede0923a27.png', 'admin', 'admin43@gmail.com', '$2y$10$0V4Tcj8cH6na7K.1rYFcpuR12OIV1tqLEMHu/vFwuS.b4zW0UAvxa', '2025-01-20 10:24:41'),
-(6, 'b7c1050167a5730d87f3bdbd9dc1cc5a.png', 'admin', 'admin43@gmail.com1', '$2y$10$cotvRCj7.09vwI5aPh9FOuf.Wr9wY7a01jjSupIxKao9u9z5lnP0u', '2025-01-20 10:25:14'),
-(7, '25b92ba31d98a269cf45ca4f77100e52.png', 'admin', 'admin43@gmail.co', '$2y$10$S2D3r4KAlU2M0KWgE0RyUe/yxwnJ8IJx3h5Y9Ndph6N2y80KW0ijO', '2025-01-20 10:28:30'),
-(8, '26f593c09142e33803d9e56c596f833f.png', 'admin', 'admin43@gmail.comm', '$2y$10$VFwkeGUAmZvPr1kOY8dwGOV3.sce8Ypjm3OG3qJ1Yir/N/ymeYLFO', '2025-01-20 10:28:59'),
-(9, '2c542eca4c8f6557b8fe1fe7cfa8dd3e.png', 'admin', 'tanav@gmail.com', '$2y$10$9GhQN8cw.nZgwEFm5Ijyc.lCs4xJqneE/bsO.KeR8nkkuFn1hdzl.', '2025-01-20 10:31:22'),
-(10, 'b3abf899445e5dcbcbf10cd4495e3f84.png', 'admin', 'tanavmahendru@gmail.com', '$2y$10$hate4a1o7j2LMNrGfRXaoeAr.TVml3tadN/isYe40wH.Y6eu7eImG', '2025-01-20 10:32:07'),
-(11, 'd84ae84868f840167ca4a0b59aaad70b.png', 'admin', 'tanavmahendru2003@gmail.com', '$2y$10$yvBb/5OkjI4xOswaLQ4Xd.MVejSk17JGC8mcKhKGq3FS9F3GkWSeW', '2025-01-20 10:32:20');
 
 -- --------------------------------------------------------
 
@@ -358,8 +341,8 @@ CREATE TABLE `journals` (
   `website_link` varchar(255) DEFAULT NULL,
   `journal_submission_link` varchar(255) DEFAULT NULL,
   `indexing` varchar(255) DEFAULT NULL,
-  `country` varchar(50) NOT NULL,
-  `state` varchar(50) NOT NULL,
+  `country` int(50) NOT NULL,
+  `state` int(50) NOT NULL,
   `publication_type` enum('Free','Paid') NOT NULL,
   `usd_publication_charge` varchar(100) DEFAULT NULL,
   `review_type` enum('Single-Blind','Double-Blind','Open Peer Review','Collaborative') NOT NULL,
@@ -373,10 +356,9 @@ CREATE TABLE `journals` (
 --
 
 INSERT INTO `journals` (`journal_id`, `user_id`, `journal_name`, `status`, `eissn_no`, `pissn_no`, `first_volume`, `number_of_issue_per_year`, `publisher_name`, `broad_research_area`, `website_link`, `journal_submission_link`, `indexing`, `country`, `state`, `publication_type`, `usd_publication_charge`, `review_type`, `review_time`, `approval_status`, `created_at`) VALUES
-(1, 5, 'hey', 'pending', '222534', '324', 233, 'Yearly', 'neha', 'gopalganj', 'http://localhost/journal-backend/api/auth/add_journal', 'http://localhost/journal-backend/api/auth/add_journal', '1', 'India', 'New York', 'Free', '20', 'Single-Blind', '3', '0', '2025-01-15 18:32:11'),
-(2, 3, 'Sahil', 'pending', '1234-5678', '1234-5678', 5, 'Yearly', 'sgcshg', 'cs', 'http://localhost:3000/create-journal', 'http://localhost:3000/create-journal', 'hsbchjb', 'UK', 'svchv', 'Paid', '0', 'Double-Blind', '55', '0', '2025-01-16 14:38:01'),
-(3, 3, 'Sahil', 'pending', '1111-1111', '1234-5678', 5, 'Yearly', 'hvschv', 'vs chvh', 'http://localhost:3000/create-journal', 'http://localhost:3000/create-journal', 'hscv', 'UK', 'jbsjcb', 'Free', '0', 'Double-Blind', '555', '0', '2025-01-16 14:33:02'),
-(4, 3, 'Aarti technolo6666666', 'pending', '989782222222222', '8765999999', 2147483647, 'Yearly', 'Aarti Gupta kumari', 'Information technology', 'http://localhost/journal-backend/api/auth/add_journal', 'http://localhost/closest', 'dark web', 'UK', 'Chhattisgarhyegf7777', 'Paid', '9', 'Double-Blind', '6', '0', '2025-01-16 16:48:01');
+(1, 5, 'hey', 'pending', '222534', '324', 233, 'Yearly', 'neha', 'gopalganj', 'http://localhost/journal-backend/api/auth/add_journal', 'http://localhost/journal-backend/api/auth/add_journal', '1', 101, 44, 'Free', '20', 'Single-Blind', '3', '0', '2025-01-18 15:30:19'),
+(2, 3, 'Sahil', 'pending', '1234-5678', '1234-5678', 5, 'Yearly', 'sgcshg', 'cs', 'http://localhost:3000/create-journal', 'http://localhost:3000/create-journal', 'hsbchjb', 0, 0, 'Paid', '0', 'Double-Blind', '55', '0', '2025-01-16 14:38:01'),
+(3, 3, 'Sahil', 'pending', '1111-1111', '1234-5678', 5, 'Yearly', 'hvschv', 'vs chvh', 'http://localhost:3000/create-journal', 'http://localhost:3000/create-journal', 'hscv', 0, 0, 'Free', '0', 'Double-Blind', '555', '0', '2025-01-16 14:33:02');
 
 -- --------------------------------------------------------
 
@@ -426,22 +408,36 @@ CREATE TABLE `publish_requests` (
 --
 
 CREATE TABLE `research_papers` (
-  `paper_id` int(11) NOT NULL,
-  `author_id` int(11) DEFAULT NULL,
-  `corresponding_email` varchar(255) DEFAULT NULL,
+  `author_id` int(11) NOT NULL,
   `author_name` varchar(255) DEFAULT NULL,
   `author_contact` varchar(50) DEFAULT NULL,
   `author_email` varchar(255) DEFAULT NULL,
   `country` varchar(100) DEFAULT NULL,
   `affiliation` varchar(255) DEFAULT NULL,
   `department` varchar(255) DEFAULT NULL,
-  `co_authors` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`co_authors`)),
+  `co_authors` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `paper_title` varchar(255) DEFAULT NULL,
   `abstract` text DEFAULT NULL,
   `file` varchar(255) DEFAULT NULL,
   `keywords` varchar(255) DEFAULT NULL,
+  `user_id` int(11) NOT NULL,
+  `submission_status` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `research_papers`
+--
+
+INSERT INTO `research_papers` (`author_id`, `author_name`, `author_contact`, `author_email`, `country`, `affiliation`, `department`, `co_authors`, `paper_title`, `abstract`, `file`, `keywords`, `user_id`, `submission_status`, `created_at`) VALUES
+(1, 'John Doe', '+1-999888333', 'john.doe@example.com', 'USA', 'Harvard University', 'Engineering', NULL, 'Advanced AI Techniques', 'This paper explores advanced techniques in AI...', 'http://localhost/journal-backend/uploads/', 'AI, Machine Learning, Deep Learning', 7, 0, '2025-01-21 14:48:10'),
+(2, 'John Doe', '+1-999888333', 'john.doe@example.com', 'USA', 'Harvard University', 'Engineering', NULL, 'Advanced AI Techniques', 'This paper explores advanced techniques in AI...', 'uploads/mangal11.pdf', 'AI, Machine Learning, Deep Learning', 7, 0, '2025-01-21 15:04:03'),
+(3, 'supriyaa', '1234567897', 'supriyaa@gmail.com', 'india', '23', '25', NULL, 'asdfffdas', 'sdf', 'uploads/RP_-_Submit_Manuscript3.docx', '6', 6, 0, '2025-01-21 16:13:56'),
+(4, 'supriya', '1234567834', 'supriya@gmail.com', 'india', '67', '25', NULL, 'asdfffdas', 'sdf', 'uploads/RP_-_Submit_Manuscript4.docx', '6', 6, 0, '2025-01-21 16:16:19'),
+(5, 'supriya', '1234567834', 'supriya@gmail.com', 'india', '67', '25', '[]', 'asdfffdas', 'sdf', 'uploads/RP_-_Submit_Manuscript5.docx', '6', 6, 0, '2025-01-21 17:02:29'),
+(6, 'supriya', '1234567834', 'supriya@gmail.com', 'india', '67', '25', '[{\"name\":\"co-author\",\"contact\":\"\",\"email\":\"\",\"coun', 'asdfffdas', 'sdf', 'uploads/RP_-_Submit_Manuscript6.docx', '6', 6, 0, '2025-01-21 17:04:15'),
+(7, 'supriya', '1234567834', 'supriya@gmail.com', 'india', '67', '25', '[]', 'asdfffdas', 'sdf', 'uploads/RP_-_Submit_Manuscript7.docx', '6', 6, 0, '2025-01-21 17:05:06'),
+(8, 'supriya', '1234567834', 'supriya@gmail.com', 'india', '67', '25', '[]', 'asdfffdas', 'sdf', 'uploads/RP_-_Submit_Manuscript8.docx', '6', 6, 0, '2025-01-21 17:07:15');
 
 -- --------------------------------------------------------
 
@@ -4567,8 +4563,7 @@ CREATE TABLE `users` (
   `profile_image` varchar(250) DEFAULT NULL,
   `contact` varchar(15) NOT NULL,
   `name` varchar(200) NOT NULL,
-  `department` varchar(255) DEFAULT NULL,
-  `university` varchar(255) NOT NULL,
+  `department` varchar(255) NOT NULL,
   `designation` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `maximum_qualification` varchar(100) NOT NULL,
@@ -4577,21 +4572,22 @@ CREATE TABLE `users` (
   `profile_link` varchar(200) NOT NULL,
   `research_area` varchar(150) NOT NULL,
   `dob` date NOT NULL,
-  `about` mediumtext NOT NULL
+  `about` mediumtext NOT NULL,
+  `university_name` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `email`, `password`, `type`, `profile_image`, `contact`, `name`, `department`, `university`, `designation`, `created_at`, `maximum_qualification`, `country`, `state`, `profile_link`, `research_area`, `dob`, `about`) VALUES
-(2, 'reviewer@gmail.com', '$2y$10$Tr7fcAxauIbOeGXd8fXjTuxYrdESxNCavgtnLvhRL.KYS3Ugg7rLq', 'reviewer', NULL, '8888888888', 'reviewer4', NULL, '', NULL, '2025-01-15 11:01:45', '', 0, 0, '', '', '0000-00-00', ''),
-(3, 'publisher@gmail.com', '$2y$10$W92EBKQtJErjt6UCMjfbKuGl6GM9nEgyPslGRNh5e7IiEXZ05BLRK', 'publisher', 'uploads/profile_3_1737130041.png', '9876543298', 'aarti', NULL, '', NULL, '2025-01-15 11:02:00', '', 0, 0, '', '', '0000-00-00', ''),
-(4, 'reviewer1@gmail.com', '$2y$10$um/qpnORWp9j8iML/TljrOhQNjopugEo4LSDPElqZK/x3jynL.PZu', 'reviewer', NULL, '8888888888', 'new reviewer', NULL, '', NULL, '2025-01-15 12:33:50', '', 1, 0, '', '', '0000-00-00', ''),
-(5, 'niaa@gmail.com', '$2y$10$k5vNVIUNRyogr1WwFb0bEOwTDSH3cv/kqVENi7rOUMtJce5sZPwEG', 'author', NULL, '4555555555', 'neha', NULL, '', NULL, '2025-01-15 18:26:48', '', 0, 0, '', '', '0000-00-00', ''),
-(6, 'author3@gmail.com', '$2y$10$/nEQRLvi8D5eSTcuBq5q3Ocs9TH.rCgiETHcJG1sLfX3yVmEo6Lza', 'author', 'C:\\fakepath\\WhatsApp Image 2025-01-02 at 1.12.18 PM.jpeg', '9934707519', 'Aarti Kumari gupta', 'Computer Science', 'central university', 'Professor', '2025-01-16 17:35:53', 'PostDoc', 0, 0, 'https://google.com', 'research', '2002-03-17', 'bbbbbbbbbbbbbbbbbbbbb'),
-(7, 'anuj@gmail.com', '$2y$10$2izeIMFE2eeh4Cb/zoJT6eJ/I8josW1BkkviRev4USlmpDFJbNGNa', 'author', NULL, '6206510871', 'anuj', NULL, '', NULL, '2025-01-16 20:12:39', '', 0, 0, '', '', '0000-00-00', ''),
-(10, 'chandan@gmail.com', '$2y$10$ieVqOq.SMclTnTiPbMm.oeq1EXEjjqyDP/esPZ1jbu7qF/Gg7GjGa', 'author', 'http://localhost/journal-backend/http://localhost/journal-backend/C:\\fakepath\\WhatsApp Image 2025-01-02 at 12.50.36 PM.jpeg', '7654327890', 'chandan kumar honeywell', 'Information technology  Amog lila', 'central university ﻿namaste ', 'Lecturer', '2025-01-17 12:13:25', 'Bachelor', 0, 0, 'https://google.com', 'research for Firewall', '2006-03-17', 'looking like am a dedicated and enthusiastic bachelor\'s student pursuing [Your Field of Study] at [Your University]. With a strong passion for [specific interest or field, e.g., technology, design, research], I am committed to expanding my knowledge and applying it to real-world challenges. My coursework, combined with hands-on projects and internships, has provided me with a solid foundation in [specific skills, e.g., programming, data analysis, creative design].kkkkkkkkkkkkkkkkkkkkkkkkk\r\n');
+INSERT INTO `users` (`id`, `email`, `password`, `type`, `profile_image`, `contact`, `name`, `department`, `designation`, `created_at`, `maximum_qualification`, `country`, `state`, `profile_link`, `research_area`, `dob`, `about`, `university_name`) VALUES
+(1, 'author@gmail.com', '$2y$10$IbF7fl9fsAgQrZ0rRClcOu7I4LewAoVE7KVLVsQYU4GPI3hy9yYfq', 'author', 'uploads/profile_1_1737475388.png', '8888888888', 'supriya singh', '', NULL, '2025-01-15 11:01:30', '', 0, 0, '', '', '0000-00-00', '', ''),
+(2, 'reviewer@gmail.com', '$2y$10$Tr7fcAxauIbOeGXd8fXjTuxYrdESxNCavgtnLvhRL.KYS3Ugg7rLq', 'reviewer', NULL, '8888888888', 'reviewer4', '', NULL, '2025-01-15 11:01:45', '', 0, 0, '', '', '0000-00-00', '', ''),
+(3, 'publisher@gmail.com', '$2y$10$W92EBKQtJErjt6UCMjfbKuGl6GM9nEgyPslGRNh5e7IiEXZ05BLRK', 'publisher', NULL, '8888888888', 'publisher', '', NULL, '2025-01-15 11:02:00', '', 0, 0, '', '', '0000-00-00', '', ''),
+(4, 'reviewer1@gmail.com', '$2y$10$um/qpnORWp9j8iML/TljrOhQNjopugEo4LSDPElqZK/x3jynL.PZu', 'reviewer', NULL, '8888888888', 'new reviewer', '', NULL, '2025-01-15 12:33:50', '', 1, 0, '', '', '0000-00-00', '', ''),
+(5, 'niaa@gmail.com', '$2y$10$k5vNVIUNRyogr1WwFb0bEOwTDSH3cv/kqVENi7rOUMtJce5sZPwEG', 'author', NULL, '4555555555', 'neha', '', NULL, '2025-01-15 18:26:48', '', 0, 0, '', '', '0000-00-00', '', ''),
+(6, 'arohineha@gmail.com', '$2y$10$Nc//Mkj.MiQZ2Sxpr4jGrO7CSlCMbj6A03RxvCf7.jZhPFl5Nmc46', 'author', NULL, '32444422244', 'supriya', '', NULL, '2025-01-17 14:48:10', '', 0, 0, '', '', '0000-00-00', '', ''),
+(7, 'arohinehaa@gmail.com', '$2y$10$8SF/BVFFRWXxvR8tf3xXvuon7LAR8VLNd4QJU3OQkp6qUBsh5jZSO', 'author', NULL, '32444422244', 'neha', '', NULL, '2025-01-19 17:33:40', '', 0, 0, '', '', '0000-00-00', '', '');
 
 --
 -- Indexes for dumped tables
@@ -4631,7 +4627,7 @@ ALTER TABLE `published_papers`
 -- Indexes for table `research_papers`
 --
 ALTER TABLE `research_papers`
-  ADD PRIMARY KEY (`paper_id`);
+  ADD PRIMARY KEY (`author_id`);
 
 --
 -- Indexes for table `states`
@@ -4650,12 +4646,6 @@ ALTER TABLE `users`
 --
 
 --
--- AUTO_INCREMENT for table `admin`
---
-ALTER TABLE `admin`
-  MODIFY `admin_id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
-
---
 -- AUTO_INCREMENT for table `countries`
 --
 ALTER TABLE `countries`
@@ -4665,7 +4655,13 @@ ALTER TABLE `countries`
 -- AUTO_INCREMENT for table `journals`
 --
 ALTER TABLE `journals`
-  MODIFY `journal_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `journal_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `research_papers`
+--
+ALTER TABLE `research_papers`
+  MODIFY `author_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `states`
@@ -4677,7 +4673,7 @@ ALTER TABLE `states`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -351,4 +351,99 @@ public function update_personal_details_post()
 }
 
 
+
+
+//Research paper submit api
+
+public function submit_research_post()
+{
+    $this->form_validation->set_rules('author_name', 'Author Name', 'trim|required');
+    $this->form_validation->set_rules('author_contact', 'Mobile No', 'trim|required'); 
+    $this->form_validation->set_rules('author_email', 'Email', 'trim|required|valid_email');
+    $this->form_validation->set_rules('country', 'Country/Region', 'trim|required');
+    $this->form_validation->set_rules('affiliation', 'Affiliation', 'trim');
+    $this->form_validation->set_rules('department', 'Department', 'trim');
+    $this->form_validation->set_rules('paper_title', 'Paper Title', 'trim|required');
+    $this->form_validation->set_rules('abstract', 'Abstract', 'trim|required');
+    $this->form_validation->set_rules('keywords', 'Keywords', 'trim|required');
+    
+    
+    if ($this->form_validation->run()) {
+        $config['upload_path'] = './uploads/';
+        $config['allowed_types'] = 'pdf|doc|docx';
+        $config['max_size'] = 2048;
+
+        $this->load->library('upload', $config);
+
+        if (!$this->upload->do_upload('file')) {
+            $result = [
+                'status' => 400,
+                'message' => $this->upload->display_errors('', ''),
+            ];
+        } else {
+            $file_data = $this->upload->data();
+
+          // Fetch co-authors data from input
+          $co_authors = $this->input->post('co_authors[]');
+          $co_author_data = [];
+          if (is_array($co_authors)) {
+              foreach ($co_authors as $co_author) {
+                  $co_author_data[] = [
+                      'name' => $co_author['co_author_name'] ?? '',
+                      'contact' => $co_author['co_author_contact'] ?? '',
+                      'email' => $co_author['co_author_email'] ?? '',
+                      'country' => $co_author['co_author_country'] ?? '',
+                      'affiliation' => $co_author['co_author_affiliation'] ?? '',
+                      'department' => $co_author['co_author_department'] ?? '',
+                  ];
+              }
+          }
+
+
+
+
+          $data = [
+            'author_name' => $this->input->post('author_name'),
+            'author_contact' => $this->input->post('author_contact'),
+            'author_email' => $this->input->post('author_email'),
+            'country' => $this->input->post('country'),
+            'affiliation' => $this->input->post('affiliation'),
+            'department' => $this->input->post('department'),
+            'paper_title' => $this->input->post('paper_title'),
+            'abstract' => $this->input->post('abstract'),
+            'keywords' => $this->input->post('keywords'),
+            'co_authors' => json_encode($co_author_data),
+            
+            'file' => 'uploads/' . $file_data['file_name'],
+            'user_id' => $this->user['id'],
+            'submission_status' => 0,
+        ];
+
+        $res = $this->UserModel->insert_research_submission($data);
+
+        if ($res) {
+            $result = [
+                'status' => 200,
+                'message' => 'Research submitted successfully!',
+                'data' => array_merge(['id' => $res], $data),
+            ];
+        } else {
+            $result = [
+                'status' => 500,
+                'message' => 'Failed to submit the research!',
+            ];
+        }
+    }
+} else {
+    // Validation failed
+    $result = [
+        'status' => 400,
+        'message' => strip_tags(validation_errors()),
+    ];
+}
+
+// Send response
+$this->response($result, RestController::HTTP_OK);
+}
+
 }
