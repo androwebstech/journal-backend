@@ -58,7 +58,7 @@ class User extends RestController {
         $this->form_validation->set_rules('website_link', 'Website Link', 'trim|valid_url');
         $this->form_validation->set_rules('journal_submission_link', 'Submission Link', 'trim|valid_url');
         $this->form_validation->set_rules('indexing', 'Indexing', 'trim');
-        $this->form_validation->set_rules('country', 'Country', 'trim|required|in_list[USA,India,UK,Canada,Australia]');
+        $this->form_validation->set_rules('country', 'Country', 'trim|required');
         $this->form_validation->set_rules('state', 'State', 'trim|required');
         $this->form_validation->set_rules('publication_type', 'Publication', 'trim|required|in_list[Free,Paid]');
         $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|integer');
@@ -344,6 +344,166 @@ public function update_personal_details_post()
     }
 
     $this->response($result, RestController::HTTP_OK);
+}
+
+// ----------------Add Publication API----------------------
+public function add_publication_post()
+{
+    $this->load->model('UserModel');
+    $this->load->helper('url');
+
+    $user_id = $this->user['id'];
+
+    // Validation rules
+    $this->form_validation->set_rules('paper_title', 'Title', 'trim|required');
+    $this->form_validation->set_rules('publication_year', 'Publication Year', 'trim|integer|required');
+    $this->form_validation->set_rules('paper_type', 'Paper Type', 'trim|required|in_list[Journal,Patent,Book]');
+    $this->form_validation->set_rules('authors', 'Author Name', 'trim|required');
+    $this->form_validation->set_rules('issn', 'Issn Number', 'trim|integer|required');
+    $this->form_validation->set_rules('volume', 'Volume', 'trim|integer|required');
+    $this->form_validation->set_rules('issue', 'Issue', 'trim|integer|required');
+    $this->form_validation->set_rules('live_url', 'Live Url', 'trim|valid_url');
+    $this->form_validation->set_rules('indexing_with', 'Indexing Partner', 'trim|required'); //Need to change further
+    $this->form_validation->set_rules('publication_date', 'Publication Date', 'trim|required');
+    $this->form_validation->set_rules('description', 'Description', 'trim');
+
+    if ($this->form_validation->run()) {
+        $data = [
+            'paper_title' => $this->input->post('paper_title'),
+            'user_id' => $user_id,
+            'publication_year' => $this->input->post('publication_year'),
+            'paper_type' => $this->input->post('paper_type'),
+            'authors' => $this->input->post('authors'),
+            'issn' => $this->input->post('issn'),
+            'volume' => $this->input->post('volume'),
+            'issue' => $this->input->post('issue'),
+            'live_url' => $this->input->post('live_url'),
+            'indexing_with' => $this->input->post('indexing_with'),
+            'publication_date' => $this->input->post('publication_date'),
+            'description' => $this->input->post('description'),
+            'approval_status' => APPROVAL_STATUS::PENDING,
+        ];
+
+
+
+        $res = $this->UserModel->insert_publication($data);
+
+        $id = $this->db->insert_id();
+        if ($res) {
+            $result = [
+                'status' => 200,
+                'message' => 'Publication submitted successfully!',
+                'data' =>  array_merge($data, ['ppuid' => $id]),
+            ];
+        } else {
+            $result = ['status' => 500, 'message' => 'Failed to submit the Publication!'];
+        }
+    } else {
+        $result = ['status' => 400, 'message' => strip_tags(validation_errors())];
+    }
+
+    // Return the response
+    $this->response($result, RestController::HTTP_OK);
+}
+
+public function get_publication_get()
+{
+    $this->load->model('UserModel');
+    $journals = $this->UserModel->getPublicationByUserId($this->user['id']);
+    if ($journals) {
+        $result = [
+            'status' => 200,
+            'message' => 'Journals fetched successfully',
+            'data' => $journals
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No journals found',
+            'data' => []
+        ];
+    }
+    $this->response($result, RestController::HTTP_OK);
+}
+
+public function delete_publication_get($id = 0)
+{
+    $this->load->database();
+    $this->load->model('UserModel');
+
+    $id = intval($id);
+    if ($id > 0) {
+        $result = $this->UserModel->deletePublicationById($id, $this->user['id']);
+    } else {
+        $result = ['status' => 400, 'message' => 'Valid ID is required.'];
+    }
+
+   
+    $this->response($result, RestController::HTTP_OK);
+}
+
+
+public function update_publication_post($id = null)
+{
+    $this->load->model('UserModel');
+    $this->load->helper('url');
+
+    if (empty($id)) {
+        $this->response(['status' => 400, 'message' => 'Invalid Publication ID.'], RestController::HTTP_BAD_REQUEST);
+        return;
+    }
+
+    // Validation rules
+    $this->form_validation->set_rules('paper_title', 'Title', 'trim|required');
+    $this->form_validation->set_rules('paper_type', 'Paper Type', 'trim|required|in_list[Journal,Patent,Book]');
+    $this->form_validation->set_rules('authors', 'Author Name', 'trim|required');
+    $this->form_validation->set_rules('issn', 'Issn Number', 'trim|integer|required');
+    $this->form_validation->set_rules('volume', 'Volume', 'trim|integer|required');
+    $this->form_validation->set_rules('issue', 'Issue', 'trim|integer|required');
+    $this->form_validation->set_rules('live_url', 'Live Url', 'trim|valid_url');
+    $this->form_validation->set_rules('indexing_with', 'Indexing Partner', 'trim|required');
+    $this->form_validation->set_rules('description', 'Description', 'trim');
+    
+    if ($this->form_validation->run()) {
+        $fields = [
+            'paper_title',
+            'paper_type',
+            'authors',
+            'issn',
+            'volume',
+            'issue',
+            'live_url',
+            'indexing_with',
+            'description',
+        ];
+
+        $update_data = [];
+
+        foreach ($fields as $field) {
+            $value = $this->input->post($field);
+            if ($value !== null) { 
+                $update_data[$field] = $value;
+            }
+        }
+
+        if (!empty($update_data)) {
+            $updated = $this->UserModel->update_publication($id, $update_data);
+
+            if ($updated) {
+                $this->response([
+                    'status' => 200,
+                    'message' => 'Publication updated successfully!',
+                    'data' => array_merge(['ppuid' => $id], $update_data),
+                ], RestController::HTTP_OK);
+            } else {
+                $this->response(['status' => 500, 'message' => 'Failed to update the Publication.'], RestController::HTTP_INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            $this->response(['status' => 400, 'message' => 'No valid data to update.'], RestController::HTTP_BAD_REQUEST);
+        }
+    } else {
+        $this->response(['status' => 400, 'message' => strip_tags(validation_errors())], RestController::HTTP_BAD_REQUEST);
+    }
 }
 
 
