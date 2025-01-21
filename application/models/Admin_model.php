@@ -18,7 +18,26 @@ class Admin_model extends CI_model
 //     return false;
 // }
 
+function validate_login($email, $password) {
+    $user = $this->db->select('*')->where('email', $email)->get('admin')->row_array();
+    if (!empty($user) && password_verify($password,$user['password'])) { 
+        unset($user['password']);
+        return $user; 
+    }
+    
+    return false;
+}
 
+public function register($data)
+{
+    $this->db->insert('admin', $data);
+    if ($this->db->affected_rows() > 0) {
+        $insert_id = $this->db->insert_id();
+        return $this->db->where('admin_id', $insert_id)->get('admin')->row_array();
+    }
+
+    return false;
+}
 
 
 
