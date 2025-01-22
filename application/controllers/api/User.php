@@ -648,4 +648,51 @@ public function submit_research_post()
 $this->response($result, RestController::HTTP_OK);
 }
 
+public function change_password_post()
+    {
+        // Input validation
+        $this->form_validation->set_rules('old_password', 'Old Password', 'trim|required');
+        $this->form_validation->set_rules('new_password', 'New Password', 'trim|required|min_length[8]');
+        $this->form_validation->set_rules('confirm_password', 'Confirm Password', 'trim|required|matches[new_password]');
+
+        if ($this->form_validation->run()) {
+            $oldPassword = $this->input->post('old_password');
+            $newPassword = $this->input->post('new_password');
+
+            // Verify old password
+            $user = $this->UserModel->getUserId($this->user['id']);
+            if (!$user || !password_verify($oldPassword, $user['password'])) {
+                $result = [
+                    'status' => 400,
+                    'message' => 'Old password is incorrect'
+                ];
+                $this->response($result, RestController::HTTP_OK);
+                return;
+            }
+
+            // Update password
+            $updateData = ['password' => password_hash($newPassword, PASSWORD_DEFAULT)];
+            $updated = $this->UserModel->updateUser($this->user['id'], $updateData);
+
+            if ($updated) {
+                $result = [
+                    'status' => 200,
+                    'message' => 'Password changed successfully'
+                ];
+            } else {
+                $result = [
+                    'status' => 500,
+                    'message' => 'Failed to change password'
+                ];
+            }
+        } else {
+            $result = [
+                'status' => 400,
+                'message' => strip_tags(validation_errors())
+            ];
+        }
+
+        $this->response($result, RestController::HTTP_OK);
+    }
+
 }
