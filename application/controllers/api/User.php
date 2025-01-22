@@ -367,11 +367,12 @@ public function add_publication_post()
     $this->form_validation->set_rules('volume', 'Volume', 'trim|integer|required');
     $this->form_validation->set_rules('issue', 'Issue', 'trim|integer|required');
     $this->form_validation->set_rules('live_url', 'Live Url', 'trim|valid_url');
-    $this->form_validation->set_rules('indexing_with', 'Indexing Partner', 'trim|required'); //Need to change further
+    $this->form_validation->set_rules('indexing_with[]', 'Indexing Partner', 'trim|required'); 
     $this->form_validation->set_rules('publication_date', 'Publication Date', 'trim|required');
     $this->form_validation->set_rules('description', 'Description', 'trim');
 
     if ($this->form_validation->run()) {
+        $indexing_with = $this->input->post('indexing_with[]'); 
         $data = [
             'paper_title' => $this->input->post('paper_title'),
             'user_id' => $user_id,
@@ -382,13 +383,11 @@ public function add_publication_post()
             'volume' => $this->input->post('volume'),
             'issue' => $this->input->post('issue'),
             'live_url' => $this->input->post('live_url'),
-            'indexing_with' => $this->input->post('indexing_with'),
+            'indexing_with' => implode(',', $indexing_with), 
             'publication_date' => $this->input->post('publication_date'),
             'description' => $this->input->post('description'),
             'approval_status' => APPROVAL_STATUS::PENDING,
         ];
-
-
 
         $res = $this->UserModel->insert_publication($data);
 
@@ -397,7 +396,7 @@ public function add_publication_post()
             $result = [
                 'status' => 200,
                 'message' => 'Publication submitted successfully!',
-                'data' =>  array_merge($data, ['ppuid' => $id]),
+                'data' => array_merge($data, ['ppuid' => $id]),
             ];
         } else {
             $result = ['status' => 500, 'message' => 'Failed to submit the Publication!'];
@@ -409,6 +408,7 @@ public function add_publication_post()
     // Return the response
     $this->response($result, RestController::HTTP_OK);
 }
+
 
 public function get_publication_get()
 {
@@ -465,7 +465,7 @@ public function update_publication_post($id = null)
     $this->form_validation->set_rules('volume', 'Volume', 'trim|integer|required');
     $this->form_validation->set_rules('issue', 'Issue', 'trim|integer|required');
     $this->form_validation->set_rules('live_url', 'Live Url', 'trim|valid_url');
-    $this->form_validation->set_rules('indexing_with', 'Indexing Partner', 'trim|required');
+    $this->form_validation->set_rules('indexing_with[]', 'Indexing Partner', 'trim|required'); 
     $this->form_validation->set_rules('description', 'Description', 'trim');
     
     if ($this->form_validation->run()) {
@@ -486,6 +486,10 @@ public function update_publication_post($id = null)
         foreach ($fields as $field) {
             $value = $this->input->post($field);
             if ($value !== null) { 
+                if ($field === 'indexing_with') {
+                 
+                    $value = is_array($value) ? implode(',', $value) : $value;
+                }
                 $update_data[$field] = $value;
             }
         }
@@ -508,6 +512,44 @@ public function update_publication_post($id = null)
     } else {
         $this->response(['status' => 400, 'message' => strip_tags(validation_errors())], RestController::HTTP_BAD_REQUEST);
     }
+}
+
+
+public function get_publication_by_id_get($id = null)
+{
+   
+    $this->load->model('UserModel');
+
+   
+    if (!$id) {
+        $result = [
+            'status' => 400,
+            'message' => 'Publication ID is required',
+            'data' => null
+        ];
+        return $this->response($result, RestController::HTTP_BAD_REQUEST);
+    }
+
+    
+    $journal = $this->UserModel->get_publication_by_id($id);
+
+  
+    if ($journal) {
+        $result = [
+            'status' => 200,
+            'message' => 'Publication fetched successfully',
+            'data' => $journal
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No Publication found with the given ID',
+            'data' => null
+        ];
+    }
+
+   
+    return $this->response($result, RestController::HTTP_OK);
 }
 
 

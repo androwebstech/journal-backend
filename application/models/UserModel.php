@@ -194,6 +194,17 @@ class UserModel extends CI_model
 
         return null; 
     }
+
+    public function get_publication_by_id($id)
+    {
+        $this->db->where('ppuid', $id);
+        $query = $this->db->get('published_papers'); 
+        if ($query->num_rows() > 0) {
+            return $query->row_array(); 
+        }
+
+        return null; 
+    }
 public function get_reviewer_by_id($id)
     {
         $this->db->where('id', $id);
@@ -253,9 +264,9 @@ return false;
 
 
 
-public function insert_research_submission($data)
-{
-    $this->db->insert('research_papers', $data);
+// public function insert_research_submission($data)
+// {
+//     $this->db->insert('research_papers', $data);
 public function insert_publication($data)
 {
     $this->db->insert('published_papers', $data);
