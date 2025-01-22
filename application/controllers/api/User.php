@@ -671,11 +671,11 @@ public function change_password_post()
                     'message' => 'Old password is incorrect'
                 ];
                 $this->response($result, RestController::HTTP_OK);
-                return;
+                exit;
             }
 
             // Update password
-            $updateData = ['password' => password_hash($newPassword, PASSWORD_DEFAULT)];
+            $updateData = ['password' => password_hash($newPassword, PASSWORD_BCRYPT)];
             $updated = $this->UserModel->updateUser($this->user['id'], $updateData);
 
             if ($updated) {
