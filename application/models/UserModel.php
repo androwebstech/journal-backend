@@ -319,5 +319,21 @@ public function update_publication($id, $update_data)
     return false;
 }    
 
+public function getUserId($userId)
+    {
+        $query = $this->db->get_where('users', ['id' => $userId]);
+        if ($query->num_rows() > 0) {
+            return $query->row_array();
+        }
+        return null;
+    }
+
+
+public function updateUser($userId, $data)
+    {
+        $this->db->where('id', $userId);
+        return $this->db->update('users', $data);
+    }
+
 
 }
