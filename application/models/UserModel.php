@@ -347,4 +347,47 @@ public function updateUser($userId, $data)
     }
 
 
+    
+public function getPublishRequestsByUserId($id)
+    {
+        $this->db->select('
+            publish_requests.pr_id,
+            research_papers.author_name,
+            research_papers.paper_title,
+            journals.journal_name,
+            users.name,
+            publish_requests.sender,
+            publish_requests.pr_status,
+            publish_requests.payment_status,
+            publish_requests.live_url,
+            publish_requests.created_at,
+            publish_requests.updated_at, 
+        ');
+        $this->db->from('publish_requests');
+        $this->db->join('research_papers', 'research_papers.paper_id = publish_requests.paper_id', 'left');
+        $this->db->join('users', 'users.id = publish_requests.publisher_id', 'left');
+        $this->db->join('journals', 'journals.journal_id = publish_requests.journal_id', 'left');
+        $this->db->where('publish_requests.publisher_id', $id);
+    
+        $query = $this->db->get();
+        return $query->result_array();
+    }
+
+public function update_publish_request_status($id, $status)
+    {
+        $this->db->where('pr_id', $id);
+        $query = $this->db->get('publish_requests');
+        $current_status = $query->row('pr_status'); 
+        // echo $current_status;
+        // exit;
+        if ($current_status != $status) {
+            $this->db->where('pr_id', $id);
+            $this->db->update('publish_requests', ['pr_status' => $status]);
+
+            return true; 
+        } else {
+            return false; 
+        }
+    }
+
 }

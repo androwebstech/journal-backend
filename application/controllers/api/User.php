@@ -699,4 +699,59 @@ public function change_password_post()
         $this->response($result, RestController::HTTP_OK);
     }
 
+
+    public function get_publish_requests_get()
+{
+    $this->load->model('UserModel');
+    $requests = $this->UserModel->getPublishRequestsByUserId($this->user['id']);
+    if ($requests) {
+        $result = [
+            'status' => 200,
+            'message' => 'Published Requests fetched successfully',
+            'data' => $requests
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No Published Requests found',
+            'data' => []
+        ];
+    }
+    $this->response($result, RestController::HTTP_OK);
+}
+
+
+    public function change_publish_request_status_post($id=null)
+    {
+        $this->form_validation->set_rules('status', 'Status', 'trim|required|in_list[pending,accept,reject,published,proceed_payment]');
+
+        if ($this->form_validation->run()) {
+            $status = $this->input->post('status');
+            $result = $this->UserModel->update_publish_request_status($id, $status); 
+
+            if ($result === true) { 
+                $this->response([
+                    'status' => 200,
+                    'message' => 'Request status updated successfully.'
+                ], RestController::HTTP_OK);
+            } elseif ($result === false) { 
+                $this->response([
+                    'status' => 400, 
+                    'message' => 'Request status is already the same.'
+                ],  RestController::HTTP_OK);
+            } else { 
+                $this->response([
+                    'status' => 500, 
+                    'message' => 'Failed to update request status.' 
+                ], RestController::HTTP_BAD_REQUEST);
+            }
+        } else {
+            $this->response([
+                'status' => 400,
+                'message' => strip_tags(validation_errors())
+            ]);
+        }
+        $this->response($result, RestController::HTTP_OK);
+    }
+
 }

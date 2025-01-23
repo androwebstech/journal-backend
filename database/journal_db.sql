@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 22, 2025 at 11:37 AM
+-- Generation Time: Jan 23, 2025 at 02:18 PM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 7.4.33
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `journal-db`
+-- Database: `journal_db`
 --
 
 -- --------------------------------------------------------
@@ -406,9 +406,8 @@ CREATE TABLE `published_papers` (
 --
 
 INSERT INTO `published_papers` (`ppuid`, `user_id`, `authors`, `paper_title`, `publication_year`, `paper_type`, `issn`, `volume`, `issue`, `live_url`, `indexing_with`, `approval_status`, `description`, `publication_date`, `created_at`) VALUES
-(7, 3, 'Tanav', 'Title', 2024, 'journal', '1111', '1', '1', 'https://google.com', 'SSCI', 'pending', 'description', '2024-12-31', '2025-01-21 12:10:39'),
-(9, 3, 'Tanav', 'Title', 2022, 'journal', '1111', '1', '1', 'https://google.com', 'SSCI', '', 'description', '2025-01-01', '2025-01-21 12:11:54'),
-(10, 3, 'Tanav', 'Title', 2025, 'journal', '1111', '1', '1', 'https://google.com', 'SSCI', '', 'description', '2025-01-01', '2025-01-21 17:11:05');
+(11, 3, 'Tanav', 'Title', 2025, 'patent', '1111', '1', '1', 'https://google.com', 'SCOPUS,SSCI,ESCI,Thomson Reuters', 'pending', 'desc', '2002-12-12', '2025-01-22 16:42:32'),
+(12, 3, 'Tanav', 'Title', 2024, 'patent', '1111', '1', '1', 'https://google.com', 'SCOPUS,SSCI', 'pending', 'desc', '2002-12-12', '2025-01-22 16:53:22');
 
 -- --------------------------------------------------------
 
@@ -430,6 +429,13 @@ CREATE TABLE `publish_requests` (
   `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `publish_requests`
+--
+
+INSERT INTO `publish_requests` (`pr_id`, `paper_id`, `author_id`, `journal_id`, `publisher_id`, `sender`, `pr_status`, `payment_status`, `live_url`, `created_at`, `updated_at`) VALUES
+(1, 1, 7, 1, 3, 'author', 'pending', 'pending', 'https://google.com', '2025-01-23 11:40:06', '2025-01-23 12:58:18');
+
 -- --------------------------------------------------------
 
 --
@@ -437,7 +443,7 @@ CREATE TABLE `publish_requests` (
 --
 
 CREATE TABLE `research_papers` (
-  `author_id` int(11) NOT NULL,
+  `paper_id` int(11) NOT NULL,
   `author_name` varchar(255) DEFAULT NULL,
   `author_contact` varchar(50) DEFAULT NULL,
   `author_email` varchar(255) DEFAULT NULL,
@@ -458,7 +464,7 @@ CREATE TABLE `research_papers` (
 -- Dumping data for table `research_papers`
 --
 
-INSERT INTO `research_papers` (`author_id`, `author_name`, `author_contact`, `author_email`, `country`, `affiliation`, `department`, `co_authors`, `paper_title`, `abstract`, `file`, `keywords`, `user_id`, `submission_status`, `created_at`) VALUES
+INSERT INTO `research_papers` (`paper_id`, `author_name`, `author_contact`, `author_email`, `country`, `affiliation`, `department`, `co_authors`, `paper_title`, `abstract`, `file`, `keywords`, `user_id`, `submission_status`, `created_at`) VALUES
 (1, 'John Doe', '+1-999888333', 'john.doe@example.com', 'USA', 'Harvard University', 'Engineering', NULL, 'Advanced AI Techniques', 'This paper explores advanced techniques in AI...', 'http://localhost/journal-backend/uploads/', 'AI, Machine Learning, Deep Learning', 7, 0, '2025-01-21 14:48:10'),
 (2, 'John Doe', '+1-999888333', 'john.doe@example.com', 'USA', 'Harvard University', 'Engineering', NULL, 'Advanced AI Techniques', 'This paper explores advanced techniques in AI...', 'uploads/mangal11.pdf', 'AI, Machine Learning, Deep Learning', 7, 0, '2025-01-21 15:04:03'),
 (3, 'supriyaa', '1234567897', 'supriyaa@gmail.com', 'india', '23', '25', NULL, 'asdfffdas', 'sdf', 'uploads/RP_-_Submit_Manuscript3.docx', '6', 6, 0, '2025-01-21 16:13:56'),
@@ -4664,7 +4670,7 @@ ALTER TABLE `publish_requests`
 -- Indexes for table `research_papers`
 --
 ALTER TABLE `research_papers`
-  ADD PRIMARY KEY (`author_id`);
+  ADD PRIMARY KEY (`paper_id`);
 
 --
 -- Indexes for table `states`
@@ -4704,19 +4710,19 @@ ALTER TABLE `journals`
 -- AUTO_INCREMENT for table `published_papers`
 --
 ALTER TABLE `published_papers`
-  MODIFY `ppuid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `ppuid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `publish_requests`
 --
 ALTER TABLE `publish_requests`
-  MODIFY `pr_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `pr_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `research_papers`
 --
 ALTER TABLE `research_papers`
-  MODIFY `author_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `paper_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `states`
