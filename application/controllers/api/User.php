@@ -508,7 +508,7 @@ public function update_publication_post($id = null)
                     'data' => array_merge(['ppuid' => $id], $update_data),
                 ], RestController::HTTP_OK);
             } else {
-                $this->response(['status' => 500, 'message' => 'Failed to update the Publication.'], RestController::HTTP_INTERNAL_SERVER_ERROR);
+                $this->response(['status' => 500, 'message' => 'Failed to update the Publication.'], RestController::HTTP_BAD_REQUEST);
             }
         } else {
             $this->response(['status' => 400, 'message' => 'No valid data to update.'], RestController::HTTP_BAD_REQUEST);
