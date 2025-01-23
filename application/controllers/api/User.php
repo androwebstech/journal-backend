@@ -656,7 +656,7 @@ public function change_password_post()
     {
         // Input validation
         $this->form_validation->set_rules('old_password', 'Old Password', 'trim|required');
-        $this->form_validation->set_rules('new_password', 'New Password', 'trim|required|min_length[8]');
+        $this->form_validation->set_rules('new_password', 'New Password', 'trim|required|min_length[6]');
         $this->form_validation->set_rules('confirm_password', 'Confirm Password', 'trim|required|matches[new_password]');
 
         if ($this->form_validation->run()) {
