@@ -723,7 +723,7 @@ public function change_password_post()
 
     public function change_publish_request_status_post($id=null)
     {
-        $this->form_validation->set_rules('status', 'Status', 'trim|required|in_list[pending,accept,reject,published,proceed_payment]');
+        $this->form_validation->set_rules('status', 'Status', 'trim|required|in_list['.implode(',',PR_STATUS::ALL).']');
 
         if ($this->form_validation->run()) {
             $status = $this->input->post('status');
@@ -737,7 +737,7 @@ public function change_password_post()
             } elseif ($result === false) { 
                 $this->response([
                     'status' => 400, 
-                    'message' => 'Request status is already the same.'
+                    'message' => 'Request status is already '.$status.'.'
                 ],  RestController::HTTP_OK);
             } else { 
                 $this->response([
@@ -755,45 +755,38 @@ public function change_password_post()
     }
 
     // API to join a journal
+public function join_journal_post($journal_id = null)
 
-    public function join_journal_post($journal_id = null)
+{
+    $this->load->model('UserModel');
+    $this->load->helper('url');
 
-    {
-        $this->load->model('UserModel');
-        $this->load->helper('url');
-    
-        if (empty($journal_id)) {
-            $result = ['status' => 400, 'message' => 'Invalid Journal ID.'];
-            $this->response($result, RestController::HTTP_BAD_REQUEST);
-            return;
-        }
-    
-        $data = [
-            'journal_id' => $journal_id,
-            'user_id' => $this->user['id'],
-            'status' => 0,
-        ];
-    
-        $res = $this->UserModel->join_journal($data);
-    
-        if ($res) {
-            $result = [
-                'status' => 200,
-                'message' => 'Journal joined successfully!',
-                'data' => array_merge(['id' => $res], $data),
-            ];
-        } else {
-            $result = ['status' => 500, 'message' => 'Failed to join the journal!'];
-        }
-    
-        $this->response($result, RestController::HTTP_OK);
-    
+    if (empty($journal_id)) {
+        $result = ['status' => 400, 'message' => 'Invalid Journal ID.'];
+        $this->response($result, RestController::HTTP_BAD_REQUEST);
+        return;
     }
-    
-    
-    
 
+    $data = [
+        'journal_id' => $journal_id,
+        'user_id' => $this->user['id'],
+        'status' => 0,
+    ];
 
+    $res = $this->UserModel->join_journal($data);
 
+    if ($res) {
+        $result = [
+            'status' => 200,
+            'message' => 'Journal joined successfully!',
+            'data' => array_merge(['id' => $res], $data),
+        ];
+    } else {
+        $result = ['status' => 500, 'message' => 'Failed to join the journal!'];
+    }
+
+    $this->response($result, RestController::HTTP_OK);
+
+}
 
 }
