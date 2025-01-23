@@ -397,13 +397,6 @@ public function update_publish_request_status($id, $status)
     }
 
 
-    public function join_journal($data)
-{
-    $this->db->insert('journal_join_requests', $data);
-    if ($this->db->affected_rows() > 0) {
-        return $this->db->insert_id();
-    }
-    return false;
-}
+   
 
 }
