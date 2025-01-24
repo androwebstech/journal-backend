@@ -519,5 +519,44 @@ public function insertJournalReviewerLink($data)
 }
 
 
+public function getResearchPaper($filters = [], $limit = 500, $offset = 0, $searchString = ''){
+
+    $this->applyResearchPaperFilter($filters, $searchString);
+
+    $this->db->select('*,(SELECT name from countries where id = research_papers.country) as country_name');
+    $this->db->limit($limit, $offset);
+    return $this->db->get('research_papers')->result_array();
+}
+public function applyResearchPaperFilter($filters = [], $searchString = '') {
+    $searchColumns = ['author_name','affiliation','paper_title','keywords'];
+    $filterColumns = ['department','country'];
+
+    if(!empty($searchString)){
+        $this->db->or_group_start();
+        foreach($searchColumns as $column){
+            $this->db->or_like($column, $searchString);
+        }
+        $this->db->group_end();
+    }
+
+    if(!empty($filters) &&  is_array($filters)){
+        foreach($filters as $key => $value){
+            if(!in_array($key, $filterColumns) || empty($value)) continue;
+            if(is_numeric($value))
+                $this->db->where($key, $value);
+            else if(is_string($value))
+                $this->db->like($key, $value);
+        }
+    }
+
+    // $this->db->where('type',USER_TYPE::REVIEWER);
+}
+public function getResearchPaperCount($filters = [], $searchString = '') {
+    $this->applyResearchPaperFilter($filters, $searchString);
+    return $this->db->count_all_results('research_papers');
+}
+
+
+
 }
 

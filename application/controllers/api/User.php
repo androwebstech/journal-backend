@@ -917,4 +917,24 @@ public function join_journal_post($journal_id = null)
 
 }
 
+
+public function research_paper_search_get($limit = 10, $page = 1){
+    $filters = $this->input->get() ?? [];
+    $searchString = $this->input->get('search',true) ?? '';
+    $limit = abs($limit) < 1 ? 10 : abs($limit) ;
+    $page = abs($page) < 1 ? 1 : abs($page);
+
+    $offset = ($page - 1) * $limit;
+    $res = $this->UserModel->getResearchPaper($filters, $limit, $offset, $searchString);
+    $count = $this->UserModel->getResearchPaperCount($filters, $searchString);
+    
+    $this->response([
+        'status' => 200,
+        'message' => 'Success',
+        'data' => $res,
+        'totalPages' => ceil($count / $limit),
+        'currentPage'=> $page,
+    ], RestController::HTTP_OK);
+}
+
 }
