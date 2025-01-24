@@ -13,3 +13,13 @@ abstract class APPROVAL_STATUS {
     const REJECTED = 'rejected';
     const ALL = [APPROVAL_STATUS::PENDING,APPROVAL_STATUS::APPROVED,APPROVAL_STATUS::REJECTED];
 }
+
+
+abstract class PR_STATUS {
+    const PENDING = 'pending';
+    const ACCEPT = 'accept';
+    const PROCEED_PAYMENT = 'proceed_payment';
+    const PUBLISHED = 'published';
+    const REJECT = 'reject';
+    const ALL = [PR_STATUS::PENDING,PR_STATUS::ACCEPT,PR_STATUS::PROCEED_PAYMENT,PR_STATUS::PUBLISHED,PR_STATUS::REJECT];
+}

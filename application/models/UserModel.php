@@ -194,6 +194,17 @@ class UserModel extends CI_model
 
         return null; 
     }
+
+    public function get_publication_by_id($id)
+    {
+        $this->db->where('ppuid', $id);
+        $query = $this->db->get('published_papers'); 
+        if ($query->num_rows() > 0) {
+            return $query->row_array(); 
+        }
+
+        return null; 
+    }
 public function get_reviewer_by_id($id)
     {
         $this->db->where('id', $id);
@@ -257,9 +268,9 @@ public function insert_research_submission($data)
 {
     $this->db->insert('research_papers', $data);
     if ($this->db->affected_rows() > 0) {
-        return $this->db->insert_id(); // Return the ID of the inserted row
+        return $this->db->insert_id();
     }
-    return false; // Return false if the insert fails
+    return false;
 }
 
 public function insert_publication($data)
@@ -326,6 +337,75 @@ public function update_publication($id, $update_data)
     return false;
 }    
 
+public function getUserId($userId)
+    {
+        $query = $this->db->get_where('users', ['id' => $userId]);
+        if ($query->num_rows() > 0) {
+            return $query->row_array();
+        }
+        return null;
+    }
+
+
+public function updateUser($userId, $data)
+    {
+        $this->db->where('id', $userId);
+        return $this->db->update('users', $data);
+    }
+
+
+    
+public function getPublishRequestsByUserId($id)
+    {
+        $this->db->select('
+            publish_requests.pr_id,
+            research_papers.author_name,
+            research_papers.paper_title,
+            journals.journal_name,
+            users.name,
+            publish_requests.sender,
+            publish_requests.pr_status,
+            publish_requests.payment_status,
+            publish_requests.live_url,
+            publish_requests.created_at,
+            publish_requests.updated_at, 
+        ');
+        $this->db->from('publish_requests');
+        $this->db->join('research_papers', 'research_papers.paper_id = publish_requests.paper_id', 'left');
+        $this->db->join('users', 'users.id = publish_requests.publisher_id', 'left');
+        $this->db->join('journals', 'journals.journal_id = publish_requests.journal_id', 'left');
+        $this->db->where('publish_requests.publisher_id', $id);
+    
+        $query = $this->db->get();
+        return $query->result_array();
+    }
+
+public function update_publish_request_status($id, $status)
+    {
+        $this->db->where('pr_id', $id);
+        $query = $this->db->get('publish_requests');
+        $current_status = $query->row('pr_status'); 
+        // echo $current_status;
+        // exit;
+        if ($current_status != $status) {
+            $this->db->where('pr_id', $id);
+            $this->db->update('publish_requests', ['pr_status' => $status]);
+
+            return true; 
+        } else {
+            return false; 
+        }
+    }
+
+
+    public function join_journal($data)
+    {
+        $this->db->insert('journal_join_requests', $data);
+        if ($this->db->affected_rows() > 0) {
+            return $this->db->insert_id();
+        }
+        return false;
+    }
 
 
 //   public function getJournalsAndUser($userId) {
@@ -345,7 +425,7 @@ public function update_publication($id, $update_data)
 
 
 
-public function getJournalsJoinRequests($req_id, $journal_id) {
+public function getJournalsJoinRequests($where=[]) {
     $this->db->select('
     journal_join_requests.req_id,
     journal_join_requests.created_at,

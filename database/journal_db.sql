@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 21, 2025 at 07:18 PM
+-- Generation Time: Jan 23, 2025 at 02:18 PM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 7.4.33
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `journal-db`
+-- Database: `journal_db`
 --
 
 -- --------------------------------------------------------
@@ -29,12 +29,29 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `admin` (
   `admin_id` int(30) NOT NULL,
-  `profile_image` varchar(50) NOT NULL,
+  `image` varchar(50) NOT NULL,
   `role` enum('super_admin','admin') NOT NULL,
-  `user_name` varchar(50) NOT NULL,
-  `password` varchar(50) NOT NULL,
+  `email` varchar(50) NOT NULL,
+  `password` varchar(100) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `admin`
+--
+
+INSERT INTO `admin` (`admin_id`, `image`, `role`, `email`, `password`, `created_at`) VALUES
+(1, '4275377ab4db3825178f7387725107b9.png', 'admin', 'admin@gmail.com', '$2y$10$q4FFAy1z877EzZhFmFet.uUdKeIFZdq.DoPI8gb2beSpC7iMXPJzO', '2025-01-20 10:23:10'),
+(2, 'bdeb9047cdbaa6635656ceeaf5427160.png', 'admin', 'admin@gmail.com', '$2y$10$s9ENZjZ0zSceH7xDqfsPfe/GfZj0egAOeALXM30exsWoL5PB13kS6', '2025-01-20 10:23:28'),
+(3, '50384946711ea9c17682fad03bbaeb4a.png', 'admin', 'admin@gmail.com', '$2y$10$5CSCXMGuOQVFVq6L0ZjuI.oWPLj/GfbeNbCJIVWoYr4o1NynVjvcC', '2025-01-20 10:23:37'),
+(4, 'a0ed743e80b45dac78f124ff6974e248.png', 'admin', 'admin@gmail.com', '$2y$10$AGUEGYPF7dHOJ5Netqx9SuVTQxNwkO4lwp0oFO9CiDA17gWOjaT2a', '2025-01-20 10:23:41'),
+(5, 'c3390367f429517f8b37edede0923a27.png', 'admin', 'admin43@gmail.com', '$2y$10$0V4Tcj8cH6na7K.1rYFcpuR12OIV1tqLEMHu/vFwuS.b4zW0UAvxa', '2025-01-20 10:24:41'),
+(6, 'b7c1050167a5730d87f3bdbd9dc1cc5a.png', 'admin', 'admin43@gmail.com1', '$2y$10$cotvRCj7.09vwI5aPh9FOuf.Wr9wY7a01jjSupIxKao9u9z5lnP0u', '2025-01-20 10:25:14'),
+(7, '25b92ba31d98a269cf45ca4f77100e52.png', 'admin', 'admin43@gmail.co', '$2y$10$S2D3r4KAlU2M0KWgE0RyUe/yxwnJ8IJx3h5Y9Ndph6N2y80KW0ijO', '2025-01-20 10:28:30'),
+(8, '26f593c09142e33803d9e56c596f833f.png', 'admin', 'admin43@gmail.comm', '$2y$10$VFwkeGUAmZvPr1kOY8dwGOV3.sce8Ypjm3OG3qJ1Yir/N/ymeYLFO', '2025-01-20 10:28:59'),
+(9, '2c542eca4c8f6557b8fe1fe7cfa8dd3e.png', 'admin', 'tanav@gmail.com', '$2y$10$9GhQN8cw.nZgwEFm5Ijyc.lCs4xJqneE/bsO.KeR8nkkuFn1hdzl.', '2025-01-20 10:31:22'),
+(10, 'b3abf899445e5dcbcbf10cd4495e3f84.png', 'admin', 'tanavmahendru@gmail.com', '$2y$10$hate4a1o7j2LMNrGfRXaoeAr.TVml3tadN/isYe40wH.Y6eu7eImG', '2025-01-20 10:32:07'),
+(11, 'd84ae84868f840167ca4a0b59aaad70b.png', 'admin', 'tanavmahendru2003@gmail.com', '$2y$10$yvBb/5OkjI4xOswaLQ4Xd.MVejSk17JGC8mcKhKGq3FS9F3GkWSeW', '2025-01-20 10:32:20');
 
 -- --------------------------------------------------------
 
@@ -379,8 +396,18 @@ CREATE TABLE `published_papers` (
   `live_url` varchar(255) DEFAULT NULL,
   `indexing_with` varchar(255) DEFAULT NULL,
   `approval_status` enum('pending','approved','rejected') DEFAULT NULL,
+  `description` varchar(255) NOT NULL,
+  `publication_date` date NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `published_papers`
+--
+
+INSERT INTO `published_papers` (`ppuid`, `user_id`, `authors`, `paper_title`, `publication_year`, `paper_type`, `issn`, `volume`, `issue`, `live_url`, `indexing_with`, `approval_status`, `description`, `publication_date`, `created_at`) VALUES
+(11, 3, 'Tanav', 'Title', 2025, 'patent', '1111', '1', '1', 'https://google.com', 'SCOPUS,SSCI,ESCI,Thomson Reuters', 'pending', 'desc', '2002-12-12', '2025-01-22 16:42:32'),
+(12, 3, 'Tanav', 'Title', 2024, 'patent', '1111', '1', '1', 'https://google.com', 'SCOPUS,SSCI', 'pending', 'desc', '2002-12-12', '2025-01-22 16:53:22');
 
 -- --------------------------------------------------------
 
@@ -389,6 +416,7 @@ CREATE TABLE `published_papers` (
 --
 
 CREATE TABLE `publish_requests` (
+  `pr_id` int(11) NOT NULL,
   `paper_id` int(11) DEFAULT NULL,
   `author_id` int(11) NOT NULL,
   `journal_id` int(11) DEFAULT NULL,
@@ -401,6 +429,13 @@ CREATE TABLE `publish_requests` (
   `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `publish_requests`
+--
+
+INSERT INTO `publish_requests` (`pr_id`, `paper_id`, `author_id`, `journal_id`, `publisher_id`, `sender`, `pr_status`, `payment_status`, `live_url`, `created_at`, `updated_at`) VALUES
+(1, 1, 7, 1, 3, 'author', 'pending', 'pending', 'https://google.com', '2025-01-23 11:40:06', '2025-01-23 12:58:18');
+
 -- --------------------------------------------------------
 
 --
@@ -408,7 +443,7 @@ CREATE TABLE `publish_requests` (
 --
 
 CREATE TABLE `research_papers` (
-  `author_id` int(11) NOT NULL,
+  `paper_id` int(11) NOT NULL,
   `author_name` varchar(255) DEFAULT NULL,
   `author_contact` varchar(50) DEFAULT NULL,
   `author_email` varchar(255) DEFAULT NULL,
@@ -429,7 +464,7 @@ CREATE TABLE `research_papers` (
 -- Dumping data for table `research_papers`
 --
 
-INSERT INTO `research_papers` (`author_id`, `author_name`, `author_contact`, `author_email`, `country`, `affiliation`, `department`, `co_authors`, `paper_title`, `abstract`, `file`, `keywords`, `user_id`, `submission_status`, `created_at`) VALUES
+INSERT INTO `research_papers` (`paper_id`, `author_name`, `author_contact`, `author_email`, `country`, `affiliation`, `department`, `co_authors`, `paper_title`, `abstract`, `file`, `keywords`, `user_id`, `submission_status`, `created_at`) VALUES
 (1, 'John Doe', '+1-999888333', 'john.doe@example.com', 'USA', 'Harvard University', 'Engineering', NULL, 'Advanced AI Techniques', 'This paper explores advanced techniques in AI...', 'http://localhost/journal-backend/uploads/', 'AI, Machine Learning, Deep Learning', 7, 0, '2025-01-21 14:48:10'),
 (2, 'John Doe', '+1-999888333', 'john.doe@example.com', 'USA', 'Harvard University', 'Engineering', NULL, 'Advanced AI Techniques', 'This paper explores advanced techniques in AI...', 'uploads/mangal11.pdf', 'AI, Machine Learning, Deep Learning', 7, 0, '2025-01-21 15:04:03'),
 (3, 'supriyaa', '1234567897', 'supriyaa@gmail.com', 'india', '23', '25', NULL, 'asdfffdas', 'sdf', 'uploads/RP_-_Submit_Manuscript3.docx', '6', 6, 0, '2025-01-21 16:13:56'),
@@ -4621,13 +4656,21 @@ ALTER TABLE `journals`
 -- Indexes for table `published_papers`
 --
 ALTER TABLE `published_papers`
-  ADD PRIMARY KEY (`ppuid`) USING BTREE;
+  ADD PRIMARY KEY (`ppuid`) USING BTREE,
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- Indexes for table `publish_requests`
+--
+ALTER TABLE `publish_requests`
+  ADD PRIMARY KEY (`pr_id`),
+  ADD KEY `journal_id` (`journal_id`);
 
 --
 -- Indexes for table `research_papers`
 --
 ALTER TABLE `research_papers`
-  ADD PRIMARY KEY (`author_id`);
+  ADD PRIMARY KEY (`paper_id`);
 
 --
 -- Indexes for table `states`
@@ -4646,6 +4689,12 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `admin`
+--
+ALTER TABLE `admin`
+  MODIFY `admin_id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
 -- AUTO_INCREMENT for table `countries`
 --
 ALTER TABLE `countries`
@@ -4658,10 +4707,22 @@ ALTER TABLE `journals`
   MODIFY `journal_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT for table `published_papers`
+--
+ALTER TABLE `published_papers`
+  MODIFY `ppuid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `publish_requests`
+--
+ALTER TABLE `publish_requests`
+  MODIFY `pr_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `research_papers`
 --
 ALTER TABLE `research_papers`
-  MODIFY `author_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `paper_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `states`
@@ -4674,6 +4735,22 @@ ALTER TABLE `states`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `published_papers`
+--
+ALTER TABLE `published_papers`
+  ADD CONSTRAINT `user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `publish_requests`
+--
+ALTER TABLE `publish_requests`
+  ADD CONSTRAINT `journal_id` FOREIGN KEY (`journal_id`) REFERENCES `journals` (`journal_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
