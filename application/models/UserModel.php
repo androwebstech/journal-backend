@@ -256,14 +256,21 @@ return false;
 public function insert_research_submission($data)
 {
     $this->db->insert('research_papers', $data);
+    if ($this->db->affected_rows() > 0) {
+        return $this->db->insert_id(); // Return the ID of the inserted row
+    }
+    return false; // Return false if the insert fails
+}
+
 public function insert_publication($data)
 {
     $this->db->insert('published_papers', $data);
     if ($this->db->affected_rows() > 0) {
-        return $this->db->insert_id();
+        return $this->db->insert_id(); // Return the ID of the inserted row
     }
-    return false;
+    return false; // Return false if the insert fails
 }
+
 
 
 
@@ -320,4 +327,117 @@ public function update_publication($id, $update_data)
 }    
 
 
+
+//   public function getJournalsAndUser($userId) {
+//         $this->db->select('journals.journal_name, journals.status, journals.created_at, users.name AS reviewer_name, users.email AS reviewer_email');
+//         $this->db->from('journals');
+//         $this->db->join('users', 'journals.user_id = users.id');
+//         $this->db->where('journals.user_id', $userId);
+//         $query = $this->db->get();
+
+//         if ($query->num_rows() > 0) {
+//             return $query->result_array();
+//         }
+
+//         return false;
+//     }
+
+
+
+
+public function getJournalsJoinRequests($req_id, $journal_id) {
+    $this->db->select('
+    journal_join_requests.req_id,
+    journal_join_requests.created_at,
+        journal_join_requests.approval_status,
+        journals.journal_id,
+        journals.journal_name, 
+        journals.eissn_no,
+        journals.status, 
+        journals.pissn_no,
+        journals.country, 
+        journals.created_at, 
+        users.name AS reviewer_name, 
+        users.email AS reviewer_email,
+        users.university_name,
+        users.contact As reviewer_contact,
+        users.department,
+        users.designation,
+        users.profile_image,
+
+    ');
+    $this->db->from('journal_join_requests');
+    $this->db->join('users', 'journal_join_requests.user_id = users.id');
+    $this->db->join('journals', 'journal_join_requests.journal_id = journals.journal_id');
+   if(!empty($where))
+   $this->db->where($where);      
+    $query = $this->db->get();
+
+    if ($query->num_rows() > 0) {
+        return $query->result_array();
+    }
+
+    return false; 
 }
+
+
+    public function updateRequestStatus($req_id, $update_data)
+    {
+      $this->db->where('req_id', $req_id);
+$updated = $this->db->update('journal_join_requests', $update_data);
+
+if (!$updated) {
+   
+    log_message('error', $this->db->last_query());
+    log_message('error', $this->db->error());
+}
+
+return $updated;
+
+    }
+
+
+    
+
+
+    public function getRequestStatus($req_id)
+{
+    $this->db->select('approval_status');
+    $this->db->from('journal_join_requests'); 
+    $this->db->where('req_id', $req_id);
+    $query = $this->db->get();
+
+    if ($query->num_rows() > 0) {
+        return $query->row()->approval_status; 
+    } 
+
+    return null;
+}
+
+
+
+
+public function getReviewerRequestsById($req_id)
+{
+    $this->db->select('journal_id, user_id');
+    $this->db->from('journal_join_requests');
+    $this->db->where('req_id', $req_id);
+    $query = $this->db->get();
+
+    if ($query->num_rows() > 0) {
+        return $query->row_array();
+    } else {
+        return null;
+    }
+}
+
+
+
+public function insertJournalReviewerLink($data)
+{
+    return $this->db->insert('journal_reviewer_link', $data);
+}
+
+
+}
+

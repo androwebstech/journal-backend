@@ -530,7 +530,7 @@ public function submit_research_post()
     
     if ($this->form_validation->run()) {
         $config['upload_path'] = './uploads/';
-        $config['allowed_types'] = 'pdf|doc|docx';
+        $config['allowed_types'] = 'png|pdf|doc|docx';
         $config['max_size'] = 2048;
 
         $this->load->library('upload', $config);
@@ -605,5 +605,130 @@ public function submit_research_post()
 // Send response
 $this->response($result, RestController::HTTP_OK);
 }
+
+
+
+
+public function get_journals_join_requests_get()
+{
+  
+    
+    
+    $userId = $this->user['id'];
+    
+   
+    $journals = $this->UserModel->getJournalsJoinRequests(['users.id' => $userId]);
+
+   
+    if ($journals) {
+        $result = [
+            'status' => 200,
+            'message' => 'Journals fetched successfully',
+            'data' => $journals
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No journals found',
+            'data' => []
+        ];
+    }
+
+  
+    $this->response($result, RestController::HTTP_OK);
+}
+
+
+public function approve_reject_request_post($req_id)
+{
+    $status = $this->input->post('approval_status'); 
+
+    if (empty($req_id) || empty($status)) {
+        $result = [
+            'status' => 400,
+            'message' => 'Request ID and status are required',
+        ];
+        $this->response($result, RestController::HTTP_BAD_REQUEST);
+        return;
+    }
+
+    
+    if (!in_array($status, APPROVAL_STATUS::ALL)) {
+        $result = [
+            'status' => 400,
+            'message' => 'Invalid status value',
+        ];
+        $this->response($result, RestController::HTTP_BAD_REQUEST);
+        return;
+    }
+
+   
+    $current_status = $this->UserModel->getRequestStatus($req_id);
+
+    if ($current_status === $status) {
+        $result = [
+            'status' => 400,
+            'message' => "Request is already {$status}",
+        ];
+        $this->response($result, RestController::HTTP_OK);
+        return;
+    }
+
+    
+    $update_data = [
+        'approval_status' => $status,
+    ];
+
+    $updated = $this->UserModel->updateRequestStatus($req_id, $update_data);
+
+    if ($updated) {
+        if ($status === 'approved') {
+           
+            $request_data = $this->UserModel->getReviewerRequestsById($req_id);
+
+            if (!empty($request_data)) {
+                $link_data = [
+                    'journal_id' => $request_data['journal_id'],
+                    'reviewer_id' => $request_data['user_id'],
+                    'request_id' => $req_id,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ];
+
+                $link_inserted = $this->UserModel->insertJournalReviewerLink($link_data);
+
+                if (!$link_inserted) {
+                    $result = [
+                        'status' => 500,
+                        'message' => 'Request status updated, but failed to create journal_reviewer_link entry',
+                    ];
+                    $this->response($result, RestController::HTTP_INTERNAL_SERVER_ERROR);
+                    return;
+                }
+            } else {
+                $result = [
+                    'status' => 404,
+                    'message' => 'Request data not found',
+                ];
+                $this->response($result, RestController::HTTP_NOT_FOUND);
+                return;
+            }
+        }
+
+        $result = [
+            'status' => 200,
+            'message' => 'Request status updated successfully',
+        ];
+    } else {
+        $result = [
+            'status' => 500,
+            'message' => 'Failed to update request status',
+        ];
+    }
+
+    $this->response($result, RestController::HTTP_OK);
+}
+
+
+
 
 }
