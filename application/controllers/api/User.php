@@ -771,7 +771,8 @@ public function change_password_post()
         $data = [
             'journal_id' => $journal_id,
             'user_id' => $this->user['id'],
-            'status' => 0,
+            // 'status' => 0,
+            'approval_status' => APPROVAL_STATUS::PENDING,
         ];
     
         $res = $this->UserModel->join_journal($data);
@@ -779,7 +780,7 @@ public function change_password_post()
         if ($res) {
             $result = [
                 'status' => 200,
-                'message' => 'Journal joined successfully!',
+                'message' => 'Joined journal request sent successfully!',
                 'data' => array_merge(['id' => $res], $data),
             ];
         } else {
