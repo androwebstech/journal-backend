@@ -134,6 +134,10 @@ class UserModel extends CI_model
 
     public function register($user)
     {
+        if(in_array($user['type'],[USER_TYPE::REVIEWER, USER_TYPE::PUBLISHER])){
+            $user['approval_status'] = APPROVAL_STATUS::APPROVED;
+        }
+
         if($this->db->insert('users', $user)){
             $new = $this->db->where('id',$this->db->insert_id())->get('users')->row_array();
             unset($new['password']);
@@ -405,18 +409,13 @@ public function update_publish_request_status($id, $status)
 
 
 
-public function getJournalsJoinRequests($req_id) {
+public function getJournalsJoinRequests($where = []) {
     $this->db->select('
-    journal_join_requests.req_id,
-    journal_join_requests.created_at,
-        journal_join_requests.approval_status,
-        journals.journal_id,
+    journal_join_requests.*,
         journals.journal_name, 
         journals.eissn_no,
-        journals.status, 
         journals.pissn_no,
         journals.country, 
-        journals.created_at, 
         users.name AS reviewer_name, 
         users.email AS reviewer_email,
         users.university_name,
@@ -424,7 +423,6 @@ public function getJournalsJoinRequests($req_id) {
         users.department,
         users.designation,
         users.profile_image,
-
     ');
     $this->db->from('journal_join_requests');
     $this->db->join('users', 'journal_join_requests.user_id = users.id');
@@ -479,7 +477,7 @@ return $updated;
 
 public function getReviewerRequestsById($req_id)
 {
-    $this->db->select('journal_id, user_id');
+    $this->db->select('*');
     $this->db->from('journal_join_requests');
     $this->db->where('req_id', $req_id);
     $query = $this->db->get();
@@ -536,7 +534,24 @@ public function getResearchPaperCount($filters = [], $searchString = '') {
     return $this->db->count_all_results('research_papers');
 }
 
-
-
+public function publisherHasJournal($journal_id,$publisher_id){
+    $jid = intval($journal_id);
+    $pid = intval($publisher_id);
+    return $this->db->where(['journal_id'=>$jid,'user_id'=>$pid])->count_all_results('journals') > 0;
 }
 
+public function getPublisherJournals($publisher_id){
+    $pid = intval($publisher_id);
+    return $this->db->where(['user_id'=>$pid])->get('journals')->result_array();
+}
+
+public function canCreateJoinJournalRequest($journal_id,$user_id){
+    $jid = intval($journal_id);
+    $uid = intval($user_id);
+    $alreadyJoined = $this->db->where(['reviewer_id'=>$uid,'journal_id'=>$jid])->count_all_results('journal_reviewer_link') > 0;
+    if($alreadyJoined)
+        return false;
+    return $this->db->where(['user_id'=>$uid,'journal_id'=>$jid,'approval_status'=>APPROVAL_STATUS::PENDING])->count_all_results('journal_join_requests') == 0; 
+}
+
+}
