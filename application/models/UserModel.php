@@ -425,7 +425,7 @@ public function update_publish_request_status($id, $status)
 
 
 
-public function getJournalsJoinRequests($where=[]) {
+public function getJournalsJoinRequests($req_id) {
     $this->db->select('
     journal_join_requests.req_id,
     journal_join_requests.created_at,

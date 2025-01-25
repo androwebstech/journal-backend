@@ -898,7 +898,7 @@ public function join_journal_post($journal_id = null)
     $data = [
         'journal_id' => $journal_id,
         'user_id' => $this->user['id'],
-        'status' => 0,
+        'approval_status' => "pending",
     ];
 
     $res = $this->UserModel->join_journal($data);
