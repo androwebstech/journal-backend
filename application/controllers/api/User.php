@@ -889,10 +889,37 @@ public function join_journal_post($journal_id = null)
     $this->load->model('UserModel');
     $this->load->helper('url');
 
-    if (empty($journal_id)) {
-        $result = ['status' => 400, 'message' => 'Invalid Journal ID.'];
-        $this->response($result, RestController::HTTP_BAD_REQUEST);
-        return;
+    {
+        $this->load->model('UserModel');
+        $this->load->helper('url');
+    
+        if (empty($journal_id)) {
+            $result = ['status' => 400, 'message' => 'Invalid Journal ID.'];
+            $this->response($result, RestController::HTTP_BAD_REQUEST);
+            return;
+        }
+    
+        $data = [
+            'journal_id' => $journal_id,
+            'user_id' => $this->user['id'],
+            // 'status' => 0,
+            'approval_status' => APPROVAL_STATUS::PENDING,
+        ];
+    
+        $res = $this->UserModel->join_journal($data);
+    
+        if ($res) {
+            $result = [
+                'status' => 200,
+                'message' => 'Joined journal request sent successfully!',
+                'data' => array_merge(['id' => $res], $data),
+            ];
+        } else {
+            $result = ['status' => 500, 'message' => 'Failed to join the journal!'];
+        }
+    
+        $this->response($result, RestController::HTTP_OK);
+    
     }
 
     $data = [
@@ -915,6 +942,26 @@ public function join_journal_post($journal_id = null)
 
     $this->response($result, RestController::HTTP_OK);
 
+}
+
+
+public function research_paper_search_get($limit = 10, $page = 1){
+    $filters = $this->input->get() ?? [];
+    $searchString = $this->input->get('search',true) ?? '';
+    $limit = abs($limit) < 1 ? 10 : abs($limit) ;
+    $page = abs($page) < 1 ? 1 : abs($page);
+
+    $offset = ($page - 1) * $limit;
+    $res = $this->UserModel->getResearchPaper($filters, $limit, $offset, $searchString);
+    $count = $this->UserModel->getResearchPaperCount($filters, $searchString);
+    
+    $this->response([
+        'status' => 200,
+        'message' => 'Success',
+        'data' => $res,
+        'totalPages' => ceil($count / $limit),
+        'currentPage'=> $page,
+    ], RestController::HTTP_OK);
 }
 
 }
