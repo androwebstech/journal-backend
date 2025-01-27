@@ -47,6 +47,11 @@ class User extends RestController {
         $this->load->model('UserModel');
         $this->load->helper('url');
 
+        if($this->user['type'] != USER_TYPE::PUBLISHER){
+            $this->response(['status'=>401,'message'=>'Action not allowed'], RestController::HTTP_OK);
+            exit;
+        }
+
         // Validation rules
         $this->form_validation->set_rules('journal_name', 'Journal Name', 'trim|required');
         $this->form_validation->set_rules('eissn_no', 'E-ISSN', 'trim');
@@ -58,17 +63,13 @@ class User extends RestController {
         $this->form_validation->set_rules('website_link', 'Website Link', 'trim|valid_url');
         $this->form_validation->set_rules('journal_submission_link', 'Submission Link', 'trim|valid_url');
         $this->form_validation->set_rules('indexing', 'Indexing', 'trim');
-
-
         $this->form_validation->set_rules('country', 'Country', 'trim|required|numeric');
         $this->form_validation->set_rules('state', 'State', 'trim|required|numeric');
-
-
         $this->form_validation->set_rules('publication_type', 'Publication', 'trim|required|in_list[Free,Paid]');
         $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|integer');
         $this->form_validation->set_rules('review_type', 'Review Type', 'trim|required|in_list[Single-Blind,Double-Blind,Open Peer Review,Collaborative]');
         $this->form_validation->set_rules('review_time', 'Review Time', 'trim');
-
+       
         if ($this->form_validation->run()) {
             $data = [
                 'journal_name' => $this->input->post('journal_name'),
@@ -657,15 +658,18 @@ $this->response($result, RestController::HTTP_OK);
 
 public function get_journals_join_requests_get()
 {
-  
-    
-    
     $userId = $this->user['id'];
-    
-   
-    $journals = $this->UserModel->getJournalsJoinRequests(['users.id' => $userId]);
 
-   
+    $where = [];
+    if($this->user['type'] == USER_TYPE::REVIEWER){
+       $where['journal_join_requests.user_id'] = $userId;
+    }else{
+        $jouranls = $this->UserModel->getPublisherJournals($userId);
+        $journalIds = array_column($jouranls,'journal_id');
+        $this->db->where_in('journal_join_requests.journal_id',!empty($journalIds) ? $journalIds : [0]);
+    }
+    
+    $journals = $this->UserModel->getJournalsJoinRequests($where);   
     if ($journals) {
         $result = [
             'status' => 200,
@@ -694,27 +698,46 @@ public function approve_reject_request_post($req_id)
             'status' => 400,
             'message' => 'Request ID and status are required',
         ];
-        $this->response($result, RestController::HTTP_BAD_REQUEST);
+        $this->response($result, RestController::HTTP_OK);
         return;
     }
 
     
-    if (!in_array($status, APPROVAL_STATUS::ALL)) {
+    if (!in_array($status, [APPROVAL_STATUS::APPROVED,APPROVAL_STATUS::REJECTED ])) {
         $result = [
             'status' => 400,
             'message' => 'Invalid status value',
         ];
-        $this->response($result, RestController::HTTP_BAD_REQUEST);
+        $this->response($result, RestController::HTTP_OK);
         return;
     }
 
-   
-    $current_status = $this->UserModel->getRequestStatus($req_id);
+    $request = $this->UserModel->getReviewerRequestsById($req_id);
 
-    if ($current_status === $status) {
+    if(empty($request)){
+        $result = [
+            'status' => 404,
+            'message' => 'Request not found',
+        ];
+        $this->response($result, RestController::HTTP_OK);
+        return;
+    }
+    if($request['sender'] == $this->user['type']){
+        $result = [
+            'status' => 401,
+            'message' => 'Can not approve own requests ',
+        ];
+        $this->response($result, RestController::HTTP_OK);
+        return;
+    }
+
+
+    $current_status = $request['approval_status'];
+
+    if ($current_status != APPROVAL_STATUS::PENDING) {
         $result = [
             'status' => 400,
-            'message' => "Request is already {$status}",
+            'message' => "Action already taken",
         ];
         $this->response($result, RestController::HTTP_OK);
         return;
@@ -731,31 +754,21 @@ public function approve_reject_request_post($req_id)
         if ($status === APPROVAL_STATUS::APPROVED) {
            
             $request_data = $this->UserModel->getReviewerRequestsById($req_id);
+            $link_data = [
+                'journal_id' => $request['journal_id'],
+                'reviewer_id' => $request['user_id'],
+                'request_id' => $req_id,
+                'created_at' => get_datetime()
+            ];
 
-            if (!empty($request_data)) {
-                $link_data = [
-                    'journal_id' => $request_data['journal_id'],
-                    'reviewer_id' => $request_data['user_id'],
-                    'request_id' => $req_id,
-                    'created_at' => date('Y-m-d H:i:s'),
-                ];
+            $link_inserted = $this->UserModel->insertJournalReviewerLink($link_data);
 
-                $link_inserted = $this->UserModel->insertJournalReviewerLink($link_data);
-
-                if (!$link_inserted) {
-                    $result = [
-                        'status' => 500,
-                        'message' => 'Request status updated, but failed to create journal_reviewer_link entry',
-                    ];
-                    $this->response($result, RestController::HTTP_INTERNAL_SERVER_ERROR);
-                    return;
-                }
-            } else {
+            if (!$link_inserted) {
                 $result = [
-                    'status' => 404,
-                    'message' => 'Request data not found',
+                    'status' => 500,
+                    'message' => 'Request status updated, but failed to create journal_reviewer_link entry',
                 ];
-                $this->response($result, RestController::HTTP_NOT_FOUND);
+                $this->response($result, RestController::HTTP_OK);
                 return;
             }
         }
@@ -884,25 +897,26 @@ public function change_password_post()
 
     // API to join a journal
 public function join_journal_post($journal_id = null)
-
 {
-    $this->load->model('UserModel');
-    $this->load->helper('url');
-
-    {
         $this->load->model('UserModel');
         $this->load->helper('url');
     
         if (empty($journal_id)) {
-            $result = ['status' => 400, 'message' => 'Invalid Journal ID.'];
+            $result = ['status' => 400, 'message' => 'Journal ID missing.'];
             $this->response($result, RestController::HTTP_BAD_REQUEST);
+            return;
+        }
+
+        if($this->UserModel->canCreateJoinJournalRequest($journal_id, $this->user['id']) == false){
+            $result = ['status' => 400, 'message' => 'Already Joined or Join Request is pending'];
+            $this->response($result, RestController::HTTP_OK);
             return;
         }
     
         $data = [
             'journal_id' => $journal_id,
             'user_id' => $this->user['id'],
-            // 'status' => 0,
+            'sender'=>USER_TYPE::REVIEWER,
             'approval_status' => APPROVAL_STATUS::PENDING,
         ];
     
@@ -917,33 +931,53 @@ public function join_journal_post($journal_id = null)
         } else {
             $result = ['status' => 500, 'message' => 'Failed to join the journal!'];
         }
-    
         $this->response($result, RestController::HTTP_OK);
-    
-    }
-
-    $data = [
-        'journal_id' => $journal_id,
-        'user_id' => $this->user['id'],
-        'approval_status' => "pending",
-    ];
-
-    $res = $this->UserModel->join_journal($data);
-
-    if ($res) {
-        $result = [
-            'status' => 200,
-            'message' => 'Journal joined successfully!',
-            'data' => array_merge(['id' => $res], $data),
-        ];
-    } else {
-        $result = ['status' => 500, 'message' => 'Failed to join the journal!'];
-    }
-
-    $this->response($result, RestController::HTTP_OK);
-
 }
 
+public function publisher_join_journal_post($journal_id = null, $user_id = null)
+{
+        $journal_id = intval($journal_id);
+        $user_id = intval($user_id);
+        $this->load->model('UserModel');
+        $this->load->helper('url');
+        if (empty($journal_id) || empty($user_id)) {
+            $result = ['status' => 400, 'message' => 'Journal ID or User ID missing.'];
+            $this->response($result, RestController::HTTP_OK);
+            return;
+        }
+        //validate journal id
+        if(!$this->UserModel->publisherHasJournal($journal_id,$this->user['id'])){
+            $result = ['status' => 401, 'message' => 'Invalid Journal ID.'];
+            $this->response($result, RestController::HTTP_OK);
+            return;
+        }
+
+        if($this->UserModel->canCreateJoinJournalRequest($journal_id, $user_id) == false){
+            $result = ['status' => 400, 'message' => 'Already Joined or Join Request is pending'];
+            $this->response($result, RestController::HTTP_OK);
+            return;
+        }
+    
+        $data = [
+            'journal_id' => $journal_id,
+            'user_id' => $user_id,
+            'sender'=> USER_TYPE::PUBLISHER,
+            'approval_status' => APPROVAL_STATUS::PENDING,
+        ];
+    
+        $res = $this->UserModel->join_journal($data);
+    
+        if ($res) {
+            $result = [
+                'status' => 200,
+                'message' => 'Joined journal request sent successfully!',
+                'data' => array_merge(['id' => $res], $data),
+            ];
+        } else {
+            $result = ['status' => 500, 'message' => 'Failed to join the journal!'];
+        }
+        $this->response($result, RestController::HTTP_OK);
+}
 
 public function research_paper_search_get($limit = 10, $page = 1){
     $filters = $this->input->get() ?? [];
