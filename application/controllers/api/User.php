@@ -728,7 +728,7 @@ public function approve_reject_request_post($req_id)
     $updated = $this->UserModel->updateRequestStatus($req_id, $update_data);
 
     if ($updated) {
-        if ($status === 'approved') {
+        if ($status === APPROVAL_STATUS::APPROVED) {
            
             $request_data = $this->UserModel->getReviewerRequestsById($req_id);
 
