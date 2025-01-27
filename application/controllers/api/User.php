@@ -591,23 +591,22 @@ public function submit_research_post()
             $file_data = $this->upload->data();
 
           // Fetch co-authors data from input
-          $co_authors = $this->input->post('co_authors[]');
-          $co_author_data = [];
-          if (is_array($co_authors)) {
-              foreach ($co_authors as $co_author) {
-                  $co_author_data[] = [
-                      'name' => $co_author['co_author_name'] ?? '',
-                      'contact' => $co_author['co_author_contact'] ?? '',
-                      'email' => $co_author['co_author_email'] ?? '',
-                      'country' => $co_author['co_author_country'] ?? '',
-                      'affiliation' => $co_author['co_author_affiliation'] ?? '',
-                      'department' => $co_author['co_author_department'] ?? '',
-                  ];
-              }
-          }
+        //   $co_authors = $this->input->post('co_authors[]');
+        //   $co_author_data = [];
+        //   if (is_array($co_authors)) {
+        //       foreach ($co_authors as $co_author) {
+        //           $co_author_data[] = [
+        //               'name' => $co_author['co_author_name'] ?? '',
+        //               'contact' => $co_author['co_author_contact'] ?? '',
+        //               'email' => $co_author['co_author_email'] ?? '',
+        //               'country' => $co_author['co_author_country'] ?? '',
+        //               'affiliation' => $co_author['co_author_affiliation'] ?? '',
+        //               'department' => $co_author['co_author_department'] ?? '',
+        //           ];
+        //       }
+        //   }
 
-
-
+        $co_author_data = $this->input->post('co_authors') ?? '[]';
 
           $data = [
             'author_name' => $this->input->post('author_name'),
@@ -619,7 +618,7 @@ public function submit_research_post()
             'paper_title' => $this->input->post('paper_title'),
             'abstract' => $this->input->post('abstract'),
             'keywords' => $this->input->post('keywords'),
-            'co_authors' => json_encode($co_author_data),
+            'co_authors' => $co_author_data,
             
             'file' => 'uploads/' . $file_data['file_name'],
             'user_id' => $this->user['id'],
