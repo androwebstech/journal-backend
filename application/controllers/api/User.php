@@ -1032,7 +1032,7 @@ public function publisher_join_paper_post($journal_id = null, $user_id = null)
             'publisher_id'=>$this->user['id'],
             'sender'=> USER_TYPE::PUBLISHER,
             'pr_status' => PR_STATUS::PENDING,
-            'payment_status' => PR_STATUS::NONE,
+            'payment_status' => PAYMENT_STATUS::NONE,
         ];
     
         $res = $this->UserModel->join_paper($data);
