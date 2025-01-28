@@ -634,4 +634,64 @@ return $updated;
 
 } 
 
+
+
+
+
+// joined all journalslist
+
+public function get_joined_journals($where = [])
+{
+    $this->db->select('journal_reviewer_link., users.');
+    $this->db->from('journal_reviewer_link');
+    
+
+    $this->db->join('users', 'journal_reviewer_link.user_id = users.id');
+
+    $this->db->join('journals', 'journal_reviewer_link.journal_id = journals.journal_id');
+    
+    if(!empty($where))
+    $this->db->where($where);
+    $query = $this->db->get();
+    if ($query->num_rows() > 0) {
+        return $query->result_array();
+    }
+
+    return false;
+   
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// leave joined journal
+
+public function leaveJoinedJournal($requestId)
+{
+
+    $this->db->where('id', $requestId);
+    $query = $this->db->get('journal_reviewer_link');
+
+    if ($query->num_rows() == 0) {
+        return 'not_found'; 
+    }
+
+   
+    $this->db->where('id', $requestId);
+    $delete = $this->db->delete('journal_reviewer_link');
+
+    return $delete ? true : false;
+}
+
+
 }

@@ -1174,6 +1174,93 @@ public function approve_reject_publish_request_post($req_id)
     $this->response($result, RestController::HTTP_OK);
 }
 
+// get joined journals
+
+public function list_joined_journals_get()
+{
+    $userId = $this->user['id'];
+
+    $where = [];
+    if($this->user['type'] == USER_TYPE::REVIEWER){
+       $where['journal_reviewer_link.user_id'] = $userId;
+    }else{
+        $jouranls = $this->UserModel->get_joined_journals($userId);
+        $journalIds = array_column($jouranls,'journal_id');
+        $this->db->where_in('journal_reviewer_link.journal_id',!empty($journalIds) ? $journalIds : [0]);
+    }
+    
+    $journals = $this->UserModel->get_joined_journals($where);   
+    if ($journals) {
+        $result = [
+            'status' => 200,
+            'message' => 'Journals fetched successfully',
+            'data' => $journals
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No journals found',
+            'data' => []
+        ];
+    }
+
+  
+    $this->response($result, RestController::HTTP_OK);
+}
+
+
+
+
+
+
+
+
+
+// leave from joined journals
+
+public function leave_journal_post()
+    {
+        $requestId = $this->input->post('request_id');
+
+       
+        if (empty($requestId)) {
+            $result = [
+                'status' => 400,
+                'message' => 'Request ID is required',
+            ];
+            $this->response($result, RestController::HTTP_BAD_REQUEST);
+            return;
+        }
+
+        
+
+        $deleteStatus = $this->UserModel->leaveJoinedJournal($requestId);
+
+        if ($deleteStatus === true) {
+            $result = [
+                'status' => 200,
+                'message' => 'Record removed successfully',
+            ];
+            $this->response($result, RestController::HTTP_OK);
+        } elseif ($deleteStatus === false) {
+            $result = [
+                'status' => 500,
+                'message' => 'Failed to remove the record',
+            ];
+            $this->response($result, RestController::HTTP_INTERNAL_SERVER_ERROR);
+        } else {
+            $result = [
+                'status' => 404,
+                'message' => 'No record found with the given Request ID',
+            ];
+            $this->response($result, RestController::HTTP_NOT_FOUND);
+        }
+    }
+
+
+
+
+
 
 
 }
