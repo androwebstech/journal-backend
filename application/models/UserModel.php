@@ -554,4 +554,84 @@ public function canCreateJoinJournalRequest($journal_id,$user_id){
     return $this->db->where(['user_id'=>$uid,'journal_id'=>$jid,'approval_status'=>APPROVAL_STATUS::PENDING])->count_all_results('journal_join_requests') == 0; 
 }
 
+public function canCreateJoinPaperRequest($journal_id,$user_id){
+    $jid = intval($journal_id);
+    $uid = intval($user_id);
+    $alreadyJoined = $this->db->where(['author_id'=>$uid,'journal_id'=>$jid])->count_all_results('publish_requests') > 0;
+    if($alreadyJoined)
+        return false;
+    return $this->db->where(['author_id'=>$uid,'journal_id'=>$jid,'pr_status'=>PR_STATUS::PENDING])->count_all_results('publish_requests') == 0; 
+}
+
+public function join_paper($data)
+{
+    $this->db->insert('publish_requests', $data);
+    if ($this->db->affected_rows() > 0) {
+        return $this->db->insert_id();
+    }
+    return false;
+}
+public function getPaperId($journal_id, $user_id)
+    {
+        return $this->db->select('paper_id')->from('research_papers')->where('user_id', $user_id)->get()->row('paper_id'); 
+    }
+
+
+
+    public function getPublisherPapers($publisher_id){
+        $pid = intval($publisher_id);
+        return $this->db->where(['publisher_id'=>$pid])->get('publish_requests')->result_array();
+    }
+    
+    public function getResearchPaperRequests($where = []) {
+        $this->db->select('
+        publish_requests.*,
+            research_papers.paper_title, 
+            users.name,
+            journals.journal_name,
+        ');
+        $this->db->from('publish_requests');
+        $this->db->join('users', 'publish_requests.author_id = users.id');
+        $this->db->join('journals', 'publish_requests.journal_id = journals.journal_id');
+        $this->db->join('research_papers', 'publish_requests.paper_id = research_papers.paper_id');
+       if(!empty($where))
+       $this->db->where($where);      
+        $query = $this->db->get();
+    
+        if ($query->num_rows() > 0) {
+            return $query->result_array();
+        }
+    
+        return false; 
+    }
+
+    public function getAuthorRequestsById($req_id)
+{
+    $this->db->select('*');
+    $this->db->from('publish_requests');
+    $this->db->where('pr_id', $req_id);
+    $query = $this->db->get();
+
+    if ($query->num_rows() > 0) {
+        return $query->row_array();
+    } else {
+        return null;
+    }
+}
+
+public function updatePublishRequestStatus($req_id, $update_data)
+{
+  $this->db->where('pr_id', $req_id);
+$updated = $this->db->update('publish_requests', $update_data);
+
+if (!$updated) {
+
+log_message('error', $this->db->last_query());
+log_message('error', $this->db->error());
+}
+
+return $updated;
+
+} 
+
 }

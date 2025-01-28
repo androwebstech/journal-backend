@@ -23,3 +23,11 @@ abstract class PR_STATUS {
     const REJECT = 'reject';
     const ALL = [PR_STATUS::PENDING,PR_STATUS::ACCEPT,PR_STATUS::PROCEED_PAYMENT,PR_STATUS::PUBLISHED,PR_STATUS::REJECT];
 }
+
+abstract class PAYMENT_STATUS {
+    const NONE = 'none';
+    const PENDING = 'pending';
+    const COMPLETE = 'complete';
+    const FAILED = 'failed';
+    const ALL = [PAYMENT_STATUS::NONE,PAYMENT_STATUS::PENDING,PAYMENT_STATUS::COMPLETE,PAYMENT_STATUS::FAILED];
+}
