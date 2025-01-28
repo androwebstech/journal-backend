@@ -692,6 +692,11 @@ public function leaveJoinedJournal($requestId)
 
     return $delete ? true : false;
 }
-
+   public function getresearchpapersByUserId($user_id)
+    {
+        $this->db->where("user_id",$user_id);
+        $query = $this->db->get('research_papers');
+        return $query->result_array();
+    }
 
 }

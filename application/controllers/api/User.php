@@ -1256,7 +1256,25 @@ public function leave_journal_post()
             $this->response($result, RestController::HTTP_NOT_FOUND);
         }
     }
-
+public function get_research_papers_get()
+{
+    $this->load->model('UserModel');
+    $journals = $this->UserModel->getresearchpapersByUserId($this->user['id']);
+    if ($journals) {
+        $result = [
+            'status' => 200,
+            'message' =>'research paper fetched successfully',
+            'data' => $journals
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No journals found',
+            'data' => []
+        ];
+    }
+    $this->response($result, RestController::HTTP_OK);
+}
 
 
 
