@@ -1186,9 +1186,9 @@ public function list_joined_journals_get()
 
     $where = [];
     if($this->user['type'] == USER_TYPE::REVIEWER){
-       $where['journal_reviewer_link.user_id'] = $userId;
+       $where['journal_reviewer_link.reviewer_id'] = $userId;
     }else{
-        $jouranls = $this->UserModel->get_joined_journals($userId);
+        $jouranls = $this->UserModel->getPublisherJournals($userId);
         $journalIds = array_column($jouranls,'journal_id');
         $this->db->where_in('journal_reviewer_link.journal_id',!empty($journalIds) ? $journalIds : [0]);
     }

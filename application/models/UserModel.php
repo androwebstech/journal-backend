@@ -668,11 +668,11 @@ public function getPaperById($paper_id)
 
 public function get_joined_journals($where = [])
 {
-    $this->db->select('journal_reviewer_link., users.');
+    $this->db->select('journal_reviewer_link.*, users.*');
     $this->db->from('journal_reviewer_link');
     
 
-    $this->db->join('users', 'journal_reviewer_link.user_id = users.id');
+    $this->db->join('users', 'journal_reviewer_link.reviewer_id = users.id');
 
     $this->db->join('journals', 'journal_reviewer_link.journal_id = journals.journal_id');
     
