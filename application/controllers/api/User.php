@@ -995,42 +995,56 @@ public function research_paper_search_get($limit = 10, $page = 1){
     ], RestController::HTTP_OK);
 }
 
-public function publisher_join_paper_post($journal_id = null, $user_id = null)
+public function publisher_join_paper_post($journal_id = null, $paper_id = null)
 {
         $journal_id = intval($journal_id);
-        $user_id = intval($user_id);
+        $paper_id = intval($paper_id);
         $this->load->model('UserModel');
         $this->load->helper('url');
-        if (empty($journal_id) || empty($user_id)) {
+        if (empty($journal_id) || empty($paper_id)) {
             $result = ['status' => 400, 'message' => 'Journal ID or User ID missing.'];
             $this->response($result, RestController::HTTP_OK);
             return;
         }
         //validate journal id
+        // Publisher-> journal and one more check for author->paper valid author and publisher
+        if($this->user['type'] == USER_TYPE::PUBLISHER){
         if(!$this->UserModel->publisherHasJournal($journal_id,$this->user['id'])){
             $result = ['status' => 401, 'message' => 'Invalid Journal ID.'];
             $this->response($result, RestController::HTTP_OK);
             return;
         }
+        else if($this->user['type'] == USER_TYPE::AUTHOR){
+            if(!$this->UserModel->authorHasPaper($paper_id,$this->user['id'])){
+                $result = ['status' => 401, 'message' => 'Invalid Paper ID.'];
+                $this->response($result, RestController::HTTP_OK);
+                return;
+            }
+        }
+    }
 
-        if($this->UserModel->canCreateJoinPaperRequest($journal_id, $user_id) == false){
+        if($this->UserModel->canCreateJoinPaperRequest($journal_id, $paper_id) == false){
             $result = ['status' => 400, 'message' => 'Already Joined or Join Request is pending'];
             $this->response($result, RestController::HTTP_OK);
             return;
         }
-        $paper_id = $this->UserModel->getPaperId($journal_id, $user_id);
-        if (empty($paper_id)) {
-            $result = ['status' => 404, 'message' => 'Paper ID not found for the given Journal ID and User ID.'];
-            $this->response($result, RestController::HTTP_OK);
-            return;
+
+        if($this->user['type'] == USER_TYPE::AUTHOR){
+            $author_id = $this->user['id'];
+            $journals_details = $this->UserModel->getUserByJournalId($journal_id);
+            $publisher_id = $journals_details['user_id'];
         }
-    
+        else if($this->user['type'] == USER_TYPE::PUBLISHER){
+            $publisher_id = $this->user['id'];
+            $paper_details = $this->UserModel->getUserByPaperId($paper_id);
+            $author_id = $paper_details['user_id'];
+        }
         $data = [
             'journal_id' => $journal_id,
-            'author_id' => $user_id,
+            'author_id' => $author_id,
             'paper_id' => $paper_id,
-            'publisher_id'=>$this->user['id'],
-            'sender'=> USER_TYPE::PUBLISHER,
+            'publisher_id'=>$publisher_id,//check getjournalBYid for author if logged in
+            'sender'=> $this->user['type'],
             'pr_status' => PR_STATUS::PENDING,
             'payment_status' => PAYMENT_STATUS::NONE,
         ];
@@ -1057,9 +1071,7 @@ public function get_publish_requests_get()
     if($this->user['type'] == USER_TYPE::AUTHOR){
        $where['publish_requests.author_id'] = $userId;
     }else{
-        $jouranls = $this->UserModel->getPublisherPapers($userId);
-        $journalIds = array_column($jouranls,'paper_id');
-        $this->db->where_in('publish_requests.paper_id',!empty($journalIds) ? $journalIds : [0]);
+        $where['publish_requests.publisher_id'] = $userId;
     }
     
     $journals = $this->UserModel->getResearchPaperRequests($where);   
@@ -1147,17 +1159,6 @@ public function approve_reject_publish_request_post($req_id)
                 'pr_id' => $req_id,
                 'updated_at' => get_datetime()
             ];
-
-            // $link_inserted = $this->UserModel->insertJournalReviewerLink($link_data);
-
-            // if (!$link_inserted) {
-            //     $result = [
-            //         'status' => 500,
-            //         'message' => 'Request status updated, but failed to create journal_reviewer_link entry',
-            //     ];
-            //     $this->response($result, RestController::HTTP_OK);
-            //     return;
-            // }
         }
 
         $result = [

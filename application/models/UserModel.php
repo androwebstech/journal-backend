@@ -554,13 +554,13 @@ public function canCreateJoinJournalRequest($journal_id,$user_id){
     return $this->db->where(['user_id'=>$uid,'journal_id'=>$jid,'approval_status'=>APPROVAL_STATUS::PENDING])->count_all_results('journal_join_requests') == 0; 
 }
 
-public function canCreateJoinPaperRequest($journal_id,$user_id){
+public function canCreateJoinPaperRequest($journal_id,$paper_id){
     $jid = intval($journal_id);
-    $uid = intval($user_id);
-    $alreadyJoined = $this->db->where(['author_id'=>$uid,'journal_id'=>$jid])->count_all_results('publish_requests') > 0;
+    $pid = intval($paper_id);
+    $alreadyJoined = $this->db->where(['paper_id'=>$pid,'journal_id'=>$jid])->count_all_results('publish_requests') > 0;
     if($alreadyJoined)
         return false;
-    return $this->db->where(['author_id'=>$uid,'journal_id'=>$jid,'pr_status'=>PR_STATUS::PENDING])->count_all_results('publish_requests') == 0; 
+    return $this->db->where(['paper_id'=>$pid,'journal_id'=>$jid,'pr_status'=>PR_STATUS::PENDING])->count_all_results('publish_requests') == 0; 
 }
 
 public function join_paper($data)
@@ -633,5 +633,26 @@ log_message('error', $this->db->error());
 return $updated;
 
 } 
+
+public function authorHasPaper($paper_id,$author_id){
+    $pid = intval($paper_id);
+    $aid = intval($author_id);
+    return $this->db->where(['paper_id'=>$pid,'user_id'=>$aid])->count_all_results('journals') > 0;
+}
+
+public function getUserByJournalId($journal_id)
+{
+    $this->db->where("journal_id",$journal_id);
+    $query = $this->db->get('journals');
+    return $query->row_array();
+}
+
+public function getUserByPaperId($paper_id)
+{
+    $this->db->where("paper_id",$paper_id);
+    $query = $this->db->get('research_papers');
+    return $query->row_array();
+}
+
 
 }
