@@ -839,24 +839,24 @@ public function change_password_post()
 
 
     
-    public function get_publish_requests_get()
-{
-    $this->load->model('UserModel');
-    $requests = $this->UserModel->getPublishRequestsByUserId($this->user['id']);
-    if ($requests) {
-        $result = [
-            'status' => 200,
-            'message' => 'Published Requests fetched successfully',
-            'data' => $requests];
-    } else {
-        $result = [
-            'status' => 404, 'message' => 'No Published Requests found',
-            'data' => []
-        ];
-    }
+//     public function get_publish_requests_get()
+// {
+//     $this->load->model('UserModel');
+//     $requests = $this->UserModel->getPublishRequestsByUserId($this->user['id']);
+//     if ($requests) {
+//         $result = [
+//             'status' => 200,
+//             'message' => 'Published Requests fetched successfully',
+//             'data' => $requests];
+//     } else {
+//         $result = [
+//             'status' => 404, 'message' => 'No Published Requests found',
+//             'data' => []
+//         ];
+//     }
 
-    $this->response($result, RestController::HTTP_OK);
-}
+//     $this->response($result, RestController::HTTP_OK);
+// }
 
 
 
@@ -996,5 +996,292 @@ public function research_paper_search_get($limit = 10, $page = 1){
         'currentPage'=> $page,
     ], RestController::HTTP_OK);
 }
+
+public function publisher_join_paper_post($journal_id = null, $paper_id = null)
+{
+        $journal_id = intval($journal_id);
+        $paper_id = intval($paper_id);
+        $this->load->model('UserModel');
+        $this->load->helper('url');
+        if (empty($journal_id) || empty($paper_id)) {
+            $result = ['status' => 400, 'message' => 'Journal ID or User ID missing.'];
+            $this->response($result, RestController::HTTP_OK);
+            return;
+        }
+        //validate journal id
+        // Publisher-> journal and one more check for author->paper valid author and publisher
+        if($this->user['type'] == USER_TYPE::PUBLISHER){
+        if(!$this->UserModel->publisherHasJournal($journal_id,$this->user['id'])){
+            $result = ['status' => 401, 'message' => 'Invalid Journal ID.'];
+            $this->response($result, RestController::HTTP_OK);
+            return;
+        }
+        else if($this->user['type'] == USER_TYPE::AUTHOR){
+            if(!$this->UserModel->authorHasPaper($paper_id,$this->user['id'])){
+                $result = ['status' => 401, 'message' => 'Invalid Paper ID.'];
+                $this->response($result, RestController::HTTP_OK);
+                return;
+            }
+        }
+    }
+
+        if($this->UserModel->canCreateJoinPaperRequest($journal_id, $paper_id) == false){
+            $result = ['status' => 400, 'message' => 'Already Joined or Join Request is pending'];
+            $this->response($result, RestController::HTTP_OK);
+            return;
+        }
+
+        if($this->user['type'] == USER_TYPE::AUTHOR){
+            $author_id = $this->user['id'];
+            $journals_details = $this->UserModel->getUserByJournalId($journal_id);
+            $publisher_id = $journals_details['user_id'];
+        }
+        else if($this->user['type'] == USER_TYPE::PUBLISHER){
+            $publisher_id = $this->user['id'];
+            $paper_details = $this->UserModel->getUserByPaperId($paper_id);
+            $author_id = $paper_details['user_id'];
+        }
+        $data = [
+            'journal_id' => $journal_id,
+            'author_id' => $author_id,
+            'paper_id' => $paper_id,
+            'publisher_id'=>$publisher_id,//check getjournalBYid for author if logged in
+            'sender'=> $this->user['type'],
+            'pr_status' => PR_STATUS::PENDING,
+            'payment_status' => PAYMENT_STATUS::NONE,
+        ];
+    
+        $res = $this->UserModel->join_paper($data);
+    
+        if ($res) {
+            $result = [
+                'status' => 200,
+                'message' => 'Joined journal request sent successfully!',
+                'data' => array_merge(['id' => $res], $data),
+            ];
+        } else {
+            $result = ['status' => 500, 'message' => 'Failed to join the journal!'];
+        }
+        $this->response($result, RestController::HTTP_OK);
+}
+
+public function get_publish_requests_get()
+{
+    $userId = $this->user['id'];
+
+    $where = [];
+    if($this->user['type'] == USER_TYPE::AUTHOR){
+       $where['publish_requests.author_id'] = $userId;
+    }else{
+        $where['publish_requests.publisher_id'] = $userId;
+    }
+    
+    $journals = $this->UserModel->getResearchPaperRequests($where);   
+    if ($journals) {
+        $result = [
+            'status' => 200,
+            'message' => 'Publish Requests fetched successfully',
+            'data' => $journals
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No Requests found',
+            'data' => []
+        ];
+    }
+    $this->response($result, RestController::HTTP_OK);
+}
+
+public function approve_reject_publish_request_post($req_id)
+{
+    $status = $this->input->post('status'); 
+    if (empty($req_id) || empty($status)) {
+        $result = [
+            'status' => 400,
+            'message' => 'Request ID and status are required',
+        ];
+        $this->response($result, RestController::HTTP_OK);
+        return;
+    }
+
+    
+    if (!in_array($status, [PR_STATUS::ACCEPT,PR_STATUS::REJECT])) {
+        $result = [
+            'status' => 400,
+            'message' => 'Invalid status value',
+        ];
+        $this->response($result, RestController::HTTP_OK);
+        return;
+    }
+
+    $request = $this->UserModel->getAuthorRequestsById($req_id);
+
+    if(empty($request)){
+        $result = [
+            'status' => 404,
+            'message' => 'Request not found',
+        ];
+        $this->response($result, RestController::HTTP_OK);
+        return;
+    }
+    if($request['sender'] == $this->user['type']){
+        $result = [
+            'status' => 401,
+            'message' => 'Can not approve own requests ',
+        ];
+        $this->response($result, RestController::HTTP_OK);
+        return;
+    }
+
+
+    $current_status = $request['pr_status'];
+
+    if ($current_status != APPROVAL_STATUS::PENDING) {
+        $result = [
+            'status' => 400,
+            'message' => "Action already taken",
+        ];
+        $this->response($result, RestController::HTTP_OK);
+        return;
+    }
+
+    
+    $update_data = [
+        'pr_status' => $status,
+    ];
+
+    $updated = $this->UserModel->updatePublishRequestStatus($req_id, $update_data);
+
+    if ($updated) {
+        if ($status === PR_STATUS::ACCEPT) {
+            $link_data = [
+                'journal_id' => $request['journal_id'],
+                'paper_id' => $request['paper_id'],
+                'pr_id' => $req_id,
+                'updated_at' => get_datetime()
+            ];
+        }
+
+        $result = [
+            'status' => 200,
+            'message' => 'Request status updated successfully',
+        ];
+    } else {
+        $result = [
+            'status' => 500,
+            'message' => 'Failed to update request status',
+        ];
+    }
+
+    $this->response($result, RestController::HTTP_OK);
+}
+
+// get joined journals
+
+public function list_joined_journals_get()
+{
+    $userId = $this->user['id'];
+
+    $where = [];
+    if($this->user['type'] == USER_TYPE::REVIEWER){
+       $where['journal_reviewer_link.user_id'] = $userId;
+    }else{
+        $jouranls = $this->UserModel->get_joined_journals($userId);
+        $journalIds = array_column($jouranls,'journal_id');
+        $this->db->where_in('journal_reviewer_link.journal_id',!empty($journalIds) ? $journalIds : [0]);
+    }
+    
+    $journals = $this->UserModel->get_joined_journals($where);   
+    if ($journals) {
+        $result = [
+            'status' => 200,
+            'message' => 'Journals fetched successfully',
+            'data' => $journals
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No journals found',
+            'data' => []
+        ];
+    }
+
+  
+    $this->response($result, RestController::HTTP_OK);
+}
+
+
+
+
+
+
+
+
+
+// leave from joined journals
+
+public function leave_journal_post()
+    {
+        $requestId = $this->input->post('request_id');
+
+       
+        if (empty($requestId)) {
+            $result = [
+                'status' => 400,
+                'message' => 'Request ID is required',
+            ];
+            $this->response($result, RestController::HTTP_BAD_REQUEST);
+            return;
+        }
+
+        
+
+        $deleteStatus = $this->UserModel->leaveJoinedJournal($requestId);
+
+        if ($deleteStatus === true) {
+            $result = [
+                'status' => 200,
+                'message' => 'Record removed successfully',
+            ];
+            $this->response($result, RestController::HTTP_OK);
+        } elseif ($deleteStatus === false) {
+            $result = [
+                'status' => 500,
+                'message' => 'Failed to remove the record',
+            ];
+            $this->response($result, RestController::HTTP_INTERNAL_SERVER_ERROR);
+        } else {
+            $result = [
+                'status' => 404,
+                'message' => 'No record found with the given Request ID',
+            ];
+            $this->response($result, RestController::HTTP_NOT_FOUND);
+        }
+    }
+public function get_research_papers_get()
+{
+    $this->load->model('UserModel');
+    $journals = $this->UserModel->getresearchpapersByUserId($this->user['id']);
+    if ($journals) {
+        $result = [
+            'status' => 200,
+            'message' =>'research paper fetched successfully',
+            'data' => $journals
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No journals found',
+            'data' => []
+        ];
+    }
+    $this->response($result, RestController::HTTP_OK);
+}
+
+
+
+
+
 
 }
