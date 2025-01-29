@@ -18,6 +18,7 @@ class UserModel extends CI_model
         $this->applyReviewerSearchFilter($filters, $searchString);
 
         $this->db->select('*,"" as password,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name');
+        $this->db->order_by('id', 'DESC');
         $this->db->limit($limit, $offset);
         return $this->db->get('users')->result_array();
     }
@@ -57,6 +58,7 @@ class UserModel extends CI_model
         $this->applyJournalSearchFilter($filters, $searchString);
 
         $this->db->select('*,"" as password,(SELECT name from countries where id = journals.country) as country_name, (SELECT name from states where id = journals.state) as state_name');
+        $this->db->order_by('journal_id', 'DESC');
         $this->db->limit($limit, $offset);
         return $this->db->get('journals')->result_array();
     }
@@ -98,6 +100,7 @@ class UserModel extends CI_model
     public function getJournalsByUserId($user_id)
     {
         $this->db->where("user_id",$user_id);
+        $this->db->order_by("journal_id", "DESC");
         $query = $this->db->get('journals');
         return $query->result_array();
     }
@@ -273,6 +276,7 @@ public function insert_publication($data)
 public function getPublicationByUserId($id)
 {
     $this->db->where('user_id', $id);
+    $this->db->order_by('ppuid', 'DESC');
     $query = $this->db->get('published_papers'); 
     if ($query->num_rows() > 0) {
         return $query->result_array(); 
@@ -428,7 +432,10 @@ public function getJournalsJoinRequests($where = []) {
     $this->db->join('users', 'journal_join_requests.user_id = users.id');
     $this->db->join('journals', 'journal_join_requests.journal_id = journals.journal_id');
    if(!empty($where))
-   $this->db->where($where);      
+   $this->db->where($where);
+
+   $this->db->order_by('journal_join_requests.req_id', 'DESC');
+   
     $query = $this->db->get();
 
     if ($query->num_rows() > 0) {
@@ -502,6 +509,7 @@ public function getResearchPaper($filters = [], $limit = 500, $offset = 0, $sear
     $this->applyResearchPaperFilter($filters, $searchString);
 
     $this->db->select('*,(SELECT name from countries where id = research_papers.country) as country_name');
+    $this->db->order_by('paper_id', 'DESC');
     $this->db->limit($limit, $offset);
     return $this->db->get('research_papers')->result_array();
 }
