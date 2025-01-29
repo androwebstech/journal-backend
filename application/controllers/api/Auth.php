@@ -284,11 +284,11 @@ public function get_publisher_get()
     if ($requests) {
         $result = [
             'status' => 200,
-            'message' => 'Journals fetched successfully',
+            'message' => 'Publisher fetched successfully',
             'data' => $requests];
     } else {
         $result = [
-            'status' => 404, 'message' => 'No Authors found',
+            'status' => 404, 'message' => 'No Publisher found',
             'data' => []
         ];
     }
@@ -307,7 +307,7 @@ public function get_reviewer_get()
             'data' => $requests];
     } else {
         $result = [
-            'status' => 404, 'message' => 'No Authors found',
+            'status' => 404, 'message' => 'No Reviewers found',
             'data' => []
         ];
     }
