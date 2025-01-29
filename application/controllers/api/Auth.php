@@ -258,6 +258,25 @@ public function contact_post()
 	$this->response($result, RestController::HTTP_OK);
 }
 
+public function get_authors_get()
+{
+    $this->load->model('Admin_model');
+    $requests = $this->Admin_model->getAuthors();
+    if ($requests) {
+        $result = [
+            'status' => 200,
+            'message' => 'Authors fetched successfully',
+            'data' => $requests];
+    } else {
+        $result = [
+            'status' => 404, 'message' => 'No Authors found',
+            'data' => []
+        ];
+    }
+
+    $this->response($result, RestController::HTTP_OK);
+}
+
        
 
 }
