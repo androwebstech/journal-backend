@@ -277,6 +277,42 @@ public function get_authors_get()
     $this->response($result, RestController::HTTP_OK);
 }
 
-       
+public function get_publisher_get()
+{
+    $this->load->model('Admin_model');
+    $requests = $this->Admin_model->getPublishers();
+    if ($requests) {
+        $result = [
+            'status' => 200,
+            'message' => 'Journals fetched successfully',
+            'data' => $requests];
+    } else {
+        $result = [
+            'status' => 404, 'message' => 'No Authors found',
+            'data' => []
+        ];
+    }
+
+    $this->response($result, RestController::HTTP_OK);
+}
+
+public function get_reviewer_get()
+{
+    $this->load->model('Admin_model');
+    $requests = $this->Admin_model->getReviewers();
+    if ($requests) {
+        $result = [
+            'status' => 200,
+            'message' => 'Reviewers fetched successfully',
+            'data' => $requests];
+    } else {
+        $result = [
+            'status' => 404, 'message' => 'No Authors found',
+            'data' => []
+        ];
+    }
+
+    $this->response($result, RestController::HTTP_OK);
+}   
 
 }
