@@ -565,10 +565,8 @@ public function canCreateJoinJournalRequest($journal_id,$user_id){
 public function canCreateJoinPaperRequest($journal_id,$paper_id){
     $jid = intval($journal_id);
     $pid = intval($paper_id);
-    $alreadyJoined = $this->db->where(['paper_id'=>$pid,'journal_id'=>$jid])->count_all_results('publish_requests') > 0;
-    if($alreadyJoined)
-        return false;
-    return $this->db->where(['paper_id'=>$pid,'journal_id'=>$jid,'pr_status'=>PR_STATUS::PENDING])->count_all_results('publish_requests') == 0; 
+
+    return $this->db->where(['paper_id'=>$pid,'journal_id'=>$jid,'pr_status!='=>PR_STATUS::REJECT])->count_all_results('publish_requests') == 0; 
 }
 
 public function join_paper($data)
@@ -645,17 +643,17 @@ return $updated;
 public function authorHasPaper($paper_id,$author_id){
     $pid = intval($paper_id);
     $aid = intval($author_id);
-    return $this->db->where(['paper_id'=>$pid,'user_id'=>$aid])->count_all_results('journals') > 0;
+    return $this->db->where(['paper_id'=>$pid,'user_id'=>$aid])->count_all_results('research_papers') > 0;
 }
 
-public function getUserByJournalId($journal_id)
+public function getJournalById($journal_id)
 {
     $this->db->where("journal_id",$journal_id);
     $query = $this->db->get('journals');
     return $query->row_array();
 }
 
-public function getUserByPaperId($paper_id)
+public function getPaperById($paper_id)
 {
     $this->db->where("paper_id",$paper_id);
     $query = $this->db->get('research_papers');
@@ -726,5 +724,78 @@ public function leaveJoinedJournal($requestId)
         $query = $this->db->get('research_papers');
         return $query->result_array();
     }
+
+
+    
+    public function deleteResearchPaperById($id, $user_id)
+    {
+        $this->db->where('paper_id', $id);
+        $this->db->where('user_id', $user_id);
+        $query = $this->db->get('research_papers');
+
+        if ($query->num_rows() > 0) {
+            $this->db->where('paper_id', $id);
+            $this->db->where('user_id', $user_id);
+            $this->db->delete('research_papers');
+
+            if ($this->db->affected_rows() > 0) {
+                return ['status' => 200, 'message' => 'Research paper deleted successfully!'];
+            } else {
+                return ['status' => 500, 'message' => 'Failed to delete the journal.'];
+            }
+        } else {
+            return ['status' => 404, 'message' => 'No Research paper found with the provided ID and User ID.'];
+        }
+    }
+
+
+    public function update_co_authors($paper_id, $co_authors) {
+    $this->db->where('paper_id', $paper_id);
+    $this->db->delete('co_authors'); 
+
+    if (!empty($co_authors)) {
+        foreach ($co_authors as $co_author) {
+            $co_author['paper_id'] = $paper_id;
+            $this->db->insert('co_authors', $co_author);
+        }
+    }
+}
+
+
+
+    
+public function update_research_paper($id, $update_data, $co_authors = null)
+{
+    if ($id && !empty($update_data)) {
+        $this->db->select('paper_id');
+        $this->db->from('research_papers');
+        $this->db->where('paper_id', $id);
+        $query = $this->db->get();
+
+        if ($query->num_rows() > 0) {
+           
+            $this->db->trans_start();
+            
+            
+            $this->db->where('paper_id', $id);
+            $this->db->update('research_papers', $update_data);
+            
+           
+            if (!empty($co_authors)) {
+                $this->update_co_authors($id, $co_authors);
+            }
+
+          
+            $this->db->trans_complete();
+
+            return $this->db->trans_status(); 
+        }
+        return false;
+    }
+    return false;
+}
+
+
+
 
 }

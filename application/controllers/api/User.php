@@ -89,7 +89,7 @@ class User extends RestController {
                 'review_type' => $this->input->post('review_type'),
                 'review_time' => $this->input->post('review_time'),
                 'user_id' => $this->user['id'], // Ensure $this->user is properly set
-                'approval_status' => 0, // Default pending status
+                'approval_status' => APPROVAL_STATUS::PENDING, // Default pending status
             ];
 
             $res = $this->UserModel->insert_journal($data);
@@ -1004,17 +1004,17 @@ public function publisher_join_paper_post($journal_id = null, $paper_id = null)
         $this->load->model('UserModel');
         $this->load->helper('url');
         if (empty($journal_id) || empty($paper_id)) {
-            $result = ['status' => 400, 'message' => 'Journal ID or User ID missing.'];
+            $result = ['status' => 400, 'message' => 'Journal ID or Paper ID missing.'];
             $this->response($result, RestController::HTTP_OK);
             return;
         }
         //validate journal id
-        // Publisher-> journal and one more check for author->paper valid author and publisher
         if($this->user['type'] == USER_TYPE::PUBLISHER){
-        if(!$this->UserModel->publisherHasJournal($journal_id,$this->user['id'])){
-            $result = ['status' => 401, 'message' => 'Invalid Journal ID.'];
-            $this->response($result, RestController::HTTP_OK);
-            return;
+             if(!$this->UserModel->publisherHasJournal($journal_id,$this->user['id'])){
+                $result = ['status' => 401, 'message' => 'Invalid Journal ID.'];
+                $this->response($result, RestController::HTTP_OK);
+                return;
+            }
         }
         else if($this->user['type'] == USER_TYPE::AUTHOR){
             if(!$this->UserModel->authorHasPaper($paper_id,$this->user['id'])){
@@ -1023,29 +1023,29 @@ public function publisher_join_paper_post($journal_id = null, $paper_id = null)
                 return;
             }
         }
-    }
+    
 
         if($this->UserModel->canCreateJoinPaperRequest($journal_id, $paper_id) == false){
-            $result = ['status' => 400, 'message' => 'Already Joined or Join Request is pending'];
+            $result = ['status' => 400, 'message' => 'Request already submitted or pending'];
             $this->response($result, RestController::HTTP_OK);
             return;
         }
 
         if($this->user['type'] == USER_TYPE::AUTHOR){
             $author_id = $this->user['id'];
-            $journals_details = $this->UserModel->getUserByJournalId($journal_id);
+            $journals_details = $this->UserModel->getJournalById($journal_id);
             $publisher_id = $journals_details['user_id'];
         }
         else if($this->user['type'] == USER_TYPE::PUBLISHER){
             $publisher_id = $this->user['id'];
-            $paper_details = $this->UserModel->getUserByPaperId($paper_id);
+            $paper_details = $this->UserModel->getPaperById($paper_id);
             $author_id = $paper_details['user_id'];
         }
         $data = [
             'journal_id' => $journal_id,
             'author_id' => $author_id,
             'paper_id' => $paper_id,
-            'publisher_id'=>$publisher_id,//check getjournalBYid for author if logged in
+            'publisher_id'=>$publisher_id,
             'sender'=> $this->user['type'],
             'pr_status' => PR_STATUS::PENDING,
             'payment_status' => PAYMENT_STATUS::NONE,
@@ -1056,11 +1056,11 @@ public function publisher_join_paper_post($journal_id = null, $paper_id = null)
         if ($res) {
             $result = [
                 'status' => 200,
-                'message' => 'Joined journal request sent successfully!',
+                'message' => 'Publish Paper request sent successfully!',
                 'data' => array_merge(['id' => $res], $data),
             ];
         } else {
-            $result = ['status' => 500, 'message' => 'Failed to join the journal!'];
+            $result = ['status' => 500, 'message' => 'Failed to send the request!'];
         }
         $this->response($result, RestController::HTTP_OK);
 }
@@ -1105,15 +1105,16 @@ public function approve_reject_publish_request_post($req_id)
         return;
     }
 
+
     
-    if (!in_array($status, [PR_STATUS::ACCEPT,PR_STATUS::REJECT])) {
-        $result = [
-            'status' => 400,
-            'message' => 'Invalid status value',
-        ];
-        $this->response($result, RestController::HTTP_OK);
-        return;
-    }
+    // if (!in_array($status, [PR_STATUS::ACCEPT,PR_STATUS::REJECT])) {
+    //     $result = [
+    //         'status' => 400,
+    //         'message' => 'Invalid status value',
+    //     ];
+    //     $this->response($result, RestController::HTTP_OK);
+    //     return;
+    // }
 
     $request = $this->UserModel->getAuthorRequestsById($req_id);
 
@@ -1125,19 +1126,19 @@ public function approve_reject_publish_request_post($req_id)
         $this->response($result, RestController::HTTP_OK);
         return;
     }
-    if($request['sender'] == $this->user['type']){
-        $result = [
-            'status' => 401,
-            'message' => 'Can not approve own requests ',
-        ];
-        $this->response($result, RestController::HTTP_OK);
-        return;
+    if($this->user['type']==USER_TYPE::AUTHOR && !in_array($status, [PR_STATUS::ACCEPT,PR_STATUS::REJECT])){
+            $result = [
+                'status' => 401,
+                'message' => 'Invalid Status',
+            ];
+            $this->response($result, RestController::HTTP_OK);
+            return;
     }
-
+    
 
     $current_status = $request['pr_status'];
 
-    if ($current_status != APPROVAL_STATUS::PENDING) {
+    if ($current_status != PR_STATUS::PENDING) {
         $result = [
             'status' => 400,
             'message' => "Action already taken",
@@ -1259,6 +1260,9 @@ public function leave_journal_post()
 
 
 
+
+
+
 public function get_research_papers_get()
 {
     $this->load->model('UserModel');
@@ -1281,7 +1285,74 @@ public function get_research_papers_get()
 
 
 
+public function delete_research_get($id = 0)
+{
+    // $this->load->database();
+    $this->load->model('UserModel');
 
+    $id = intval($id);
+    if ($id > 0) {
+        $result = $this->UserModel->deleteResearchPaperById($id, $this->user['id']);
+    } else {
+        $result = ['status' => 400, 'message' => 'Valid ID is required.'];
+    }
+
+   
+    $this->response($result, RestController::HTTP_OK);
+}
+
+
+
+public function update_research_paper_post($id = null)
+{
+    $this->load->model('UserModel');
+    $this->load->helper('url');
+
+    if (empty($id)) {
+        $this->response(['status' => 400, 'message' => 'Invalid Publication ID.'], RestController::HTTP_BAD_REQUEST);
+        return;
+    }
+
+    $fields = [
+        'author_name',
+        'author_contact',
+        'author_email',
+        'country',
+        'affiliation',
+        'department',
+        'paper_title',
+        'abstract',
+        'keywords',
+    ];
+
+    $update_data = [];
+    foreach ($fields as $field) {
+        $input_value = $this->input->post($field);
+        if ($input_value !== null && $input_value !== '') { 
+            $update_data[$field] = $input_value;
+        }
+    }
+
+  
+    $co_authors = $this->input->post('co_authors') ? json_decode($this->input->post('co_authors'), true) : null;
+
+   
+    if (!empty($update_data) || !is_null($co_authors)) {
+        $updated = $this->UserModel->update_research_paper($id, $update_data, $co_authors);
+
+        if ($updated) {
+            $this->response([
+                'status' => 200,
+                'message' => 'Research paper updated successfully!',
+                'data' => array_merge(['paper_id' => $id], $update_data, ['co_authors' => $co_authors]),
+            ], RestController::HTTP_OK);
+        } else {
+            $this->response(['status' => 500, 'message' => 'Failed to update the Publication.'], RestController::HTTP_BAD_REQUEST);
+        }
+    } else {
+        $this->response(['status' => 400, 'message' => 'No valid data to update.'], RestController::HTTP_BAD_REQUEST);
+    }
+}
 
 
 }
