@@ -50,10 +50,52 @@ public function insert_contact($data)
         return false;
     } 
 
-   
 
     
 
+
+public function getAuthors()
+{
+    $this->db->select('*');
+    $this->db->from('users');
+    $this->db->where('type', USER_TYPE::AUTHOR);
+    $query = $this->db->get();
+
+    if ($query->num_rows() > 0) {
+        return $query->result_array();
+    } else {
+        return null;
+    }
+}
+   
+
+public function getPublishers()
+{
+    $this->db->select('*');
+    $this->db->from('users');
+    $this->db->where('type', USER_TYPE::PUBLISHER);
+    $query = $this->db->get();
+
+    if ($query->num_rows() > 0) {
+        return $query->result_array();
+    } else {
+        return null;
+    }
+}
+
+public function getReviewers()
+{
+    $this->db->select('*');
+    $this->db->from('users');
+    $this->db->where('type', USER_TYPE::REVIEWER);
+    $query = $this->db->get();
+
+    if ($query->num_rows() > 0) {
+        return $query->result_array();
+    } else {
+        return null;
+    }
+}
 
 
 }

@@ -565,10 +565,8 @@ public function canCreateJoinJournalRequest($journal_id,$user_id){
 public function canCreateJoinPaperRequest($journal_id,$paper_id){
     $jid = intval($journal_id);
     $pid = intval($paper_id);
-    $alreadyJoined = $this->db->where(['paper_id'=>$pid,'journal_id'=>$jid])->count_all_results('publish_requests') > 0;
-    if($alreadyJoined)
-        return false;
-    return $this->db->where(['paper_id'=>$pid,'journal_id'=>$jid,'pr_status'=>PR_STATUS::PENDING])->count_all_results('publish_requests') == 0; 
+
+    return $this->db->where(['paper_id'=>$pid,'journal_id'=>$jid,'pr_status!='=>PR_STATUS::REJECT])->count_all_results('publish_requests') == 0; 
 }
 
 public function join_paper($data)
@@ -645,17 +643,17 @@ return $updated;
 public function authorHasPaper($paper_id,$author_id){
     $pid = intval($paper_id);
     $aid = intval($author_id);
-    return $this->db->where(['paper_id'=>$pid,'user_id'=>$aid])->count_all_results('journals') > 0;
+    return $this->db->where(['paper_id'=>$pid,'user_id'=>$aid])->count_all_results('research_papers') > 0;
 }
 
-public function getUserByJournalId($journal_id)
+public function getJournalById($journal_id)
 {
     $this->db->where("journal_id",$journal_id);
     $query = $this->db->get('journals');
     return $query->row_array();
 }
 
-public function getUserByPaperId($paper_id)
+public function getPaperById($paper_id)
 {
     $this->db->where("paper_id",$paper_id);
     $query = $this->db->get('research_papers');
@@ -670,11 +668,11 @@ public function getUserByPaperId($paper_id)
 
 public function get_joined_journals($where = [])
 {
-    $this->db->select('journal_reviewer_link., users.');
+    $this->db->select('journal_reviewer_link.*, users.*');
     $this->db->from('journal_reviewer_link');
     
 
-    $this->db->join('users', 'journal_reviewer_link.user_id = users.id');
+    $this->db->join('users', 'journal_reviewer_link.reviewer_id = users.id');
 
     $this->db->join('journals', 'journal_reviewer_link.journal_id = journals.journal_id');
     
