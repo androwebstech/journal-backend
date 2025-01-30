@@ -179,4 +179,65 @@ public function approve_reject_journal_post(){
     }
 }
 
+
+
+
+public function approve_reject_publication_post(){
+    $this->form_validation->set_rules('ppuid', 'ID', 'required');
+    $this->form_validation->set_rules('approval_status', 'Status', 'required|in_list['.APPROVAL_STATUS::APPROVED.','.APPROVAL_STATUS::REJECTED.']');
+    if (!$this->form_validation->run()) {
+        $this->response(['status'=>400,'message'=>validation_errors()], RestController::HTTP_OK);
+    } else {
+        $ppuid = $this->post('ppuid');
+        $status = $this->post('approval_status');
+        $this->load->model('Admin_model');
+        $req = $this->UserModel->get_publication_by_id($ppuid);
+        if (!$req) {
+            $this->response(['status' => 404, 'message' => 'Publication not found'], RestController::HTTP_OK);
+            return;
+        }
+        $current_status = $req['approval_status'];
+        if ($current_status != APPROVAL_STATUS::PENDING) {
+            $result = [
+                'status' => 400,
+                'message' => "Action already taken",
+            ];
+            $this->response($result, RestController::HTTP_OK);
+            return;
+        }
+        $requests = $this->Admin_model->approveRejectPublication($ppuid, $status);
+        if ($requests) {
+            $result = [
+                'status' => 200,
+                'message' => 'Publication status updated successfully',
+                'data' => $requests];
+        } else {
+            $result = [
+                'status' => 400, 'message' => 'Failed to update publication status',
+                'data' => []
+            ];
+        }
+        $this->response($result, RestController::HTTP_OK);
+    }
+}
+
+
+    public function get_publications_get()
+{
+    $this->load->model('Admin_model');
+    $requests = $this->Admin_model->getPublications();
+    if ($requests) {
+        $result = [
+            'status' => 200,
+            'message' => 'Publications fetched successfully',
+            'data' => $requests];
+    } else {
+        $result = [
+            'status' => 404, 'message' => 'No Publication found',
+            'data' => []
+        ];
+    }
+
+    $this->response($result, RestController::HTTP_OK);
+}
 }
