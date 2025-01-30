@@ -183,7 +183,7 @@ public function approve_reject_journal_post(){
 
 
 public function approve_reject_publication_post(){
-    $this->form_validation->set_rules('ppuid', 'ID', 'required');
+    $this->form_validation->set_rules('ppuid', 'ID', 'required|numeric');
     $this->form_validation->set_rules('approval_status', 'Status', 'required|in_list['.APPROVAL_STATUS::APPROVED.','.APPROVAL_STATUS::REJECTED.']');
     if (!$this->form_validation->run()) {
         $this->response(['status'=>400,'message'=>validation_errors()], RestController::HTTP_OK);
