@@ -130,4 +130,31 @@ public function approveRejectJournal($journalId,$status){
     return false;
 }
 
+
+
+public function getPublications()
+{
+    $this->db->select('*');
+    $this->db->from('published_papers');
+    $query = $this->db->get();
+
+    if ($query->num_rows() > 0) {
+        return $query->result_array();
+    } else {
+        return null;
+    }
+}
+
+
+
+
+public function approveRejectPublication($ppuid,$status){
+    $this->db->where('ppuid', $ppuid);
+    $this->db->update('published_papers', ['approval_status' => $status]);
+    if ($this->db->affected_rows() > 0) {
+        return true;
+    }
+    return false;
+}
+
 }
