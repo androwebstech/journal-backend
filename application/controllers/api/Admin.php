@@ -98,6 +98,85 @@ class Admin extends RestController {
 //     }
 
 //     $this->response($result, RestController::HTTP_OK);
-// }   
+// }
+
+
+public function approve_reject_reviewer_post(){
+    $this->form_validation->set_rules('id', 'ID', 'required');
+    $this->form_validation->set_rules('status', 'Status', 'required|in_list['.APPROVAL_STATUS::APPROVED.','.APPROVAL_STATUS::REJECTED.']');
+    if (!$this->form_validation->run()) {
+        $this->response(['status'=>400,'message'=>validation_errors()], RestController::HTTP_OK);
+    } else {
+        $user_id = $this->post('id');
+        $status = $this->post('status');
+        $this->load->model('Admin_model');
+        $req = $this->Admin_model->getReviewerDetail($user_id);
+        if (!$req) {
+            $this->response(['status' => 404, 'message' => 'Reviewer not found'], RestController::HTTP_OK);
+            return;
+        }
+        $current_status = $req['approval_status'];
+        if ($current_status != APPROVAL_STATUS::PENDING) {
+            $result = [
+                'status' => 400,
+                'message' => "Action already taken",
+            ];
+            $this->response($result, RestController::HTTP_OK);
+            return;
+        }
+        $requests = $this->Admin_model->approveRejectReviewer($user_id, $status);
+        if ($requests) {
+            $result = [
+                'status' => 200,
+                'message' => 'Reviewer status updated successfully',
+                'data' => $requests];
+        } else {
+            $result = [
+                'status' => 400, 'message' => 'Failed to update reviewer status',
+                'data' => []
+            ];
+        }
+        $this->response($result, RestController::HTTP_OK);
+    }
+}
+
+public function approve_reject_journal_post(){
+    $this->form_validation->set_rules('journal_id', 'ID', 'required');
+    $this->form_validation->set_rules('status', 'Status', 'required|in_list['.APPROVAL_STATUS::APPROVED.','.APPROVAL_STATUS::REJECTED.']');
+    if (!$this->form_validation->run()) {
+        $this->response(['status'=>400,'message'=>validation_errors()], RestController::HTTP_OK);
+    } else {
+        $journal_id = $this->post('journal_id');
+        $status = $this->post('status');
+        $this->load->model('Admin_model');
+        $req = $this->UserModel->getJournalById($journal_id);
+        if (!$req) {
+            $this->response(['status' => 404, 'message' => 'Journal not found'], RestController::HTTP_OK);
+            return;
+        }
+        $current_status = $req['approval_status'];
+        if ($current_status != APPROVAL_STATUS::PENDING) {
+            $result = [
+                'status' => 400,
+                'message' => "Action already taken",
+            ];
+            $this->response($result, RestController::HTTP_OK);
+            return;
+        }
+        $requests = $this->Admin_model->approveRejectJournal($journal_id, $status);
+        if ($requests) {
+            $result = [
+                'status' => 200,
+                'message' => 'Journal status updated successfully',
+                'data' => $requests];
+        } else {
+            $result = [
+                'status' => 400, 'message' => 'Failed to update Journal status',
+                'data' => []
+            ];
+        }
+        $this->response($result, RestController::HTTP_OK);
+    }
+}
 
 }

@@ -97,5 +97,37 @@ public function getReviewers()
     }
 }
 
+public function getReviewerDetail($userId){
+    $this->db->select('*');
+    $this->db->from('users');
+    $this->db->where('id', $userId);
+    $this->db->where('type', USER_TYPE::REVIEWER);
+    $query = $this->db->get();
+    if ($query->num_rows() > 0) {
+        return $query->row_array();
+    } else {
+        return null;
+    }
+}
+
+public function approveRejectReviewer($userId,$status){
+
+    $this->db->where('id', $userId);
+    $this->db->where('type', USER_TYPE::REVIEWER);
+    $this->db->update('users', ['approval_status' => $status]);
+    if ($this->db->affected_rows() > 0) {
+        return true;
+    }
+    return false;
+}
+
+public function approveRejectJournal($journalId,$status){
+    $this->db->where('journal_id', $journalId);
+    $this->db->update('journals', ['approval_status' => $status]);
+    if ($this->db->affected_rows() > 0) {
+        return true;
+    }
+    return false;
+}
 
 }
