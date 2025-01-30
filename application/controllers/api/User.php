@@ -1225,7 +1225,6 @@ public function leave_journal_post()
     {
         $requestId = $this->input->post('request_id');
 
-       
         if (empty($requestId)) {
             $result = [
                 'status' => 400,
@@ -1235,30 +1234,31 @@ public function leave_journal_post()
             return;
         }
 
+
+
+        $where = [];
+        if($this->user['type'] == USER_TYPE::REVIEWER){
+           $where['journal_reviewer_link.reviewer_id'] = $userId;
+       
+        }
+
         
 
         $deleteStatus = $this->UserModel->leaveJoinedJournal($requestId);
 
-        if ($deleteStatus === true) {
+         
             $result = [
                 'status' => 200,
                 'message' => 'Record removed successfully',
             ];
             $this->response($result, RestController::HTTP_OK);
-        } elseif ($deleteStatus === false) {
-            $result = [
-                'status' => 500,
-                'message' => 'Failed to remove the record',
-            ];
-            $this->response($result, RestController::HTTP_INTERNAL_SERVER_ERROR);
-        } else {
-            $result = [
-                'status' => 404,
-                'message' => 'No record found with the given Request ID',
-            ];
-            $this->response($result, RestController::HTTP_NOT_FOUND);
-        }
+        
     }
+
+
+
+
+
 public function get_research_papers_get()
 {
     $this->load->model('UserModel');

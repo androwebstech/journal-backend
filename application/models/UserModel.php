@@ -707,19 +707,19 @@ public function get_joined_journals($where = [])
 public function leaveJoinedJournal($requestId)
 {
 
-    $this->db->where('id', $requestId);
-    $query = $this->db->get('journal_reviewer_link');
-
-    if ($query->num_rows() == 0) {
-        return 'not_found'; 
-    }
-
+   
    
     $this->db->where('id', $requestId);
     $delete = $this->db->delete('journal_reviewer_link');
 
-    return $delete ? true : false;
+  
 }
+
+
+
+
+
+
    public function getresearchpapersByUserId($user_id)
     {
         $this->db->where("user_id",$user_id);
