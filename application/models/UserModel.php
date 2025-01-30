@@ -794,6 +794,14 @@ public function update_research_paper($id, $update_data, $co_authors = null)
     }
     return false;
 }
+// public function getPublisherJournals($publisherId)
+// {
+//     return $this->db->select('journal_id')
+//         ->from('journals')
+//         ->where('publisher_id', $publisherId)
+//         ->get()
+//         ->result_array();
+// }
 
 
 

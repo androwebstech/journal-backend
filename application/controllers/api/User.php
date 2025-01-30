@@ -1354,5 +1354,50 @@ public function update_research_paper_post($id = null)
     }
 }
 
+public function get_joined_reviewers_get()
+{
+    $userId = $this->user['id'];
+    if ($this->user['type'] != USER_TYPE::PUBLISHER) {
+        $this->response([
+            'status' => 403,
+            'message' => 'Access denied. Only publishers can view reviewers.',
+            'data' => []
+        ], RestController::HTTP_FORBIDDEN);
+        return;
+    }
+    $journals = $this->UserModel->getPublisherJournals($userId);
+    $journalIds = array_column($journals, 'journal_id');
+
+    if (empty($journalIds)) {
+        $this->response([
+            'status' => 404,
+            'message' => 'No journals found for this publisher.',
+            'data' => []
+        ], RestController::HTTP_NOT_FOUND);
+        return;
+    }
+    $this->db->select('users.id, users.name, users.email, journal_reviewer_link.journal_id');
+    $this->db->from('journal_reviewer_link');
+    $this->db->join('users', 'journal_reviewer_link.reviewer_id = users.id');
+    $this->db->where_in('journal_reviewer_link.journal_id', $journalIds);
+
+    $reviewers = $this->db->get()->result_array();
+
+    if (!empty($reviewers)) {
+        $this->response([
+            'status' => 200,
+            'message' => 'Reviewers fetched successfully.',
+            'data' => $reviewers
+        ], RestController::HTTP_OK);
+    } else {
+        $this->response([
+            'status' => 404,
+            'message' => 'No reviewers found for your journals.',
+            'data' => []
+        ], RestController::HTTP_NOT_FOUND);
+    }
+}
+
+
 
 }
