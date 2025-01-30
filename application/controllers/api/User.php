@@ -1260,6 +1260,14 @@ public function leave_journal_post()
             $this->response($result, RestController::HTTP_NOT_FOUND);
         }
     }
+
+
+
+
+
+
+
+
 public function get_research_papers_get()
 {
     $this->load->model('UserModel');
@@ -1282,7 +1290,74 @@ public function get_research_papers_get()
 
 
 
+public function delete_research_get($id = 0)
+{
+    // $this->load->database();
+    $this->load->model('UserModel');
 
+    $id = intval($id);
+    if ($id > 0) {
+        $result = $this->UserModel->deleteResearchPaperById($id, $this->user['id']);
+    } else {
+        $result = ['status' => 400, 'message' => 'Valid ID is required.'];
+    }
+
+   
+    $this->response($result, RestController::HTTP_OK);
+}
+
+
+
+public function update_research_paper_post($id = null)
+{
+    $this->load->model('UserModel');
+    $this->load->helper('url');
+
+    if (empty($id)) {
+        $this->response(['status' => 400, 'message' => 'Invalid Publication ID.'], RestController::HTTP_BAD_REQUEST);
+        return;
+    }
+
+    $fields = [
+        'author_name',
+        'author_contact',
+        'author_email',
+        'country',
+        'affiliation',
+        'department',
+        'paper_title',
+        'abstract',
+        'keywords',
+    ];
+
+    $update_data = [];
+    foreach ($fields as $field) {
+        $input_value = $this->input->post($field);
+        if ($input_value !== null && $input_value !== '') { 
+            $update_data[$field] = $input_value;
+        }
+    }
+
+  
+    $co_authors = $this->input->post('co_authors') ? json_decode($this->input->post('co_authors'), true) : null;
+
+   
+    if (!empty($update_data) || !is_null($co_authors)) {
+        $updated = $this->UserModel->update_research_paper($id, $update_data, $co_authors);
+
+        if ($updated) {
+            $this->response([
+                'status' => 200,
+                'message' => 'Research paper updated successfully!',
+                'data' => array_merge(['paper_id' => $id], $update_data, ['co_authors' => $co_authors]),
+            ], RestController::HTTP_OK);
+        } else {
+            $this->response(['status' => 500, 'message' => 'Failed to update the Publication.'], RestController::HTTP_BAD_REQUEST);
+        }
+    } else {
+        $this->response(['status' => 400, 'message' => 'No valid data to update.'], RestController::HTTP_BAD_REQUEST);
+    }
+}
 
 
 }
