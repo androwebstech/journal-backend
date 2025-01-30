@@ -135,6 +135,7 @@ public function approveRejectJournal($journalId,$status){
 public function getPublications()
 {
     $this->db->select('*');
+      $this->db->order_by('ppuid', 'DESC');
     $this->db->from('published_papers');
     $query = $this->db->get();
 
