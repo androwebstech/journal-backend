@@ -89,7 +89,7 @@ class User extends RestController {
                 'review_type' => $this->input->post('review_type'),
                 'review_time' => $this->input->post('review_time'),
                 'user_id' => $this->user['id'], // Ensure $this->user is properly set
-                'approval_status' => 0, // Default pending status
+                'approval_status' => APPROVAL_STATUS::PENDING, // Default pending status
             ];
 
             $res = $this->UserModel->insert_journal($data);
