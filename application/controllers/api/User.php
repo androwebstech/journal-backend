@@ -1362,7 +1362,7 @@ public function get_joined_reviewers_get()
             'status' => 403,
             'message' => 'Access denied. Only publishers can view reviewers.',
             'data' => []
-        ], RestController::HTTP_FORBIDDEN);
+        ], RestController::HTTP_OK);
         return;
     }
     $journals = $this->UserModel->getPublisherJournals($userId);
@@ -1370,10 +1370,10 @@ public function get_joined_reviewers_get()
 
     if (empty($journalIds)) {
         $this->response([
-            'status' => 404,
+            'status' => 200,
             'message' => 'No journals found for this publisher.',
             'data' => []
-        ], RestController::HTTP_NOT_FOUND);
+        ], RestController::HTTP_OK);
         return;
     }
     $this->db->select('users.id, users.name, users.email, journal_reviewer_link.journal_id');
@@ -1394,7 +1394,7 @@ public function get_joined_reviewers_get()
             'status' => 404,
             'message' => 'No reviewers found for your journals.',
             'data' => []
-        ], RestController::HTTP_NOT_FOUND);
+        ], RestController::HTTP_OK);
     }
 }
 
@@ -1437,7 +1437,7 @@ public function assign_request_to_reviewer_post($reviewer_id = null, $pr_id = nu
             return $this->response([
                 'status' => 404,
                 'message' => 'Publish request not found.'
-            ], RestController::HTTP_NOT_FOUND);
+            ], RestController::HTTP_OK);
         }
 
         if ($request['pr_status'] !== 'accept') {
@@ -1455,7 +1455,7 @@ public function assign_request_to_reviewer_post($reviewer_id = null, $pr_id = nu
         if ($update_result) {
             return $this->response(['status' => 200, 'message' => 'Reviewer assigned successfully.','data'=>$update_result], RestController::HTTP_OK);
         } else {
-            return $this->response(['status' => 500, 'message' => 'Failed to assign reviewer.'], RestController::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->response(['status' => 500, 'message' => 'Failed to assign reviewer.'], RestController::HTTP_OK);
         }
     }
 }
