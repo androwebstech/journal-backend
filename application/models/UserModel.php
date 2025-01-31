@@ -151,6 +151,7 @@ class UserModel extends CI_model
 
     public function getUserById($id)
     {
+        $this->db->select('*,"" as password,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name');
         $user = $this->db->where('id', $id)->get('users')->row_array();
         if(isset($user['password']))
             unset($user['password']);
