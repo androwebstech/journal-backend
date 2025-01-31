@@ -1403,9 +1403,6 @@ public function get_joined_reviewers_get()
 
 
 
-
-
-
 public function get_research_by_id_get($id = null)
 {
    
@@ -1445,4 +1442,65 @@ public function get_research_by_id_get($id = null)
 
 
 
+
+public function assign_request_to_reviewer_post($reviewer_id = null, $pr_id = null)
+{
+        $reviewer_id = intval($reviewer_id);
+        $pr_id = intval($pr_id);
+        $this->load->model('UserModel');
+        $this->load->helper('url');
+        if (empty($reviewer_id) || empty($pr_id)) {
+            $result = ['status' => 400, 'message' => 'Reviewer ID or Paper ID missing.'];
+            $this->response($result, RestController::HTTP_OK);
+            return;
+        }
+
+        if(!$this->UserModel->publishRequestExists($pr_id)){
+            $result = ['status' => 400, 'message' => 'Invalid Request ID.'];
+                $this->response($result, RestController::HTTP_OK);
+                return;
+        }
+        
+
+        if(!$this->UserModel->reviewerExists($reviewer_id)){
+            $result = ['status' => 400, 'message' => 'Invalid reviewer ID.'];
+                $this->response($result, RestController::HTTP_OK);
+                return;
+        }
+        
+        //validate journal id
+        if($this->user['type'] != USER_TYPE::PUBLISHER){
+                return $this->response([
+                    'status' => 400,
+                    'message' => 'Only publishers can assign reviewers.',
+                ], RestController::HTTP_OK);
+            }
+    
+        $request = $this->UserModel->getPublishRequest($pr_id);
+    
+        if (!$request) {
+            return $this->response([
+                'status' => 404,
+                'message' => 'Publish request not found.'
+            ], RestController::HTTP_NOT_FOUND);
+        }
+
+        if ($request['pr_status'] !== 'accept') {
+            return $this->response(['status' => 400, 'message' => 'Request status must be "accept" to assign a reviewer.'], RestController::HTTP_OK);
+        }
+        if ($request['publisher_id'] !== $this->user['id']) {
+            return $this->response(['status' => 401, 'message' => 'You are not authorized to assign a reviewer to this request.'], RestController::HTTP_OK);
+        }
+        $update_data = [
+            'assigned_reviewer' => $reviewer_id,
+            'reviewer_remarks' => ''
+        ];
+        $update_result = $this->UserModel->updatePublishRequest($pr_id, $update_data);
+    
+        if ($update_result) {
+            return $this->response(['status' => 200, 'message' => 'Reviewer assigned successfully.','data'=>$update_result], RestController::HTTP_OK);
+        } else {
+            return $this->response(['status' => 500, 'message' => 'Failed to assign reviewer.'], RestController::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }
