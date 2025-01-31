@@ -595,6 +595,7 @@ public function getPaperId($journal_id, $user_id)
             research_papers.paper_title, 
             users.name,
             journals.journal_name,
+            (Select name from users where users.id = publish_requests.assigned_reviewer) AS reviewer_name
         ');
         $this->db->from('publish_requests');
         $this->db->join('users', 'publish_requests.author_id = users.id');
@@ -803,6 +804,46 @@ public function update_research_paper($id, $update_data, $co_authors = null)
 //         ->result_array();
 // }
 
+public function reviewerExists($reviewerId){
+    $this->db->select("*");
+    $this->db->where('reviewer_id',$reviewerId);
+    $query = $this->db->get('journal_reviewer_link');
+    if ($query->num_rows() > 0) {
+        return $query->row_array();
+    }
+    return false;
+}
+public function publishRequestExists($pr_id){
+    $this->db->select("*");
+    $this->db->where('pr_id',$pr_id);
+    $query = $this->db->get('publish_requests');
+    if ($query->num_rows() > 0) {
+        return $query->row_array();
+    }
+    return false;
+}
+
+public function getPublishRequest($pr_id){
+    $this->db->select("*");
+    $this->db->where('pr_id',$pr_id);
+    $query = $this->db->get('publish_requests');
+    if ($query->num_rows() > 0) {
+        return $query->row_array();
+    }
+    return false;
+}
+
+public function updatePublishRequest($pr_id,$update_data){
+    $reviewer_id = $update_data['assigned_reviewer'];
+    $this->db->select('name');
+    $this->db->where('id',$reviewer_id);
+    $query = $this->db->get('users')->row_array();
+
+    $this->db->where('pr_id',$pr_id);
+    $this->db->update('publish_requests',$update_data);
+    $update_data['reviewer_name'] = $query['name'];
+    return $update_data;
+}
 
 
 
