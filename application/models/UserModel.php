@@ -751,17 +751,15 @@ public function leaveJoinedJournal($requestId)
     }
 
 
-    public function update_co_authors($paper_id, $co_authors) {
-    $this->db->where('paper_id', $paper_id);
-    $this->db->delete('co_authors'); 
-
+public function update_co_authors($paper_id, $co_authors) {
+    
     if (!empty($co_authors)) {
-        foreach ($co_authors as $co_author) {
-            $co_author['paper_id'] = $paper_id;
-            $this->db->insert('co_authors', $co_author);
-        }
+        
+        $this->db->where('paper_id', $paper_id);
+        $this->db->update('research_papers', ['co_authors' => json_encode($co_authors)]);
     }
 }
+
 
 
 
@@ -787,7 +785,6 @@ public function update_research_paper($id, $update_data, $co_authors = null)
                 $this->update_co_authors($id, $co_authors);
             }
 
-          
             $this->db->trans_complete();
 
             return $this->db->trans_status(); 
@@ -796,6 +793,7 @@ public function update_research_paper($id, $update_data, $co_authors = null)
     }
     return false;
 }
+
 // public function getPublisherJournals($publisherId)
 // {
 //     return $this->db->select('journal_id')
@@ -846,6 +844,18 @@ public function updatePublishRequest($pr_id,$update_data){
     return $update_data;
 }
 
+
+
+    public function get_research_by_id($id)
+    {
+        $this->db->where('paper_id', $id);
+        $query = $this->db->get('research_papers'); 
+        if ($query->num_rows() > 0) {
+            return $query->row_array(); 
+        }
+
+        return null; 
+    }
 
 
 }

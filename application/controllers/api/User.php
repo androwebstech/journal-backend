@@ -1309,7 +1309,7 @@ public function update_research_paper_post($id = null)
     $this->load->helper('url');
 
     if (empty($id)) {
-        $this->response(['status' => 400, 'message' => 'Invalid Publication ID.'], RestController::HTTP_BAD_REQUEST);
+        $this->response(['status' => 400, 'message' => 'Invalid research paper ID.'], RestController::HTTP_BAD_REQUEST);
         return;
     }
 
@@ -1334,7 +1334,10 @@ public function update_research_paper_post($id = null)
     }
 
   
-    $co_authors = $this->input->post('co_authors') ? json_decode($this->input->post('co_authors'), true) : null;
+     $co_authors = $this->input->post('co_authors');
+     if (is_string($co_authors)) {
+        $co_authors = json_decode($co_authors, true);
+    }
 
    
     if (!empty($update_data) || !is_null($co_authors)) {
@@ -1347,7 +1350,7 @@ public function update_research_paper_post($id = null)
                 'data' => array_merge(['paper_id' => $id], $update_data, ['co_authors' => $co_authors]),
             ], RestController::HTTP_OK);
         } else {
-            $this->response(['status' => 500, 'message' => 'Failed to update the Publication.'], RestController::HTTP_BAD_REQUEST);
+            $this->response(['status' => 500, 'message' => 'Failed to update the research paper.'], RestController::HTTP_BAD_REQUEST);
         }
     } else {
         $this->response(['status' => 400, 'message' => 'No valid data to update.'], RestController::HTTP_BAD_REQUEST);
@@ -1397,6 +1400,48 @@ public function get_joined_reviewers_get()
         ], RestController::HTTP_OK);
     }
 }
+
+
+
+public function get_research_by_id_get($id = null)
+{
+   
+    $this->load->model('UserModel');
+
+   
+    if (!$id) {
+        $result = [
+            'status' => 400,
+            'message' => 'Research paper  ID is required',
+            'data' => null
+        ];
+        return $this->response($result, RestController::HTTP_BAD_REQUEST);
+    }
+
+    
+    $research_paper = $this->UserModel->get_research_by_id($id);
+
+  
+    if ($research_paper) {
+        $result = [
+            'status' => 200,
+            'message' => 'Research paper  fetched successfully',
+            'data' => $research_paper
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No Research paper found with the given ID',
+            'data' => null
+        ];
+    }
+
+   
+    return $this->response($result, RestController::HTTP_OK);
+}
+
+
+
 
 public function assign_request_to_reviewer_post($reviewer_id = null, $pr_id = null)
 {
