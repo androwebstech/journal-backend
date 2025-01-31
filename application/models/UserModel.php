@@ -706,19 +706,19 @@ public function get_joined_journals($where = [])
 public function leaveJoinedJournal($requestId)
 {
 
-    $this->db->where('id', $requestId);
-    $query = $this->db->get('journal_reviewer_link');
-
-    if ($query->num_rows() == 0) {
-        return 'not_found'; 
-    }
-
+   
    
     $this->db->where('id', $requestId);
     $delete = $this->db->delete('journal_reviewer_link');
 
-    return $delete ? true : false;
+  
 }
+
+
+
+
+
+
    public function getresearchpapersByUserId($user_id)
     {
         $this->db->where("user_id",$user_id);
@@ -795,6 +795,14 @@ public function update_research_paper($id, $update_data, $co_authors = null)
     }
     return false;
 }
+// public function getPublisherJournals($publisherId)
+// {
+//     return $this->db->select('journal_id')
+//         ->from('journals')
+//         ->where('publisher_id', $publisherId)
+//         ->get()
+//         ->result_array();
+// }
 
 
 
