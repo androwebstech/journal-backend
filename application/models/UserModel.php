@@ -670,7 +670,7 @@ public function getPaperById($paper_id)
 
 public function get_joined_journals($where = [])
 {
-    $this->db->select('journal_reviewer_link.*, users.*');
+    $this->db->select('journal_reviewer_link.*, users.*,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name');
     $this->db->from('journal_reviewer_link');
     
 
