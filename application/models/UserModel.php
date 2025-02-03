@@ -670,7 +670,7 @@ public function getPaperById($paper_id)
 
 public function get_joined_journals($where = [])
 {
-    $this->db->select('journal_reviewer_link.*, users.*,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name');
+    $this->db->select('journal_reviewer_link.*,journals.journal_name, users.*,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name');
     $this->db->from('journal_reviewer_link');
     
 
@@ -709,7 +709,7 @@ public function leaveJoinedJournal($requestId)
 
    
    
-    $this->db->where('id', $requestId);
+    $this->db->where('request_id', $requestId);
     $delete = $this->db->delete('journal_reviewer_link');
 
   

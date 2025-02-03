@@ -1225,7 +1225,7 @@ class User extends RestController
         $this->response($result, RestController::HTTP_OK);
     }
 
-
+    
 
 
 
@@ -1250,11 +1250,11 @@ class User extends RestController
 
 
 
-        $where = [];
-        if ($this->user['type'] == USER_TYPE::REVIEWER) {
-            $where['journal_reviewer_link.reviewer_id'] = $userId;
+        // $where = [];
+        // if ($this->user['type'] == USER_TYPE::REVIEWER) {
+        //     $where['journal_reviewer_link.reviewer_id'] = $userId;
 
-        }
+        // }
 
 
 
