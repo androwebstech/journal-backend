@@ -695,7 +695,7 @@ class UserModel extends CI_model
 
     public function get_joined_journals($where = [])
     {
-        $this->db->select('journal_reviewer_link.*,journals.journal_name, users.*,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name');
+        $this->db->select('journal_reviewer_link.*,journals.journal_name,journals.eissn_no,journals.pissn_no,journals.website_link,journals.publication_type, users.*,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name');
         $this->db->from('journal_reviewer_link');
 
 
