@@ -72,7 +72,7 @@ class User extends RestController
         $this->form_validation->set_rules('review_type', 'Review Type', 'trim|required|in_list[Single-Blind,Double-Blind,Open Peer Review,Collaborative]');
         $this->form_validation->set_rules('review_time', 'Review Time', 'trim');
         if(empty($_FILES['image']['name'])) {
-            $this->form_validation->set_rules('image' , 'Image' , 'require');
+            $this->form_validation->set_rules('image' , 'Image' , 'required');
         }
 
         if ($this->form_validation->run()) {
@@ -212,7 +212,7 @@ class User extends RestController
 
             if (!empty($update_data)) {
                 $updated = $this->UserModel->update_journal($journal_id, $update_data);
-                if ($uploaded_image) $update_data['image'] = base_url('uploads/' . $uploaded_image);;
+                if ($uploaded_image) $update_data['image'] = base_url('uploads/' . $uploaded_image);
                 if ($updated) {
                     $result = [
                         'status' => 200,
