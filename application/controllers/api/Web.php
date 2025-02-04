@@ -247,5 +247,74 @@ public function get_reviewer_by_id_get($id = null)
     return $this->response($result, RestController::HTTP_OK);
 }
 
+public function get_publication_by_id_get($id = null)
+{
+    $this->load->model('UserModel');
+
+    if (!$id) {
+        $result = [
+            'status' => 400,
+            'message' => 'Publication ID is required',
+            'data' => null
+        ];
+        return $this->response($result, RestController::HTTP_BAD_REQUEST);
+    }
+
+    
+    $publication = $this->UserModel->get_approved_publication_by_id($id);
+
+    if ($publication) {
+        $result = [
+            'status' => 200,
+            'message' => 'Publication fetched successfully',
+            'data' => $publication
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No approved publication found with the given ID',
+            'data' => []
+        ];
+    }
+
+    return $this->response($result, RestController::HTTP_OK);
+}
+
+
+
+public function get_published_papers_by_journal_get($journal_id = null)
+{
+    $this->load->model('UserModel');
+
+    if (!$journal_id) {
+        $result = [
+            'status' => 400,
+            'message' => 'Journal ID is required',
+            'data' => null
+        ];
+        return $this->response($result, RestController::HTTP_BAD_REQUEST);
+    }
+
+    
+    $published_papers = $this->UserModel->get_published_research_papers($journal_id);
+
+    if (!empty($published_papers)) {
+        $result = [
+            'status' => 200,
+            'message' => 'Published research papers fetched successfully',
+            'data' => $published_papers
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No published research papers found for the given journal ID',
+            'data' => []
+        ];
+    }
+
+    return $this->response($result, RestController::HTTP_OK);
+}
+
+
 
 }

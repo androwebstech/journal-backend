@@ -754,6 +754,7 @@ class UserModel extends CI_model
     public function getresearchpapersByUserId($user_id)
     {
         $this->db->where("user_id", $user_id);
+           $this->db->order_by('paper_id', 'DESC');
         $query = $this->db->get('research_papers');
         return $query->result_array();
     }
@@ -892,6 +893,83 @@ class UserModel extends CI_model
 
         return null;
     }
+
+
+
+    public function get_approved_publication_by_id($id)
+{
+    $this->db->where('ppuid', $id);
+    $this->db->where('approval_status', APPROVAL_STATUS::APPROVED); 
+    $query = $this->db->get('published_papers');
+
+    return $query->row_array(); 
+}
+
+
+
+// public function get_published_research_papers($journal_id)
+// {
+//     $this->db->select('
+//         rp.paper_id,
+//         rp.author_name,
+//         rp.author_contact,
+//         rp.author_email,
+//         rp.country,
+//         rp.affiliation,
+//         rp.department,
+//         rp.paper_title,
+//         rp.abstract,
+//         rp.file,
+//         rp.keywords,
+//         rp.user_id,
+//         rp.submission_status,
+//         rp.created_at,
+//         pr.pr_id,
+//         pr.author_id,
+//         pr.journal_id,
+//         pr.publisher_id,
+//         pr.sender,
+//         pr.pr_status,
+//         pr.payment_status,
+//         pr.assigned_reviewer,
+//         pr.reviewer_remarks,
+//         pr.live_url,
+//         pr.created_at AS pr_created_at
+//     ');
+//     $this->db->from('publish_requests pr');
+//     $this->db->join('research_papers rp', 'pr.paper_id = rp.paper_id');
+//     $this->db->where('pr.journal_id', $journal_id);
+//     $this->db->where('pr.pr_status', PR_STATUS::PUBLISHED); 
+
+//     $query = $this->db->get();
+
+//     return $query->result_array(); 
+// }
+
+
+public function get_published_research_papers($journal_id)
+{
+    $this->db->select('
+        publish_requests.*,
+        research_papers.author_email,
+        research_papers.country,
+        research_papers.affiliation,
+        research_papers.department,
+        research_papers.author_name,
+        research_papers.paper_title,
+        research_papers.abstract,
+        research_papers.file,
+        research_papers.keywords
+    ');
+    $this->db->from('publish_requests');
+    $this->db->join('research_papers', 'publish_requests.paper_id = research_papers.paper_id');
+    $this->db->where('publish_requests.journal_id', $journal_id);
+    $this->db->where('publish_requests.pr_status', PR_STATUS::PUBLISHED); 
+
+    $query = $this->db->get();
+
+    return $query->result_array(); 
+}
 
 
 }
