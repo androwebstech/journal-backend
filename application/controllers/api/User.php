@@ -25,6 +25,7 @@ class User extends RestController
         $this->load->library(['form_validation']);
         $this->load->helper(['url','common']);
         $this->load->model(['Authentication_model','UserModel','Admin_model']);
+        $this->load->library('upload');
 
         $headers = $this->input->request_headers();
         if (isset($headers['Authorization'])) {
@@ -70,8 +71,29 @@ class User extends RestController
         $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|integer');
         $this->form_validation->set_rules('review_type', 'Review Type', 'trim|required|in_list[Single-Blind,Double-Blind,Open Peer Review,Collaborative]');
         $this->form_validation->set_rules('review_time', 'Review Time', 'trim');
+        if(empty($_FILES['image']['name'])) {
+            $this->form_validation->set_rules('image' , 'Image' , 'required');
+        }
 
         if ($this->form_validation->run()) {
+            $config['upload_path']          = './uploads/';
+			$config['allowed_types']        = 'gif|jpg|png|jpeg|pdf';
+			$config['encrypt_name']			= true;
+			$config['max_size']             = 10000;
+
+            $this->upload->initialize($config);
+
+
+            $uploaded_image = null;
+
+            if ($this->upload->do_upload('image')) {
+                $uploaded_image = $this->upload->data('file_name'); 
+            } else {
+                $result = ['status' => 400, 'message' => $this->upload->display_errors()];
+                $this->response($result, RestController::HTTP_OK);
+                return;
+            }
+
             $data = [
                 'journal_name' => $this->input->post('journal_name'),
                 'eissn_no' => $this->input->post('eissn_no'),
@@ -90,10 +112,12 @@ class User extends RestController
                 'review_type' => $this->input->post('review_type'),
                 'review_time' => $this->input->post('review_time'),
                 'user_id' => $this->user['id'], // Ensure $this->user is properly set
+                'image' => $uploaded_image,
                 'approval_status' => APPROVAL_STATUS::PENDING, // Default pending status
             ];
 
             $res = $this->UserModel->insert_journal($data);
+            $data['image'] = base_url('uploads/' . $uploaded_image);
 
             if ($res) {
                 $result = [
@@ -147,6 +171,24 @@ class User extends RestController
         $this->form_validation->set_rules('review_time', 'Review Time', 'trim');
 
         if ($this->form_validation->run()) {
+            $uploaded_image = null;
+            if (!empty($_FILES['image']['name'])) {
+                $config['upload_path']          = './uploads/';
+                $config['allowed_types']        = 'gif|jpg|png|jpeg|pdf';
+                $config['encrypt_name']         = true;
+                $config['max_size']             = 10000;
+    
+                $this->upload->initialize($config);
+                
+    
+                if ($this->upload->do_upload('image')) {
+                    $uploaded_image = $this->upload->data('file_name');
+                } else {
+                    $result = ['status' => 400, 'message' => $this->upload->display_errors()];
+                    $this->response($result, RestController::HTTP_OK);
+                    return;
+                }
+            }
 
             $update_data = [
                 'journal_name' => $this->input->post('journal_name'),
@@ -166,10 +208,11 @@ class User extends RestController
                 'review_type' => $this->input->post('review_type'),
                 'review_time' => $this->input->post('review_time'),
             ];
+            if ($uploaded_image) $update_data['image'] = $uploaded_image;
 
             if (!empty($update_data)) {
                 $updated = $this->UserModel->update_journal($journal_id, $update_data);
-
+                if ($uploaded_image) $update_data['image'] = base_url('uploads/' . $uploaded_image);
                 if ($updated) {
                     $result = [
                         'status' => 200,

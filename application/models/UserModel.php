@@ -19,7 +19,7 @@ class UserModel extends CI_model
 
         $this->applyReviewerSearchFilter($filters, $searchString);
 
-        $this->db->select('*,"" as password,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name');
+        $this->db->select('*,"" as password,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name,CONCAT("' . base_url('') . '", profile_image) as profile_image');
         $this->db->order_by('id', 'DESC');
         $this->db->limit($limit, $offset);
         return $this->db->get('users')->result_array();
@@ -65,7 +65,7 @@ class UserModel extends CI_model
 
         $this->applyJournalSearchFilter($filters, $searchString);
 
-        $this->db->select('*,"" as password,(SELECT name from countries where id = journals.country) as country_name, (SELECT name from states where id = journals.state) as state_name');
+        $this->db->select('*,"" as password,(SELECT name from countries where id = journals.country) as country_name, (SELECT name from states where id = journals.state) as state_name,CONCAT("' . base_url('uploads/') . '", image) as image');
         $this->db->order_by('journal_id', 'DESC');
         $this->db->limit($limit, $offset);
         return $this->db->get('journals')->result_array();
@@ -85,7 +85,7 @@ class UserModel extends CI_model
 
         if (!empty($filters) &&  is_array($filters)) {
             foreach ($filters as $key => $value) {
-                if (!in_array($key, $filterColumns)) {
+                if (!in_array($key, $filterColumns) || empty($value)) {
                     continue;
                 }
                 if (is_numeric($value)) {
@@ -695,7 +695,7 @@ class UserModel extends CI_model
 
     public function get_joined_journals($where = [])
     {
-        $this->db->select('journal_reviewer_link.*,journals.journal_name, users.*,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name');
+        $this->db->select('journal_reviewer_link.*,journals.journal_name,journals.eissn_no,journals.pissn_no,journals.website_link,journals.publication_type, users.*,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name');
         $this->db->from('journal_reviewer_link');
 
 
