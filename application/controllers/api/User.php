@@ -878,27 +878,55 @@ class User extends RestController
     public function change_publish_request_status_post($id = null)
     {
         $this->form_validation->set_rules('status', 'Status', 'trim|required|in_list['.implode(',', PR_STATUS::ALL).']');
-
+        $this->form_validation->set_rules('live_url', 'Live URL', 'trim');
         if ($this->form_validation->run()) {
             $status = $this->input->post('status');
-            $result = $this->UserModel->update_publish_request_status($id, $status);
 
-            if ($result === true) {
-                $this->response([
-                    'status' => 200,
-                    'message' => 'Request status updated successfully.'
-                ], RestController::HTTP_OK);
-            } elseif ($result === false) {
+            $request = $this->UserModel->getPublishRequestsById($id);
+
+            if (empty($request)) {
                 $this->response([
                     'status' => 400,
-                    'message' => 'Request status is already '.$status.'.'
+                    'message' => 'Request not found.'
                 ], RestController::HTTP_OK);
-            } else {
-                $this->response([
-                    'status' => 500,
-                    'message' => 'Failed to update request status.'
-                ], RestController::HTTP_BAD_REQUEST);
             }
+            $allowedAction = [];
+            if ($request['pr_status'] == PR_STATUS::PENDING) {
+                $allowedAction = [PR_STATUS::ACCEPT, PR_STATUS::REJECT];
+            } elseif ($request['pr_status'] == PR_STATUS::ACCEPT) {
+                $allowedAction = [PR_STATUS::PROCEED_PAYMENT, PR_STATUS::REJECT];
+            } elseif ($request['pr_status'] == PR_STATUS::PROCEED_PAYMENT) {
+                $allowedAction = [PR_STATUS::PUBLISHED];
+            }
+
+            if (!in_array($status, $allowedAction)) {
+                $this->response([
+                    'status' => 401,
+                    'message' => 'Invalid status provided according to current status.'
+                ], RestController::HTTP_OK);
+            }
+
+            if ($this->user['id'] == $request['author_id'] && $request['pr_status'] == PR_STATUS::PENDING && $request['sender'] == USER_TYPE::PUBLISHER) {
+                $this->UserModel->update_publish_request_status($id, $status);
+                $result = [
+                    'status' => 200,
+                    'message' => 'Request status updated successfully.'
+                ];
+            } elseif ($this->user['id'] == $request['publisher_id']) {
+                $liveURL  = null;
+                if ($status == PR_STATUS::PUBLISHED && !empty($_POST['live_url'])) {
+                    $liveURL = $this->input->post('live_url');
+                }
+                $this->UserModel->update_publish_request_status($id, $status, $liveURL);
+                $result = [
+                    'status' => 200,
+                    'message' => 'Request status updated successfully.'
+                ];
+
+            } else {
+                $result = ['status' => 401,'message' => 'Unauthorized action'];
+            }
+            $this->response($result, RestController::HTTP_OK);
         } else {
             $this->response([
                 'status' => 400,
@@ -1129,7 +1157,7 @@ class User extends RestController
         //     return;
         // }
 
-        $request = $this->UserModel->getAuthorRequestsById($req_id);
+        $request = $this->UserModel->getPublishRequestsById($req_id);
 
         if (empty($request)) {
             $result = [
@@ -1225,7 +1253,7 @@ class User extends RestController
         $this->response($result, RestController::HTTP_OK);
     }
 
-    
+
 
 
 
@@ -1237,36 +1265,33 @@ class User extends RestController
 
     public function leave_journal_post()
     {
-        $requestId = $this->input->post('request_id');
+        $requestId = intval($this->input->post('request_id'));
 
-        if (empty($requestId)) {
+        $link = $this->UserModel->getJournalReviewerLinkByRequestId($requestId);
+        if (empty($link)) {
             $result = [
                 'status' => 400,
-                'message' => 'Request ID is required',
+                'message' => 'Joined Link not found',
             ];
-            $this->response($result, RestController::HTTP_BAD_REQUEST);
+            $this->response($result, RestController::HTTP_OK);
             return;
         }
 
+        if (($this->user['type'] == USER_TYPE::PUBLISHER && $this->UserModel->publisherHasJournal($link['journal_id'], $this->user['id']))
+        || ($this->user['type'] == USER_TYPE::REVIEWER && $this->user['id'] ==  $link['reviewer_id'])) {
 
-
-        // $where = [];
-        // if ($this->user['type'] == USER_TYPE::REVIEWER) {
-        //     $where['journal_reviewer_link.reviewer_id'] = $userId;
-
-        // }
-
-
-
-        $deleteStatus = $this->UserModel->leaveJoinedJournal($requestId);
-
-
-        $result = [
-            'status' => 200,
-            'message' => 'Record removed successfully',
-        ];
+            $deleteStatus = $this->UserModel->leaveJoinedJournal($requestId);
+            $result = [
+                'status' => 200,
+                'message' => 'Leaved Journal Successfully',
+            ];
+        } else {
+            $result = [
+                'status' => 401,
+                'message' => 'Unauthorized action',
+            ];
+        }
         $this->response($result, RestController::HTTP_OK);
-
     }
 
 
