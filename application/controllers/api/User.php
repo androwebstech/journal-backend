@@ -955,6 +955,8 @@ class User extends RestController
                     'status' => 200,
                     'message' => 'Request status updated successfully.'
                 ];
+            } elseif ($this->user['type'] == $request['sender'] && $request['pr_status'] == PR_STATUS::PENDING) {
+                $result = ['status' => 401,'message' => 'Unauthorized action'];
             } elseif ($this->user['id'] == $request['publisher_id']) {
                 $liveURL  = null;
                 if ($status == PR_STATUS::PUBLISHED && !empty($_POST['live_url'])) {
