@@ -189,6 +189,7 @@ class UserModel extends CI_model
     public function get_journal_by_id($id)
     {
         $this->db->where('journal_id', $id);
+         $this->db->select('*,"" as password,(SELECT name from countries where id = journals.country) as country_name, (SELECT name from states where id = journals.state) as state_name,CONCAT("' . base_url('uploads/') . '", image) as image');
         $query = $this->db->get('journals');
         if ($query->num_rows() > 0) {
             return $query->row_array();
