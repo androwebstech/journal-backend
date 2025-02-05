@@ -899,11 +899,11 @@ class UserModel extends CI_model
 
     public function get_approved_publication_by_id($id)
 {
-    $this->db->where('ppuid', $id);
+    $this->db->where('user_id', $id);
     $this->db->where('approval_status', APPROVAL_STATUS::APPROVED); 
     $query = $this->db->get('published_papers');
 
-    return $query->row_array(); 
+    return $query->result_array(); 
 }
 
 
