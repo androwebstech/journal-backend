@@ -912,8 +912,6 @@ class UserModel extends CI_model
 //     $this->db->select('
 //         rp.paper_id,
 //         rp.author_name,
-//         rp.author_contact,
-//         rp.author_email,
 //         rp.country,
 //         rp.affiliation,
 //         rp.department,
