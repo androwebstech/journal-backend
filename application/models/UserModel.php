@@ -951,13 +951,13 @@ public function get_published_research_papers($journal_id)
     $this->db->select('
         publish_requests.*,
         research_papers.author_email,
+        research_papers.author_contact,
+        research_papers.author_name,
         research_papers.country,
         research_papers.affiliation,
         research_papers.department,
-        research_papers.author_name,
         research_papers.paper_title,
         research_papers.abstract,
-        research_papers.file,
         research_papers.keywords
     ');
     $this->db->from('publish_requests');
