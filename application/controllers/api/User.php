@@ -71,15 +71,15 @@ class User extends RestController
         $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|integer');
         $this->form_validation->set_rules('review_type', 'Review Type', 'trim|required|in_list[Single-Blind,Double-Blind,Open Peer Review,Collaborative]');
         $this->form_validation->set_rules('review_time', 'Review Time', 'trim');
-        if(empty($_FILES['image']['name'])) {
-            $this->form_validation->set_rules('image' , 'Image' , 'required');
+        if (empty($_FILES['image']['name'])) {
+            $this->form_validation->set_rules('image', 'Image', 'required');
         }
 
         if ($this->form_validation->run()) {
             $config['upload_path']          = './uploads/';
-			$config['allowed_types']        = 'gif|jpg|png|jpeg|pdf';
-			$config['encrypt_name']			= true;
-			$config['max_size']             = 10000;
+            $config['allowed_types']        = 'gif|jpg|png|jpeg|pdf';
+            $config['encrypt_name']			= true;
+            $config['max_size']             = 10000;
 
             $this->upload->initialize($config);
 
@@ -87,7 +87,7 @@ class User extends RestController
             $uploaded_image = null;
 
             if ($this->upload->do_upload('image')) {
-                $uploaded_image = $this->upload->data('file_name'); 
+                $uploaded_image = $this->upload->data('file_name');
             } else {
                 $result = ['status' => 400, 'message' => $this->upload->display_errors()];
                 $this->response($result, RestController::HTTP_OK);
@@ -177,10 +177,10 @@ class User extends RestController
                 $config['allowed_types']        = 'gif|jpg|png|jpeg|pdf';
                 $config['encrypt_name']         = true;
                 $config['max_size']             = 10000;
-    
+
                 $this->upload->initialize($config);
-                
-    
+
+
                 if ($this->upload->do_upload('image')) {
                     $uploaded_image = $this->upload->data('file_name');
                 } else {
@@ -208,11 +208,15 @@ class User extends RestController
                 'review_type' => $this->input->post('review_type'),
                 'review_time' => $this->input->post('review_time'),
             ];
-            if ($uploaded_image) $update_data['image'] = $uploaded_image;
+            if ($uploaded_image) {
+                $update_data['image'] = $uploaded_image;
+            }
 
             if (!empty($update_data)) {
                 $updated = $this->UserModel->update_journal($journal_id, $update_data);
-                if ($uploaded_image) $update_data['image'] = base_url('uploads/' . $uploaded_image);
+                if ($uploaded_image) {
+                    $update_data['image'] = base_url('uploads/' . $uploaded_image);
+                }
                 if ($updated) {
                     $result = [
                         'status' => 200,
@@ -369,18 +373,16 @@ class User extends RestController
             $id = $this->user['id'];
             $profile_image = null;
 
-            if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
+            if (!empty($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
                 // Define upload configuration
                 $config['upload_path'] = './uploads/';
                 $config['allowed_types'] = 'jpg|jpeg|png|gif';
                 $config['max_size'] = 2048; // 2MB limit
-                $config['file_name'] = 'profile_' . $id . '_' . time();
+                $config['encrypt_name'] = true;
 
-                // Load upload library and initialize the config
-                $this->load->library('upload', $config);
+                $this->upload->initialize($config);
 
                 if ($this->upload->do_upload('profile_image')) {
-                    // Get uploaded file data
                     $uploadData = $this->upload->data();
                     $profile_image = 'uploads/' . $uploadData['file_name'];
                 } else {
@@ -637,7 +639,7 @@ class User extends RestController
             $config['allowed_types'] = 'png|pdf|doc|docx';
             $config['max_size'] = 2048;
 
-            $this->load->library('upload', $config);
+            $this->upload->initialize($config);
 
             if (!$this->upload->do_upload('file')) {
                 $result = [
