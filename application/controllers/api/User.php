@@ -87,7 +87,7 @@ class User extends RestController
             $uploaded_image = null;
 
             if ($this->upload->do_upload('image')) {
-                $uploaded_image = $this->upload->data('file_name');
+                $uploaded_image = 'uploads/'.$this->upload->data('file_name');
             } else {
                 $result = ['status' => 400, 'message' => $this->upload->display_errors()];
                 $this->response($result, RestController::HTTP_OK);
@@ -182,7 +182,7 @@ class User extends RestController
 
 
                 if ($this->upload->do_upload('image')) {
-                    $uploaded_image = $this->upload->data('file_name');
+                    $uploaded_image = 'uploads/'.$this->upload->data('file_name');
                 } else {
                     $result = ['status' => 400, 'message' => $this->upload->display_errors()];
                     $this->response($result, RestController::HTTP_OK);
@@ -1310,10 +1310,9 @@ class User extends RestController
 
     // leave from joined journals
 
-    public function leave_journal_post()
+    public function leave_journal_post($requestId = 0)
     {
-        $requestId = intval($this->input->post('request_id'));
-
+        $requestId = intval($requestId);
         $link = $this->UserModel->getJournalReviewerLinkByRequestId($requestId);
         if (empty($link)) {
             $result = [
@@ -1442,49 +1441,49 @@ class User extends RestController
         }
     }
 
-    public function get_joined_reviewers_get()
-    {
-        $userId = $this->user['id'];
-        if ($this->user['type'] != USER_TYPE::PUBLISHER) {
-            $this->response([
-                'status' => 403,
-                'message' => 'Access denied. Only publishers can view reviewers.',
-                'data' => []
-            ], RestController::HTTP_OK);
-            return;
-        }
-        $journals = $this->UserModel->getPublisherJournals($userId);
-        $journalIds = array_column($journals, 'journal_id');
+    // public function get_joined_reviewers_get()
+    // {
+    //     $userId = $this->user['id'];
+    //     if ($this->user['type'] != USER_TYPE::PUBLISHER) {
+    //         $this->response([
+    //             'status' => 403,
+    //             'message' => 'Access denied. Only publishers can view reviewers.',
+    //             'data' => []
+    //         ], RestController::HTTP_OK);
+    //         return;
+    //     }
+    //     $journals = $this->UserModel->getPublisherJournals($userId);
+    //     $journalIds = array_column($journals, 'journal_id');
 
-        if (empty($journalIds)) {
-            $this->response([
-                'status' => 200,
-                'message' => 'No journals found for this publisher.',
-                'data' => []
-            ], RestController::HTTP_OK);
-            return;
-        }
-        $this->db->select('users.id, users.name, users.email, journal_reviewer_link.journal_id');
-        $this->db->from('journal_reviewer_link');
-        $this->db->join('users', 'journal_reviewer_link.reviewer_id = users.id');
-        $this->db->where_in('journal_reviewer_link.journal_id', $journalIds);
+    //     if (empty($journalIds)) {
+    //         $this->response([
+    //             'status' => 200,
+    //             'message' => 'No journals found for this publisher.',
+    //             'data' => []
+    //         ], RestController::HTTP_OK);
+    //         return;
+    //     }
+    //     $this->db->select('users.id, users.name, users.email, journal_reviewer_link.journal_id');
+    //     $this->db->from('journal_reviewer_link');
+    //     $this->db->join('users', 'journal_reviewer_link.reviewer_id = users.id');
+    //     $this->db->where_in('journal_reviewer_link.journal_id', $journalIds);
 
-        $reviewers = $this->db->get()->result_array();
+    //     $reviewers = $this->db->get()->result_array();
 
-        if (!empty($reviewers)) {
-            $this->response([
-                'status' => 200,
-                'message' => 'Reviewers fetched successfully.',
-                'data' => $reviewers
-            ], RestController::HTTP_OK);
-        } else {
-            $this->response([
-                'status' => 404,
-                'message' => 'No reviewers found for your journals.',
-                'data' => []
-            ], RestController::HTTP_OK);
-        }
-    }
+    //     if (!empty($reviewers)) {
+    //         $this->response([
+    //             'status' => 200,
+    //             'message' => 'Reviewers fetched successfully.',
+    //             'data' => $reviewers
+    //         ], RestController::HTTP_OK);
+    //     } else {
+    //         $this->response([
+    //             'status' => 404,
+    //             'message' => 'No reviewers found for your journals.',
+    //             'data' => []
+    //         ], RestController::HTTP_OK);
+    //     }
+    // }
 
 
 
