@@ -977,7 +977,7 @@ class UserModel extends CI_model
         $this->db->where('pr_status', PR_STATUS::ACCEPT);
         $query = $this->db->get('publish_requests');
         if ($query->num_rows() > 0) {
-            return $query->row_array();
+            return $query->result_array();
         }
 
         return null;
