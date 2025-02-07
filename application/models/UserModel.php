@@ -986,15 +986,15 @@ class UserModel extends CI_model
         return null;
     }
 
-    public function update_remarks($pr_id, $id, $remarks)
-    {
+    public function update_remarks($pr_id, $id, $remarks){
+        
+        if($pr_id && $id && !empty($remarks)){        
         $this->db->where('pr_id', $pr_id)
                  ->where('assigned_reviewer', $id)
                  ->where('pr_status', PR_STATUS::ACCEPT)
                  ->update('publish_requests', ['reviewer_remarks' => $remarks]);
-    
-        if ($this->db->affected_rows() > 0) {
-            return true; 
+
+                 return true;
         }
     
         return false;
