@@ -971,5 +971,30 @@ class UserModel extends CI_model
         return $query->result_array();
     }
 
+    public function get_request_by_id($id)
+    {
+        $this->db->where('assigned_reviewer', $id);
+        $this->db->where('pr_status', PR_STATUS::ACCEPT);
+        $query = $this->db->get('publish_requests');
+        if ($query->num_rows() > 0) {
+            return $query->row_array();
+        }
+
+        return null;
+    }
+
+    public function update_remarks($pr_id, $id, $remarks)
+    {
+        $this->db->where('pr_id', $pr_id)
+                 ->where('assigned_reviewer', $id)
+                 ->where('pr_status', PR_STATUS::ACCEPT)
+                 ->update('publish_requests', ['reviewer_remarks' => $remarks]);
+    
+        if ($this->db->affected_rows() > 0) {
+            return true; 
+        }
+    
+        return false;
+    }
 
 }
