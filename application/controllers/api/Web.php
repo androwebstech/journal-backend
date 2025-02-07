@@ -247,7 +247,7 @@ public function get_reviewer_by_id_get($id = null)
     return $this->response($result, RestController::HTTP_OK);
 }
 
-public function get_publication_by_id_get($id = null)
+public function get_publication_by_User_id_get($id = null)
 {
     $this->load->model('UserModel');
 
