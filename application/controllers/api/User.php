@@ -71,6 +71,7 @@ class User extends RestController
         $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|integer');
         $this->form_validation->set_rules('review_type', 'Review Type', 'trim|required|in_list[Single-Blind,Double-Blind,Open Peer Review,Collaborative]');
         $this->form_validation->set_rules('review_time', 'Review Time', 'trim');
+         $this->form_validation->set_rules('description', 'Description', 'trim');
         if (empty($_FILES['image']['name'])) {
             $this->form_validation->set_rules('image', 'Image', 'required');
         }
@@ -111,9 +112,10 @@ class User extends RestController
                 'usd_publication_charge' => $this->input->post('usd_publication_charge'),
                 'review_type' => $this->input->post('review_type'),
                 'review_time' => $this->input->post('review_time'),
-                'user_id' => $this->user['id'], // Ensure $this->user is properly set
+                'description' => $this->input->post('description'),
+                'user_id' => $this->user['id'], 
                 'image' => $uploaded_image,
-                'approval_status' => APPROVAL_STATUS::PENDING, // Default pending status
+                'approval_status' => APPROVAL_STATUS::PENDING, 
             ];
 
             $res = $this->UserModel->insert_journal($data);
@@ -169,6 +171,7 @@ class User extends RestController
         $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|integer');
         $this->form_validation->set_rules('review_type', 'Review Type', 'trim|in_list[Single-Blind,Double-Blind,Open Peer Review,Collaborative]');
         $this->form_validation->set_rules('review_time', 'Review Time', 'trim');
+         $this->form_validation->set_rules('description', 'Description', 'trim');
 
         if ($this->form_validation->run()) {
             $uploaded_image = null;
@@ -207,6 +210,7 @@ class User extends RestController
                 'usd_publication_charge' => $this->input->post('usd_publication_charge'),
                 'review_type' => $this->input->post('review_type'),
                 'review_time' => $this->input->post('review_time'),
+                'description' => $this->input->post('description'),
             ];
             if ($uploaded_image) {
                 $update_data['image'] = $uploaded_image;
