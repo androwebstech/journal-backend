@@ -1604,4 +1604,80 @@ public function update_personal_details_post()
             return $this->response(['status' => 500, 'message' => 'Failed to assign reviewer.'], RestController::HTTP_OK);
         }
     }
+
+    public function get_assigned_request_get()
+    {
+        $id = $this->user['id'];
+
+        if($this->user['type']!=USER_TYPE::REVIEWER){
+            return $this->response(['status' => 401, 'message' => 'You are not authorized'], RestController::HTTP_OK);
+        }
+
+        $requests = $this->UserModel->get_request_by_id($id);
+
+        if ($requests) {
+            $result = [
+                'status' => 200,
+                'message' => 'Requests fetched successfully',
+                'data' => $requests
+            ];
+        } else {
+            $result = [
+                'status' => 404,
+                'message' => 'No Requests found with the given ID',
+                'data' => []
+            ];
+        }
+
+
+        return $this->response($result, RestController::HTTP_OK);
+    }
+
+    public function update_remarks_post($pr_id = null)
+    {
+
+        if (empty($pr_id)) {
+            $result = ['status' => 400, 'message' => 'Publish Request Id is required'];
+            $this->response($result, RestController::HTTP_OK);
+            return;
+        }
+
+        $this->form_validation->set_rules('remarks', 'Remarks', 'trim|required');
+
+        if($this->user['type']!=USER_TYPE::REVIEWER){
+            return $this->response(['status' => 401, 'message' => 'You are not authorized'], RestController::HTTP_OK);
+        }
+
+        if ($this->form_validation->run()) {
+            $remarks = $this->input->post('remarks');
+
+            $id = $this->user['id'];
+            $update = $this->UserModel->update_remarks($pr_id,$id,$remarks);
+
+            if ($update) {
+                $result = [
+                    'status' => 200,
+                    'message' => 'Remarks updated successfully'
+                ];
+            } else {
+                $result = [
+                    'status' => 500,
+                    'message' => 'Failed to change remarks'
+                ];
+            }
+        } else {
+            $result = [
+                'status' => 400,
+                'message' => strip_tags(validation_errors())
+            ];
+        }
+
+        $this->response($result, RestController::HTTP_OK);
+    }
+
+
+
+
+
+
 }

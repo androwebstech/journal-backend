@@ -971,5 +971,33 @@ class UserModel extends CI_model
         return $query->result_array();
     }
 
+    public function get_request_by_id($id)
+    {
+        $this->db->select('publish_requests.* , journals.journal_name ,research_papers.paper_title,research_papers.author_name,research_papers.abstract',);
+        $this->db->where('assigned_reviewer', $id);
+        $this->db->where('pr_status', PR_STATUS::ACCEPT);
+        $this->db->join('journals', 'journals.journal_id = publish_requests.journal_id');
+        $this->db->join('research_papers', 'research_papers.paper_id = publish_requests.paper_id');
+        $query = $this->db->get('publish_requests');
+        if ($query->num_rows() > 0) {
+            return $query->result_array();
+        }
+
+        return null;
+    }
+
+    public function update_remarks($pr_id, $id, $remarks){
+        
+        if($pr_id && $id && !empty($remarks)){        
+        $this->db->where('pr_id', $pr_id)
+                 ->where('assigned_reviewer', $id)
+                 ->where('pr_status', PR_STATUS::ACCEPT)
+                 ->update('publish_requests', ['reviewer_remarks' => $remarks]);
+
+                 return true;
+        }
+    
+        return false;
+    }
 
 }
