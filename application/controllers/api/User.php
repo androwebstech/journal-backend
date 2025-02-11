@@ -72,6 +72,7 @@ class User extends RestController
         $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|integer');
         $this->form_validation->set_rules('review_type', 'Review Type', 'trim|required|in_list[Single-Blind,Double-Blind,Open Peer Review,Collaborative]');
         $this->form_validation->set_rules('review_time', 'Review Time', 'trim');
+         $this->form_validation->set_rules('description', 'Description', 'trim');
         if (empty($_FILES['image']['name'])) {
             $this->form_validation->set_rules('image', 'Image', 'required');
         }
@@ -112,9 +113,10 @@ class User extends RestController
                 'usd_publication_charge' => $this->input->post('usd_publication_charge'),
                 'review_type' => $this->input->post('review_type'),
                 'review_time' => $this->input->post('review_time'),
-                'user_id' => $this->user['id'], // Ensure $this->user is properly set
+                'description' => $this->input->post('description'),
+                'user_id' => $this->user['id'], 
                 'image' => $uploaded_image,
-                'approval_status' => APPROVAL_STATUS::PENDING, // Default pending status
+                'approval_status' => APPROVAL_STATUS::PENDING, 
             ];
 
             $res = $this->UserModel->insert_journal($data);
@@ -170,6 +172,7 @@ class User extends RestController
         $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|integer');
         $this->form_validation->set_rules('review_type', 'Review Type', 'trim|in_list[Single-Blind,Double-Blind,Open Peer Review,Collaborative]');
         $this->form_validation->set_rules('review_time', 'Review Time', 'trim');
+         $this->form_validation->set_rules('description', 'Description', 'trim');
 
         if ($this->form_validation->run()) {
             $uploaded_image = null;
@@ -208,6 +211,7 @@ class User extends RestController
                 'usd_publication_charge' => $this->input->post('usd_publication_charge'),
                 'review_type' => $this->input->post('review_type'),
                 'review_time' => $this->input->post('review_time'),
+                'description' => $this->input->post('description'),
             ];
             if ($uploaded_image) {
                 $update_data['image'] = $uploaded_image;
@@ -343,73 +347,90 @@ class User extends RestController
     }
 
 
+public function update_personal_details_post()
+{
+    $this->form_validation->set_rules('name', 'Name', 'trim|required');
+    $this->form_validation->set_rules('contact', 'Mobile No', 'trim|required');
+    $this->form_validation->set_rules('department', 'Department', 'trim|required');
+    $this->form_validation->set_rules('designation', 'Designation', 'trim|required');
+    $this->form_validation->set_rules('maximum_qualification', 'Maximum Qualification', 'trim');
+    $this->form_validation->set_rules('country', 'Country', 'trim|required|numeric');
+    $this->form_validation->set_rules('state', 'State', 'trim|required|numeric');
+    $this->form_validation->set_rules('profile_link', 'Profile Link', 'trim');
+    $this->form_validation->set_rules('research_area', 'Research Area', 'trim|required');
+    $this->form_validation->set_rules('dob', 'DOB', 'trim|required');
+    $this->form_validation->set_rules('about', 'About', 'trim');
+    $this->form_validation->set_rules('university_name', 'University name', 'trim');
 
-    public function update_personal_details_post()
-    {
-
-        $this->form_validation->set_rules('name', 'Name', 'trim|required');
-        $this->form_validation->set_rules('contact', 'Mobile No', 'trim|required');
-        $this->form_validation->set_rules('department', 'Department', 'trim|required');
-        $this->form_validation->set_rules('designation', 'Designation', 'trim|required');
-        $this->form_validation->set_rules('maximum_qualification', 'Maximum Qualification', 'trim');
-        $this->form_validation->set_rules('country', 'Country', 'trim|required|numeric');
-        $this->form_validation->set_rules('state', 'State', 'trim|required|numeric');
-        $this->form_validation->set_rules('profile_link', 'Profile Link', 'trim');
-        $this->form_validation->set_rules('research_area', 'Research Area', 'trim|required');
-        $this->form_validation->set_rules('dob', 'DOB', 'trim|required');
-        $this->form_validation->set_rules('about', 'About', 'trim');
-        $this->form_validation->set_rules('university_name', 'University name', 'trim');
-
-        if ($this->form_validation->run()) {
-            $data = [
-                'name' => $this->input->post('name', true),
-                'contact' => $this->input->post('contact', true),
-                'department' => $this->input->post('department', true),
-                'designation' => $this->input->post('designation', true),
-                'country' => $this->input->post('country', true),
-                'state' => $this->input->post('state', true),
-                'research_area' => $this->input->post('research_area', true),
-                'dob' => $this->input->post('dob', true),
+    if ($this->form_validation->run()) {
+        $data = [
+            'name' => $this->input->post('name', true),
+            'contact' => $this->input->post('contact', true),
+            'department' => $this->input->post('department', true),
+            'designation' => $this->input->post('designation', true),
+            'country' => $this->input->post('country', true),
+            'state' => $this->input->post('state', true),
+            'research_area' => $this->input->post('research_area', true),
+            'dob' => $this->input->post('dob', true),
+            'about' => $this->input->post('about', true),
+            'university_name' => $this->input->post('university_name', true),
+            'maximum_qualification' => $this->input->post('maximum_qualification', true),
         ];
-            $id = $this->user['id'];
-            $profile_image = null;
+        
+        $id = $this->user['id'];
 
-            if (!empty($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
-                // Define upload configuration
-                $config['upload_path'] = './uploads/';
-                $config['allowed_types'] = 'jpg|jpeg|png|gif';
-                $config['max_size'] = 2048; // 2MB limit
-                $config['encrypt_name'] = true;
+       
+        $upload_config = [
+            'upload_path'   => './uploads/',
+            'allowed_types' => 'jpg|jpeg|png|gif|pdf|doc|docx',
+            'max_size'      => 2048, 
+            'encrypt_name'  => true
+        ];
+        $this->upload->initialize($upload_config);
 
-                $this->upload->initialize($config);
-
-                if ($this->upload->do_upload('profile_image')) {
-                    $uploadData = $this->upload->data();
-                    $profile_image = 'uploads/' . $uploadData['file_name'];
+       
+        function uploadFile($field_name)
+        {
+            if (!empty($_FILES[$field_name]) && $_FILES[$field_name]['error'] === UPLOAD_ERR_OK) {
+                $ci = &get_instance(); 
+                if ($ci->upload->do_upload($field_name)) {
+                    $uploadData = $ci->upload->data();
+                    return 'uploads/' . $uploadData['file_name'];
                 } else {
                     $result = [
                         'status' => 400,
-                        'message' => 'Profile image upload failed: ' . $this->upload->display_errors('', '')
+                        'message' => ucfirst(str_replace('_', ' ', $field_name)) . ' upload failed: ' . $ci->upload->display_errors('', '')
                     ];
-                    return $this->response($result, RestController::HTTP_OK);
+                    return $ci->response($result, RestController::HTTP_OK);
                 }
             }
-            if (!empty($profile_image)) {
-                $data['profile_image'] = $profile_image;
-            }
-            $update = $this->UserModel->updateUserById($id, $data);
-            $result = [
-                'status' => 200,
-                'message' => 'User details updated successfully',
-                'data' => $update,
-            ];
-        } else {
-
-            $result = ['status' => 400, 'message' => strip_tags(validation_errors())];
+            return null;
         }
-        $this->response($result, RestController::HTTP_OK);
-        $data = $this->input->post();
+
+        // Upload files
+        $profile_image = uploadFile('profile_image');
+        $doc1 = uploadFile('doc1');
+        $doc2 = uploadFile('doc2');
+        $doc3 = uploadFile('doc3');
+
+        // Add uploaded file paths to $data array
+        if ($profile_image) $data['profile_image'] = $profile_image;
+        if ($doc1) $data['doc1'] = $doc1;
+        if ($doc2) $data['doc2'] = $doc2;
+        if ($doc3) $data['doc3'] = $doc3;
+
+        $update = $this->UserModel->updateUserById($id, $data);
+        $result = [
+            'status' => 200,
+            'message' => 'User details updated successfully',
+            'data' => $update,
+        ];
+    } else {
+        $result = ['status' => 400, 'message' => strip_tags(validation_errors())];
     }
+    $this->response($result, RestController::HTTP_OK);
+}
+
 
     // ----------------Add Publication API----------------------
     public function add_publication_post()
