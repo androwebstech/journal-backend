@@ -7,6 +7,8 @@ class Admin_model extends CI_model
 		parent::__construct();
 		$this->load->database();
 		$this->load->helper(['common_helper']);
+        $this->load->helper('url');
+
 	}
 // 	public function register($data)
 // {
@@ -56,7 +58,11 @@ public function insert_contact($data)
 
 public function getAuthors()
 {
-    $this->db->select('*');
+    
+    $this->db->select('
+        users.*, 
+        CONCAT("' . base_url('') . '", users.profile_image) AS profile_image
+    ');
     $this->db->from('users');
     $this->db->where('type', USER_TYPE::AUTHOR);
     $query = $this->db->get();
@@ -71,7 +77,10 @@ public function getAuthors()
 
 public function getPublishers()
 {
-    $this->db->select('*');
+    $this->db->select('
+        users.*, 
+        CONCAT("' . base_url() . '", users.profile_image) AS profile_image
+    ');
     $this->db->from('users');
     $this->db->where('type', USER_TYPE::PUBLISHER);
     $query = $this->db->get();

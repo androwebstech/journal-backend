@@ -439,8 +439,11 @@ class UserModel extends CI_model
         users.department,
         users.designation,
         users.profile_image,
+        CONCAT("' . base_url() . '", users.profile_image) AS profile_image
     ');
+    
         $this->db->from('journal_join_requests');
+
         $this->db->join('users', 'journal_join_requests.user_id = users.id');
         $this->db->join('journals', 'journal_join_requests.journal_id = journals.journal_id');
         if (!empty($where)) {
