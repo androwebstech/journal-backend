@@ -1708,7 +1708,7 @@ public function update_personal_details_post()
                                      return $this->response([
                                     'status' => 200,
                                     'message' => 'Payment initiated successfully.',
-                                    'data' => $result
+                                    'data' => $data
                                 ], RestController::HTTP_OK);
                                 }
                                 else{
@@ -1717,7 +1717,6 @@ public function update_personal_details_post()
                                         'message' => 'Payment Already Done.', //if status is pending and payment failed what to do
                                     ], RestController::HTTP_OK);
                                 }
-                               
                             }else{
                                 $result = ['status'=>500,'message'=>$res['message']];
                                 $this->response($result,RestController::HTTP_OK);
