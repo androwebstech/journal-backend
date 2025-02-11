@@ -4,6 +4,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 require_once APPPATH.'/libraries/RestController.php';
 require_once APPPATH.'/libraries/Format.php';
+// require_once(APPPATH."libraries/Payment_Lib.php");
 use chriskacerguis\RestServer\RestController;
 use chriskacerguis\RestServer\Format;
 
@@ -22,7 +23,7 @@ class User extends RestController
         }
 
         $this->load->library('Authorization_Token');
-        $this->load->library(['form_validation']);
+        $this->load->library(['form_validation','Payment_Lib']);
         $this->load->helper(['url','common']);
         $this->load->model(['Authentication_model','UserModel','Admin_model']);
         $this->load->library('upload');
@@ -1658,6 +1659,62 @@ class User extends RestController
         $this->response($result, RestController::HTTP_OK);
     }
 
+
+    public function razorpay_post($journal_id = null)
+    {
+                        if(empty($journal_id)){
+                            return $this->response(['status' => 400, 'message' => 'Please enter a valid journal id'], RestController::HTTP_OK);
+                        }
+                        $this->load->library('Payment_Lib');
+                        // if($post['payment_app'] == 'razorpay'){
+                            $data = $this->UserModel->getJournalById($journal_id);
+                            if (empty($data)) {
+                                return $this->response([
+                                    'status' => 404,
+                                    'message' => 'Journal not found.'
+                                ], RestController::HTTP_OK);
+                            }              
+                            $result = [];          
+                            $amount = intval($data['usd_publication_charge']) * 100;
+                            $this->payment_lib->activate(Payment_Lib::RAZORPAY);
+                            $res = $this->payment_lib->create_payment(new PaymentParams($amount,$data['journal_id']));
+                            if($res['status'] == true){
+                                $data['order_id'] = $res['data']->id;
+                                $result['journal_id'] = $data['journal_id'];
+                                $result['order_id'] = $data['order_id'];
+                                $var = $this->UserModel->addData($result);
+                                if($var){
+                                     return $this->response([
+                                    'status' => 200,
+                                    'message' => 'Payment initiated successfully.',
+                                    'data' => $result
+                                ], RestController::HTTP_OK);
+                                }
+                                else{
+                                    return $this->response([
+                                        'status' => 200,
+                                        'message' => 'Payment Already Done.', //if status is pending and payment failed what to do
+                                    ], RestController::HTTP_OK);
+                                }
+                               
+                            }else{
+                                $result = ['status'=>500,'message'=>$res['message']];
+                                $this->response($result,RestController::HTTP_OK);
+                            }
+                        // }
+                        // else{
+                        //     $amount = intval($data['fees']);
+                        //     $this->payment_lib->activate(Payment_Lib::PAYPAL);
+                        //     $res = $this->payment_lib->create_payment(new PaymentParams($amount,$bookingCode));
+                        //     if($res['status'] == true){
+                        //         $data['order_id'] = $res['data']['paymentId'];
+                        //         $data['redirectURL'] = $res['data']['redirectURL'];
+                        //     }else{
+                        //         $result = ['status'=>500,'message'=>$res['message']];
+                        //         $this->response($result,RestController::HTTP_OK);
+                        //     }
+                        // }
+    }
 
 
 
