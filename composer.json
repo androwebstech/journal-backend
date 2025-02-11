@@ -1,0 +1,6 @@
+{
+    "require": {
+        "razorpay/razorpay": "2.*",
+        "paypal/rest-api-sdk-php": "^1.14"
+    }
+}

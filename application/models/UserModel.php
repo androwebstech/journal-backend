@@ -1003,4 +1003,21 @@ class UserModel extends CI_model
         return false;
     }
 
+    public function addData($result)
+    {
+        if (!empty($result)) {
+            $id = $result['journal_id'];
+            $exists = $this->db->where('journal_id', $id)->get('transaction')->num_rows();
+            if ($exists > 0) {
+                return false;
+            }
+            $inserted = $this->db->insert('transaction', $result);
+            return $inserted ? true : false;
+        }
+    
+        return false;
+    }
+    
+
+
 }
