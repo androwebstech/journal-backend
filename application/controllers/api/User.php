@@ -1141,10 +1141,9 @@ public function update_personal_details_post()
             $this->response($result, RestController::HTTP_OK);
             return;
         }
-
+        $journals_details = $this->UserModel->getJournalById($journal_id);
         if ($this->user['type'] == USER_TYPE::AUTHOR) {
             $author_id = $this->user['id'];
-            $journals_details = $this->UserModel->getJournalById($journal_id);
             $publisher_id = $journals_details['user_id'];
         } elseif ($this->user['type'] == USER_TYPE::PUBLISHER) {
             $publisher_id = $this->user['id'];
@@ -1157,6 +1156,7 @@ public function update_personal_details_post()
             'paper_id' => $paper_id,
             'publisher_id' => $publisher_id,
             'sender' => $this->user['type'],
+            'amount' => $journals_details['usd_publication_charge'],
             'pr_status' => PR_STATUS::PENDING,
             'payment_status' => PAYMENT_STATUS::NONE,
         ];
@@ -1681,46 +1681,60 @@ public function update_personal_details_post()
     }
 
 
-    public function razorpay_post($journal_id = null)
+    public function init_payment_post($pr_id = null)
     {
-                        if(empty($journal_id)){
-                            return $this->response(['status' => 400, 'message' => 'Please enter a valid journal id'], RestController::HTTP_OK);
-                        }
-                        $this->load->library('Payment_Lib');
-                        // if($post['payment_app'] == 'razorpay'){
-                            $data = $this->UserModel->getJournalById($journal_id);
-                            if (empty($data)) {
-                                return $this->response([
-                                    'status' => 404,
-                                    'message' => 'Journal not found.'
-                                ], RestController::HTTP_OK);
-                            }              
-                            $result = [];          
-                            $amount = intval($data['usd_publication_charge']) * 100;
-                            $this->payment_lib->activate(Payment_Lib::RAZORPAY);
-                            $res = $this->payment_lib->create_payment(new PaymentParams($amount,$data['journal_id']));
-                            if($res['status'] == true){
-                                $data['order_id'] = $res['data']->id;
-                                $result['journal_id'] = $data['journal_id'];
-                                $result['order_id'] = $data['order_id'];
-                                $var = $this->UserModel->addData($result);
-                                if($var){
-                                     return $this->response([
-                                    'status' => 200,
-                                    'message' => 'Payment initiated successfully.',
-                                    'data' => $data
-                                ], RestController::HTTP_OK);
-                                }
-                                else{
-                                    return $this->response([
-                                        'status' => 200,
-                                        'message' => 'Payment Already Done.', //if status is pending and payment failed what to do
-                                    ], RestController::HTTP_OK);
-                                }
-                            }else{
-                                $result = ['status'=>500,'message'=>$res['message']];
-                                $this->response($result,RestController::HTTP_OK);
-                            }
+        if (empty($pr_id)) {
+            return $this->response(
+                ['status' => 400, 'message' => 'Please enter a valid journal ID.'], 
+                RestController::HTTP_OK
+            );
+        }
+        $this->load->library('Payment_Lib');
+        $data = $this->UserModel->getPublishRequestsById($pr_id);
+        if (empty($data)) {
+            return $this->response(
+                ['status' => 404, 'message' => 'Publish Request not found.'], 
+                RestController::HTTP_OK
+            );
+        }
+        $amount = intval($data['amount']) * 100; 
+        $this->payment_lib->activate(Payment_Lib::RAZORPAY);
+        $paymentResponse = $this->payment_lib->create_payment(new PaymentParams($amount, $data['pr_id']));
+    
+        if ($paymentResponse['status'] === true) {
+            $data['order_id'] = $paymentResponse['data']->id;
+            $result = [
+                'pr_id' => $data['pr_id'],
+                'order_id' => $data['order_id']
+            ];
+            $dbResponse = $this->UserModel->addData($result);
+            // print_r($dbResponse);
+            // exit;
+            if ($dbResponse) {
+                return $this->response(
+                    [
+                        'status' => 200,
+                        'message' => 'Payment initiated successfully.',
+                        'data' => $dbResponse
+                    ],
+                    RestController::HTTP_OK
+                );
+            } else {
+                return $this->response(
+                    [
+                        'status' => 500,
+                        'message' => 'Payment Already Initiated.',
+                    ],
+                    RestController::HTTP_OK
+                );
+            }
+        } else {
+            return $this->response(
+                ['status' => 500, 'message' => $paymentResponse['message']], 
+                RestController::HTTP_OK
+            );
+        }
+
                         // }
                         // else{
                         //     $amount = intval($data['fees']);
