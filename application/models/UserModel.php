@@ -1012,19 +1012,31 @@ class UserModel extends CI_model
     }
 
     public function addData($result)
-    {
-        if (!empty($result)) {
-            $id = $result['journal_id'];
-            $exists = $this->db->where('journal_id', $id)->get('transaction')->num_rows();
-            if ($exists > 0) {
-                return false;
+{
+    if (!empty($result)) {
+        $id = $result['pr_id'];
+        $query = $this->db->where('pr_id', $id)->get('transaction');
+        if ($query->num_rows() > 0) {
+            $existingRecord = $query->row_array();
+            if ($existingRecord['status'] == APPROVAL_STATUS::PENDING) {
+                return $existingRecord; //Status Pending -> Record
+            } else {
+                return false; // Not pending -> Record
             }
-            $inserted = $this->db->insert('transaction', $result);
-            return $inserted ? true : false;
         }
-    
-        return false;
+        $inserted = $this->db->insert('transaction', $result);
+        if ($inserted) {
+            $res = $this->db->where('pr_id', $result['pr_id'])->get('transaction');
+            return $res->row_array();
+        } else {
+            return false; // Insertion failed
+        }
     }
+
+    return false;
+}
+
+
     
 
 
