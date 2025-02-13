@@ -19,7 +19,12 @@ class UserModel extends CI_model
 
         $this->applyReviewerSearchFilter($filters, $searchString);
 
-        $this->db->select('*,"" as password,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name,CONCAT("' . base_url('') . '", profile_image) as profile_image');
+        $this->db->select('*,"" as password,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name,
+        CONCAT("' . base_url('') . '", profile_image) as profile_image,
+        CONCAT("' . base_url('') . '", doc1) as doc1,
+        CONCAT("' . base_url('') . '", doc2) as doc2,
+        CONCAT("' . base_url('') . '", doc3) as doc3
+    ');
         $this->db->order_by('id', 'DESC');
         $this->db->limit($limit, $offset);
         return $this->db->get('users')->result_array();
@@ -172,8 +177,8 @@ class UserModel extends CI_model
         }
         $user['profile_image'] =  safe_image($user['profile_image']);
          $user['doc1'] =  safe_image($user['doc1']);
-          $user['doc2'] =  safe_image($user['doc2']);
-           $user['doc3'] =  safe_image($user['doc3']);
+         $user['doc2'] =  safe_image($user['doc2']);
+         $user['doc3'] =  safe_image($user['doc3']);
         return $user;
     }
 
