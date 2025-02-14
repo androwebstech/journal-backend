@@ -167,4 +167,22 @@ public function approveRejectPublication($ppuid,$status){
     return false;
 }
 
+
+   public function getAdminId($adminId)
+    {
+        $query = $this->db->get_where('admin', ['admin_id' => $adminId]);
+        if ($query->num_rows() > 0) {
+            return $query->row_array();
+        }
+        return null;
+    }
+
+
+        public function updateAdmin($adminId, $data)
+    {
+        $this->db->where('admin_id', $adminId);
+        return $this->db->update('admin', $data);
+    }
+
+
 }
