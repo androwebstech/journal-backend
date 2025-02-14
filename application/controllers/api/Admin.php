@@ -240,4 +240,23 @@ public function approve_reject_publication_post(){
 
     $this->response($result, RestController::HTTP_OK);
 }
+public function get_publish_requests_get()
+    {
+        $journals = $this->Admin_model->getResearchPaperRequests();
+        if ($journals) {
+            $result = [
+                'status' => 200,
+                'message' => 'Publish Requests fetched successfully',
+                'data' => $journals
+            ];
+        } else {
+            $result = [
+                'status' => 404,
+                'message' => 'No Requests found',
+                'data' => []
+            ];
+        }
+        $this->response($result, RestController::HTTP_OK);
+    }
+
 }

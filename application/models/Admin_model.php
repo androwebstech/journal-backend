@@ -166,5 +166,29 @@ public function approveRejectPublication($ppuid,$status){
     }
     return false;
 }
+public function getResearchPaperRequests()
+    {
+        $this->db->select('
+        publish_requests.*,
+            research_papers.paper_title, 
+            users.name,
+            journals.journal_name,
+            CONCAT("' . base_url() . '", journals.image) as journal_image,
+            CONCAT("' . base_url() . '", users.profile_image) as author_image,
+            research_papers.department,
+            (Select name from users where users.id = publish_requests.assigned_reviewer) AS reviewer_name
+        ');
+        $this->db->from('publish_requests');
+        $this->db->join('users', 'publish_requests.author_id = users.id');
+        $this->db->join('journals', 'publish_requests.journal_id = journals.journal_id');
+        $this->db->join('research_papers', 'publish_requests.paper_id = research_papers.paper_id');
+        $query = $this->db->get();
+
+        if ($query->num_rows() > 0) {
+            return $query->result_array();
+        }
+
+        return false;
+    }
 
 }
