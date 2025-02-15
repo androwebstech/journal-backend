@@ -1685,7 +1685,7 @@ public function update_personal_details_post()
     {
         if (empty($pr_id)) {
             return $this->response(
-                ['status' => 400, 'message' => 'Please enter a valid journal ID.'], 
+                ['status' => 400, 'message' => 'Please enter a valid Request ID.'], 
                 RestController::HTTP_OK
             );
         }
