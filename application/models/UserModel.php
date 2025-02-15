@@ -1078,6 +1078,18 @@ public function changePaymentStatus($order_id) {
 
     return false;
 }
+public function get_reviews_by_reviewer_id($reviewer_id)
+{
+            $this->db->select('publish_requests.* , journals.journal_name ,research_papers.paper_title,research_papers.author_name,research_papers.abstract,research_papers.keywords',);
+    $this->db->from('publish_requests');
+    $this->db->where('assigned_Reviewer', $reviewer_id);
+    $this->db->where('pr_status!=', PR_STATUS::ACCEPT); 
+     $this->db->join('journals', 'journals.journal_id = publish_requests.journal_id');
+        $this->db->join('research_papers', 'research_papers.paper_id = publish_requests.paper_id');
+
+    $query = $this->db->get();
+    return $query->result_array(); // Return results as an array
+}
 
 
 
