@@ -24,7 +24,7 @@ class Payment_Lib
     public const RAZORPAY = 'razorpay';
     public const PAYPAL = 'paypal';
     private $ids        = [
-        self::RAZORPAY => 'rzp_test_rtz36XubVZ3yDG',
+        self::RAZORPAY => 'rzp_test_lo1DpXawQRBUZe',
         self::PAYPAL  => 'XXXXXXX'
     ];
     private $secrets    = [
