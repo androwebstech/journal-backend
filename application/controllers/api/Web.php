@@ -330,7 +330,7 @@ class Web extends RestController
         $finalResult = 'RazorPay-';
         $headers = $this->input->request_headers();
         $sign = isset($headers['X-Razorpay-Signature']) ? $headers['X-Razorpay-Signature'] : false ;
-        $key                = 'WSXitLb2ccR2NeliX2z8TtuE';
+        $key                = 'a1b68accb187';
         $jsonString         = $this->input->raw_input_stream; // raw webhook request body
         $received_signature = $sign;
         $res = json_decode($jsonString, true);
