@@ -324,14 +324,13 @@ class Web extends RestController
     }
 
 
-    public function razorpay_webhook()
+    public function razorpay_webhook_post()
     {
-        $this->load->model('AdminModel');
         //process razor pay status
         $finalResult = 'RazorPay-';
         $headers = $this->input->request_headers();
         $sign = isset($headers['X-Razorpay-Signature']) ? $headers['X-Razorpay-Signature'] : false ;
-        $key                = 'XXXXXXSECRETKEY';
+        $key                = 'WSXitLb2ccR2NeliX2z8TtuE';
         $jsonString         = $this->input->raw_input_stream; // raw webhook request body
         $received_signature = $sign;
         $res = json_decode($jsonString, true);
@@ -348,13 +347,14 @@ class Web extends RestController
                 $payment = $res['payload']['payment']['entity'];
                 $order   = $res['payload']['order']['entity'];
                 if ($order['status'] == 'paid') {
-                    $booking = $this->AdminModel->get_booking_by_payment_id($order['id']);
-                    if ($booking['payment_status'] == 0) {
-                        $this->AdminModel->mark_booking_paid($order['id'], json_encode($payment));
+                    $transaction = $this->UserModel->getTransactionDetails($order['id']);
+                    if (!empty($transaction) && $transaction['payment_status'] == PAYMENT_STATUS::PENDING) {
+                        $this->UserModel->markTransactionPaid($order['id'], json_encode($payment));
+                        $this->UserModel->changePaymentStatus($order['id']);
                         //send mail
-                        $booking['payment_status'] = 1;
-                        $this->load->library('Mailer_Lib');
-                        $this->mailer_lib->send_mail($booking['email'], 'Appointment Scheduled', appointment_template($booking));
+                        // $booking['payment_status'] = 1;
+                        // $this->load->library('Mailer_Lib');
+                        // $this->mailer_lib->send_mail($booking['email'], 'Appointment Scheduled', appointment_template($booking));
                     }
                     $finalResult .=  "success:Order-".$order['id'];
                 } else {

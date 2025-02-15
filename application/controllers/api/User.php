@@ -1707,7 +1707,7 @@ public function update_personal_details_post()
                 'pr_id' => $data['pr_id'],
                 'order_id' => $data['order_id']
             ];
-            $dbResponse = $this->UserModel->addData($result);
+            $dbResponse = $this->UserModel->addData($result); // mark pending when started in publish request
             // print_r($dbResponse);
             // exit;
             if ($dbResponse) {

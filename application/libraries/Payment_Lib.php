@@ -28,7 +28,7 @@ class Payment_Lib
         self::PAYPAL  => 'XXXXXXX'
     ];
     private $secrets    = [
-        self::RAZORPAY => 'e6IqpWW3LFGlmcczUJB3yUnX',
+        self::RAZORPAY => 'WSXitLb2ccR2NeliX2z8TtuE',
         self::PAYPAL  => 'YYYYYYYYY'
     ];
     private $gateways = [];

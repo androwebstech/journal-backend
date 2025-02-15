@@ -1036,6 +1036,50 @@ class UserModel extends CI_model
     return false;
 }
 
+public function getTransactionDetails($id)
+{
+    $this->db->where('order_id', $id);
+    $this->db->select('*');
+    $query = $this->db->get('transaction');
+    if ($query->num_rows() > 0) {
+        return $query->row_array();
+    }
+
+    return null;
+}
+
+public function markTransactionPaid($order_id, $payment_data) {
+    $this->db->where('order_id', $order_id);
+    $this->db->update('transaction', [
+        'status' => PAYMENT_STATUS::COMPLETE,
+        'gateway_response'   => $payment_data,
+        'updated_at'     => get_datetime()
+    ]);
+
+    if($this->db->affected_rows() > 0){
+        return true;
+    }
+    return false;
+
+}
+
+public function changePaymentStatus($order_id) {
+    $this->db->where('order_id', $order_id);
+    $query = $this->db->get('transaction');
+    if ($query->num_rows() > 0) {
+        $transaction = $query->row_array(); 
+        $pr_id = $transaction['pr_id'];
+        $this->db->where('pr_id', $pr_id);
+        $this->db->update('publish_requests', ['payment_status' => PAYMENT_STATUS::COMPLETE]);
+        if ($this->db->affected_rows() > 0) {
+            return true; 
+        }
+    }
+
+    return false;
+}
+
+
 
     
 
