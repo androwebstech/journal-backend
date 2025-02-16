@@ -32,7 +32,7 @@ class UserModel extends CI_model
     public function applyReviewerSearchFilter($filters = [], $searchString = '')
     {
         $searchColumns = ['name','research_area'];
-        $filterColumns = ['department','designation','country','state'];
+        $filterColumns = ['department','designation','country','state','approval_status'];
 
         if (!empty($searchString)) {
             $this->db->or_group_start();

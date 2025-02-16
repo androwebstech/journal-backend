@@ -39,8 +39,8 @@ class Web extends RestController
         $searchString = $this->input->get('search', true) ?? '';
         $limit = abs($limit) < 1 ? 10 : abs($limit) ;
         $page = abs($page) < 1 ? 1 : abs($page);
-
         $offset = ($page - 1) * $limit;
+        $filters['approval_status'] = APPROVAL_STATUS::APPROVED;
         $res = $this->UserModel->getReviewers($filters, $limit, $offset, $searchString);
         $count = $this->UserModel->getReviewersCount($filters, $searchString);
 
