@@ -221,7 +221,7 @@ class UserModel extends CI_model
     {
         $this->db->where('id', $id);
         $this->db->where('type', 'reviewer');
-        $this->db->select('*, "" as password, CONCAT("'.base_url().'",profile_image) as profile_image');
+        $this->db->select('*, "" as password, CONCAT("'.base_url().'",profile_image) as profile_image,(Select count(*) from publish_requests where assigned_reviewer ="'.$id.'" and reviewer_remarks !="") as total_reviews');
         $query = $this->db->get('users');
         if ($query->num_rows() > 0) {
             return $query->row_array();
@@ -909,15 +909,25 @@ class UserModel extends CI_model
 
 
 
+
     public function get_approved_publication_by_id($id)
-    {
-        $this->db->where('user_id', $id);
-        $this->db->where('approval_status', APPROVAL_STATUS::APPROVED);
-        $query = $this->db->get('published_papers');
+{
+    $this->db->where('user_id', $id);
+    $this->db->where('approval_status', APPROVAL_STATUS::APPROVED);
+    $query = $this->db->get('published_papers');
+    $publications = $query->result_array();
 
-        return $query->result_array();
-    }
+    // Count total publications
+    $this->db->where('user_id', $id);
+    $this->db->where('approval_status', APPROVAL_STATUS::APPROVED);
+    $this->db->from('published_papers');
+    $total_publications = $this->db->count_all_results();
 
+    return [
+        'publications' => $publications,
+        'total_publications' => $total_publications
+    ];
+}
 
 
     // public function get_published_research_papers($journal_id)

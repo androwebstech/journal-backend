@@ -275,7 +275,10 @@ class Web extends RestController
             $result = [
                 'status' => 200,
                 'message' => 'Publication fetched successfully',
-                'data' => $publication
+               'data' => [
+                'publications' => $publication['publications'],
+                'total_publications' => $publication['total_publications'] // Total count displayed once
+            ]
             ];
         } else {
             $result = [
