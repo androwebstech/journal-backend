@@ -1628,7 +1628,7 @@ public function update_personal_details_post()
             ];
         } else {
             $result = [
-                'status' => 404,
+                'status' => 200,
                 'message' => 'No Requests found with the given ID',
                 'data' => []
             ];
