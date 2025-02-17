@@ -176,9 +176,9 @@ class UserModel extends CI_model
             unset($user['password']);
         }
         $user['profile_image'] =  safe_image($user['profile_image']);
-        $user['doc1'] =  safe_image($user['doc1']);
-        $user['doc2'] =  safe_image($user['doc2']);
-        $user['doc3'] =  safe_image($user['doc3']);
+        $user['doc1'] = $user['doc1'] != "" ? base_url($user['doc1']) : '';
+        $user['doc2'] = $user['doc2'] != "" ? base_url($user['doc2']) : '';
+        $user['doc3'] = $user['doc3'] != "" ? base_url($user['doc3']) : '';
         return $user;
     }
 
