@@ -20,10 +20,10 @@ class UserModel extends CI_model
         $this->applyReviewerSearchFilter($filters, $searchString);
 
         $this->db->select('*,"" as password,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name,
-        CONCAT("' . base_url('') . '", profile_image) as profile_image,
-        CONCAT("' . base_url('') . '", doc1) as doc1,
-        CONCAT("' . base_url('') . '", doc2) as doc2,
-        CONCAT("' . base_url('') . '", doc3) as doc3
+        IF(profile_image="","",CONCAT("' . base_url('') . '", profile_image)) as profile_image,
+        IF(doc1="","",CONCAT("' . base_url('') . '", doc1)) as doc1,
+        IF(doc2="","",CONCAT("' . base_url('') . '", doc2)) as doc2,
+        IF(doc3="","",CONCAT("' . base_url('') . '", doc3)) as doc3
     ');
         $this->db->order_by('id', 'DESC');
         $this->db->limit($limit, $offset);
@@ -78,7 +78,7 @@ class UserModel extends CI_model
     public function applyJournalSearchFilter($filters = [], $searchString = '')
     {
         $searchColumns = ['journal_name','publisher_name','broad_research_area','eissn_no','pissn_no',];
-        $filterColumns = ['country', 'publication_type', 'number_of_issue_per_year','review_type','status'];
+        $filterColumns = ['country', 'publication_type', 'number_of_issue_per_year','review_type','approval_status'];
 
         if (!empty($searchString)) {
             $this->db->or_group_start();
@@ -176,9 +176,9 @@ class UserModel extends CI_model
             unset($user['password']);
         }
         $user['profile_image'] =  safe_image($user['profile_image']);
-         $user['doc1'] =  safe_image($user['doc1']);
-         $user['doc2'] =  safe_image($user['doc2']);
-         $user['doc3'] =  safe_image($user['doc3']);
+        $user['doc1'] = $user['doc1'] != "" ? base_url($user['doc1']) : '';
+        $user['doc2'] = $user['doc2'] != "" ? base_url($user['doc2']) : '';
+        $user['doc3'] = $user['doc3'] != "" ? base_url($user['doc3']) : '';
         return $user;
     }
 
@@ -449,7 +449,7 @@ class UserModel extends CI_model
         users.profile_image,
         CONCAT("' . base_url() . '", users.profile_image) AS profile_image
     ');
-    
+
         $this->db->from('journal_join_requests');
 
         $this->db->join('users', 'journal_join_requests.user_id = users.id');
@@ -911,23 +911,23 @@ class UserModel extends CI_model
 
 
     public function get_approved_publication_by_id($id)
-{
-    $this->db->where('user_id', $id);
-    $this->db->where('approval_status', APPROVAL_STATUS::APPROVED);
-    $query = $this->db->get('published_papers');
-    $publications = $query->result_array();
+    {
+        $this->db->where('user_id', $id);
+        $this->db->where('approval_status', APPROVAL_STATUS::APPROVED);
+        $query = $this->db->get('published_papers');
+        $publications = $query->result_array();
 
-    // Count total publications
-    $this->db->where('user_id', $id);
-    $this->db->where('approval_status', APPROVAL_STATUS::APPROVED);
-    $this->db->from('published_papers');
-    $total_publications = $this->db->count_all_results();
+        // Count total publications
+        $this->db->where('user_id', $id);
+        $this->db->where('approval_status', APPROVAL_STATUS::APPROVED);
+        $this->db->from('published_papers');
+        $total_publications = $this->db->count_all_results();
 
-    return [
-        'publications' => $publications,
-        'total_publications' => $total_publications
-    ];
-}
+        return [
+            'publications' => $publications,
+            'total_publications' => $total_publications
+        ];
+    }
 
 
     // public function get_published_research_papers($journal_id)
@@ -994,7 +994,7 @@ class UserModel extends CI_model
 
     public function get_request_by_id($id)
     {
-        $this->db->select('publish_requests.* , journals.journal_name ,research_papers.paper_title,research_papers.author_name,research_papers.abstract',);
+        $this->db->select('publish_requests.* , journals.journal_name ,research_papers.paper_title,research_papers.author_name,research_papers.abstract', );
         $this->db->where('assigned_reviewer', $id);
         $this->db->where('pr_status', PR_STATUS::ACCEPT);
         $this->db->join('journals', 'journals.journal_id = publish_requests.journal_id');
@@ -1007,103 +1007,108 @@ class UserModel extends CI_model
         return null;
     }
 
-    public function update_remarks($pr_id, $id, $remarks){
-        
-        if($pr_id && $id && !empty($remarks)){        
-        $this->db->where('pr_id', $pr_id)
-                 ->where('assigned_reviewer', $id)
-                 ->where('pr_status', PR_STATUS::ACCEPT)
-                 ->update('publish_requests', ['reviewer_remarks' => $remarks]);
+    public function update_remarks($pr_id, $id, $remarks)
+    {
 
-                 return true;
+        if ($pr_id && $id && !empty($remarks)) {
+            $this->db->where('pr_id', $pr_id)
+                     ->where('assigned_reviewer', $id)
+                     ->where('pr_status', PR_STATUS::ACCEPT)
+                     ->update('publish_requests', ['reviewer_remarks' => $remarks]);
+
+            return true;
         }
-    
+
         return false;
     }
 
     public function addData($result)
-{
-    if (!empty($result)) {
-        $id = $result['pr_id'];
-        $query = $this->db->where('pr_id', $id)->get('transaction');
-        if ($query->num_rows() > 0) {
-            $existingRecord = $query->row_array();
-            if ($existingRecord['status'] == APPROVAL_STATUS::PENDING) {
-                return $existingRecord; //Status Pending -> Record
+    {
+        if (!empty($result)) {
+            $id = $result['pr_id'];
+            $query = $this->db->where('pr_id', $id)->get('transaction');
+            if ($query->num_rows() > 0) {
+                $existingRecord = $query->row_array();
+                if ($existingRecord['status'] == APPROVAL_STATUS::PENDING) {
+                    return $existingRecord; //Status Pending -> Record
+                } else {
+                    return false; // Not pending -> Record
+                }
+            }
+            $inserted = $this->db->insert('transaction', $result);
+            if ($inserted) {
+                $this->db->where('pr_id', $result['pr_id'])
+                ->update('publish_requests', ['payment_status' => PAYMENT_STATUS::PENDING]);
+                $res = $this->db->where('pr_id', $result['pr_id'])->get('transaction');
+                return $res->row_array();
             } else {
-                return false; // Not pending -> Record
+                return false; // Insertion failed
             }
         }
-        $inserted = $this->db->insert('transaction', $result);
-        if ($inserted) {
-            $res = $this->db->where('pr_id', $result['pr_id'])->get('transaction');
-            return $res->row_array();
-        } else {
-            return false; // Insertion failed
+
+        return false;
+    }
+
+    public function getTransactionDetails($id)
+    {
+        $this->db->where('order_id', $id);
+        $this->db->select('*');
+        $query = $this->db->get('transaction');
+        if ($query->num_rows() > 0) {
+            return $query->row_array();
         }
+
+        return null;
     }
 
-    return false;
-}
+    public function markTransactionPaid($order_id, $payment_data)
+    {
+        $this->db->where('order_id', $order_id);
+        $this->db->update('transaction', [
+            'status' => PAYMENT_STATUS::COMPLETE,
+            'gateway_response'   => $payment_data,
+            'updated_at'     => get_datetime()
+        ]);
 
-public function getTransactionDetails($id)
-{
-    $this->db->where('order_id', $id);
-    $this->db->select('*');
-    $query = $this->db->get('transaction');
-    if ($query->num_rows() > 0) {
-        return $query->row_array();
-    }
-
-    return null;
-}
-
-public function markTransactionPaid($order_id, $payment_data) {
-    $this->db->where('order_id', $order_id);
-    $this->db->update('transaction', [
-        'status' => PAYMENT_STATUS::COMPLETE,
-        'gateway_response'   => $payment_data,
-        'updated_at'     => get_datetime()
-    ]);
-
-    if($this->db->affected_rows() > 0){
-        return true;
-    }
-    return false;
-
-}
-
-public function changePaymentStatus($order_id) {
-    $this->db->where('order_id', $order_id);
-    $query = $this->db->get('transaction');
-    if ($query->num_rows() > 0) {
-        $transaction = $query->row_array(); 
-        $pr_id = $transaction['pr_id'];
-        $this->db->where('pr_id', $pr_id);
-        $this->db->update('publish_requests', ['payment_status' => PAYMENT_STATUS::COMPLETE]);
         if ($this->db->affected_rows() > 0) {
-            return true; 
+            return true;
         }
+        return false;
+
     }
 
-    return false;
-}
-public function get_reviews_by_reviewer_id($reviewer_id)
-{
-    $this->db->select('publish_requests.reviewer_remarks , journals.journal_name ,research_papers.paper_title,research_papers.author_name,research_papers.abstract,research_papers.keywords',);
-    $this->db->from('publish_requests');
-    $this->db->where('assigned_Reviewer', $reviewer_id);
-    $this->db->where('pr_status!=', PR_STATUS::ACCEPT); 
-    $this->db->join('journals', 'journals.journal_id = publish_requests.journal_id');
-    $this->db->join('research_papers', 'research_papers.paper_id = publish_requests.paper_id');
+    public function changePaymentStatus($order_id)
+    {
+        $this->db->where('order_id', $order_id);
+        $query = $this->db->get('transaction');
+        if ($query->num_rows() > 0) {
+            $transaction = $query->row_array();
+            $pr_id = $transaction['pr_id'];
+            $this->db->where('pr_id', $pr_id);
+            $this->db->update('publish_requests', ['payment_status' => PAYMENT_STATUS::COMPLETE]);
+            if ($this->db->affected_rows() > 0) {
+                return true;
+            }
+        }
 
-    $query = $this->db->get();
-    return $query->result_array(); 
-}
+        return false;
+    }
+    public function get_reviews_by_reviewer_id($reviewer_id)
+    {
+        $this->db->select('publish_requests.reviewer_remarks , journals.journal_name ,research_papers.paper_title,research_papers.author_name,research_papers.abstract,research_papers.keywords', );
+        $this->db->from('publish_requests');
+        $this->db->where('assigned_Reviewer', $reviewer_id);
+        $this->db->where('pr_status!=', PR_STATUS::ACCEPT);
+        $this->db->join('journals', 'journals.journal_id = publish_requests.journal_id');
+        $this->db->join('research_papers', 'research_papers.paper_id = publish_requests.paper_id');
+
+        $query = $this->db->get();
+        return $query->result_array();
+    }
 
 
 
-    
+
 
 
 }
