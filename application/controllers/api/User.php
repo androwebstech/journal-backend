@@ -1685,7 +1685,7 @@ public function update_personal_details_post()
     {
         if (empty($pr_id)) {
             return $this->response(
-                ['status' => 400, 'message' => 'Please enter a valid journal ID.'], 
+                ['status' => 400, 'message' => 'Please enter a valid Request ID.'], 
                 RestController::HTTP_OK
             );
         }
@@ -1707,7 +1707,7 @@ public function update_personal_details_post()
                 'pr_id' => $data['pr_id'],
                 'order_id' => $data['order_id']
             ];
-            $dbResponse = $this->UserModel->addData($result);
+            $dbResponse = $this->UserModel->addData($result); // mark pending when started in publish request
             // print_r($dbResponse);
             // exit;
             if ($dbResponse) {
@@ -1749,6 +1749,37 @@ public function update_personal_details_post()
                         //     }
                         // }
     }
+    public function get_my_reviews_get()
+{
+    $id = $this->user['id'];
+
+    if ($this->user['type'] != USER_TYPE::REVIEWER) {
+        return $this->response([
+            'status' => 401,
+            'message' => 'You are not authorized'
+        ], RestController::HTTP_OK);
+    }
+
+    // Fetch reviews assigned to the reviewer where pr_status is not 'accept'
+    $reviews = $this->UserModel->get_reviews_by_reviewer_id($id);
+
+    if ($reviews) {
+        $result = [
+            'status' => 200,
+            'message' => 'Reviews fetched successfully',
+            'data' => $reviews
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No reviews found for the given reviewer',
+            'data' => []
+        ];
+    }
+
+    return $this->response($result, RestController::HTTP_OK);
+}
+
 
 
 
