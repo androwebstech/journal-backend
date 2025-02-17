@@ -221,7 +221,7 @@ class UserModel extends CI_model
     {
         $this->db->where('id', $id);
         $this->db->where('type', 'reviewer');
-        $this->db->select('*, "" as password, CONCAT("'.base_url().'",profile_image) as profile_image,(Select count(*) from publish_requests where assigned_reviewer ="'.$id.'" and reviewer_remarks !="") as total_reviews');
+        $this->db->select('*, "" as password, CONCAT("'.base_url().'",profile_image) as profile_image,(Select count(*) from publish_requests where assigned_reviewer ="'.$id.'" and reviewer_remarks !="") as total_reviews,(Select count(*) from published_papers where user_id ="'.$id.'" and approval_status = "'.APPROVAL_STATUS::APPROVED.'") as total_publications');
         $query = $this->db->get('users');
         if ($query->num_rows() > 0) {
             return $query->row_array();
