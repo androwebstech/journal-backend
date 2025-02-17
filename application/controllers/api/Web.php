@@ -351,7 +351,7 @@ class Web extends RestController
                 $order   = $res['payload']['order']['entity'];
                 if ($order['status'] == 'paid') {
                     $transaction = $this->UserModel->getTransactionDetails($order['id']);
-                    if (!empty($transaction) && $transaction['payment_status'] == PAYMENT_STATUS::PENDING) {
+                    if (!empty($transaction) && $transaction['status'] == PAYMENT_STATUS::PENDING) {
                         $this->UserModel->markTransactionPaid($order['id'], json_encode($payment));
                         $this->UserModel->changePaymentStatus($order['id']);
                         //send mail
@@ -364,12 +364,14 @@ class Web extends RestController
                     $finalResult .=  "failed:Order-".$order['id'].'status:'.$order['status'];
                 }
             } else {
-                $finalResult .= 'Failed: event-'.$res['event'];
+                $finalResult .= 'Failed: event->> '.$res['event'];
             }
         } else {
             $finalResult .= "Signature Mismatch";
         }
         echo $finalResult;
+        $raw = 'CompleteData => event ['.$res["event"].'] | '.$jsonString;
+        log_message('debug', $raw);
         log_message('debug', $finalResult);
     }
 

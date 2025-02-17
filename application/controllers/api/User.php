@@ -654,6 +654,7 @@ public function update_personal_details_post()
         $this->form_validation->set_rules('paper_title', 'Paper Title', 'trim|required');
         $this->form_validation->set_rules('abstract', 'Abstract', 'trim|required');
         $this->form_validation->set_rules('keywords', 'Keywords', 'trim|required');
+        $this->form_validation->set_rules('subjects', 'Subjects', 'trim|required');
 
 
         if ($this->form_validation->run()) {
@@ -699,6 +700,7 @@ public function update_personal_details_post()
                   'paper_title' => $this->input->post('paper_title'),
                   'abstract' => $this->input->post('abstract'),
                   'keywords' => $this->input->post('keywords'),
+                  'subjects' => $this->input->post('subjects'),
                   'co_authors' => $co_author_data,
 
                   'file' => 'uploads/' . $file_data['file_name'],
@@ -1429,6 +1431,7 @@ public function update_personal_details_post()
             'paper_title',
             'abstract',
             'keywords',
+            'subjects',
         ];
 
         $update_data = [];
@@ -1628,7 +1631,7 @@ public function update_personal_details_post()
             ];
         } else {
             $result = [
-                'status' => 404,
+                'status' => 200,
                 'message' => 'No Requests found with the given ID',
                 'data' => []
             ];
