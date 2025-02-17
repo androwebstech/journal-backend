@@ -1759,8 +1759,6 @@ public function update_personal_details_post()
             'message' => 'You are not authorized'
         ], RestController::HTTP_OK);
     }
-
-    // Fetch reviews assigned to the reviewer where pr_status is not 'accept'
     $reviews = $this->UserModel->get_reviews_by_reviewer_id($id);
 
     if ($reviews) {
