@@ -259,4 +259,44 @@ public function get_publish_requests_get()
         $this->response($result, RestController::HTTP_OK);
     }
 
+    public function journals_search_get($limit = 10, $page = 1)
+    {
+        $filters = $this->input->get() ?? [];
+        $searchString = $this->input->get('search', true) ?? '';
+        $limit = abs($limit) < 1 ? 10 : abs($limit) ;
+        $page = abs($page) < 1 ? 1 : abs($page);
+
+        $offset = ($page - 1) * $limit;
+        $res = $this->UserModel->getJournals($filters, $limit, $offset, $searchString);
+        $count = $this->UserModel->getJournalsCount($filters, $searchString);
+
+        $this->response([
+            'status' => 200,
+            'message' => 'Success',
+            'data' => $res,
+            'totalPages' => ceil($count / $limit),
+            'currentPage' => $page,
+        ], RestController::HTTP_OK);
+    }
+
+    public function reviewers_search_get($limit = 10, $page = 1)
+    {
+        $filters = $this->input->get() ?? [];
+        $searchString = $this->input->get('search', true) ?? '';
+        $limit = abs($limit) < 1 ? 10 : abs($limit) ;
+        $page = abs($page) < 1 ? 1 : abs($page);
+        $offset = ($page - 1) * $limit;
+        $res = $this->UserModel->getReviewers($filters, $limit, $offset, $searchString);
+        $count = $this->UserModel->getReviewersCount($filters, $searchString);
+
+        $this->response([
+            'status' => 200,
+            'message' => 'Success',
+            'data' => $res,
+            'totalPages' => ceil($count / $limit),
+            'currentPage' => $page,
+        ], RestController::HTTP_OK);
+    }
+
+
 }

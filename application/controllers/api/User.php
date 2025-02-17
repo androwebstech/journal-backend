@@ -1631,7 +1631,7 @@ public function update_personal_details_post()
             ];
         } else {
             $result = [
-                'status' => 404,
+                'status' => 200,
                 'message' => 'No Requests found with the given ID',
                 'data' => []
             ];
@@ -1752,6 +1752,35 @@ public function update_personal_details_post()
                         //     }
                         // }
     }
+    public function get_my_reviews_get()
+{
+    $id = $this->user['id'];
+
+    if ($this->user['type'] != USER_TYPE::REVIEWER) {
+        return $this->response([
+            'status' => 401,
+            'message' => 'You are not authorized'
+        ], RestController::HTTP_OK);
+    }
+    $reviews = $this->UserModel->get_reviews_by_reviewer_id($id);
+
+    if ($reviews) {
+        $result = [
+            'status' => 200,
+            'message' => 'Reviews fetched successfully',
+            'data' => $reviews
+        ];
+    } else {
+        $result = [
+            'status' => 404,
+            'message' => 'No reviews found for the given reviewer',
+            'data' => []
+        ];
+    }
+
+    return $this->response($result, RestController::HTTP_OK);
+}
+
 
 
 
