@@ -1036,6 +1036,8 @@ class UserModel extends CI_model
         }
         $inserted = $this->db->insert('transaction', $result);
         if ($inserted) {
+            $this->db->where('pr_id', $result['pr_id'])
+            ->update('publish_requests', ['payment_status' => PAYMENT_STATUS::PENDING]);
             $res = $this->db->where('pr_id', $result['pr_id'])->get('transaction');
             return $res->row_array();
         } else {
