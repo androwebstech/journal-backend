@@ -370,7 +370,7 @@ class Web extends RestController
             $finalResult .= "Signature Mismatch";
         }
         echo $finalResult;
-        $raw = 'CompleteData => event ['.$res["event"].'] | '.$res;
+        $raw = 'CompleteData => event ['.$res["event"].'] | '.$jsonString;
         log_message('debug', $raw);
         log_message('debug', $finalResult);
     }
