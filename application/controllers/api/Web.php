@@ -62,7 +62,7 @@ class Web extends RestController
         $page = abs($page) < 1 ? 1 : abs($page);
 
         $offset = ($page - 1) * $limit;
-        $filters['status'] = APPROVAL_STATUS::APPROVED;
+        $filters['approval_status'] = APPROVAL_STATUS::APPROVED;
         $res = $this->UserModel->getJournals($filters, $limit, $offset, $searchString);
         $count = $this->UserModel->getJournalsCount($filters, $searchString);
 

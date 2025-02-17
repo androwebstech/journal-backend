@@ -78,7 +78,7 @@ class UserModel extends CI_model
     public function applyJournalSearchFilter($filters = [], $searchString = '')
     {
         $searchColumns = ['journal_name','publisher_name','broad_research_area','eissn_no','pissn_no',];
-        $filterColumns = ['country', 'publication_type', 'number_of_issue_per_year','review_type','status'];
+        $filterColumns = ['country', 'publication_type', 'number_of_issue_per_year','review_type','approval_status'];
 
         if (!empty($searchString)) {
             $this->db->or_group_start();
