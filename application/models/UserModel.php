@@ -1090,7 +1090,7 @@ public function changePaymentStatus($order_id) {
 }
 public function get_reviews_by_reviewer_id($reviewer_id)
 {
-    $this->db->select('publish_requests.* , journals.journal_name ,research_papers.paper_title,research_papers.author_name,research_papers.abstract,research_papers.keywords',);
+    $this->db->select('publish_requests.reviewer_remarks , journals.journal_name ,research_papers.paper_title,research_papers.author_name,research_papers.abstract,research_papers.keywords',);
     $this->db->from('publish_requests');
     $this->db->where('assigned_Reviewer', $reviewer_id);
     $this->db->where('pr_status!=', PR_STATUS::ACCEPT); 
