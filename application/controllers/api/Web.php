@@ -364,12 +364,14 @@ class Web extends RestController
                     $finalResult .=  "failed:Order-".$order['id'].'status:'.$order['status'];
                 }
             } else {
-                $finalResult .= 'Failed: event-'.$res['event'];
+                $finalResult .= 'Failed: event->> '.$res['event'];
             }
         } else {
             $finalResult .= "Signature Mismatch";
         }
         echo $finalResult;
+        $raw = 'CompleteData => event ['.$res["event"].'] | '.$res;
+        log_message('debug', $raw);
         log_message('debug', $finalResult);
     }
 
