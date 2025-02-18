@@ -996,7 +996,7 @@ class UserModel extends CI_model
 
     public function get_request_by_id($id)
     {
-        $this->db->select('publish_requests.* , journals.journal_name ,research_papers.paper_title,research_papers.author_name,research_papers.abstract', );
+        $this->db->select('publish_requests.* , journals.journal_name ,research_papers.paper_title,research_papers.author_name,research_papers.abstract,research_papers.subjects,', );
         $this->db->where('assigned_reviewer', $id);
         $this->db->where('pr_status', PR_STATUS::ACCEPT);
         $this->db->join('journals', 'journals.journal_id = publish_requests.journal_id');
