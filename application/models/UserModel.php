@@ -1024,48 +1024,26 @@ class UserModel extends CI_model
         return false;
     }
 
-   public function addData($result)
-{
-    if (empty($result)) {
+    public function addData($result)
+    {
+        if (empty($result)) {
+            return false;
+        }
+    
+        $id = $result['pr_id'];
+    
+        // Insert the new transaction
+        $inserted = $this->db->insert('transaction', $result);
+    
+        if ($inserted) {
+            // Update the payment_status in publish_requests table
+            $this->db->where('pr_id', $result['pr_id'])
+                     ->update('publish_requests', ['payment_status' => PAYMENT_STATUS::PENDING]);
+            return true;
+        }
+    
         return false;
     }
-
-    $id = $result['pr_id'];
-
-    // Fetch the latest transaction for the given pr_id
-    $query = $this->db->where('pr_id', $id)
-                      ->order_by('id', 'DESC')
-                      ->get('transaction');
-
-    if ($query->num_rows() > 0) {
-        $existingRecord = $query->row_array();
-        
-        if ($existingRecord['status'] == PAYMENT_STATUS::PENDING) {
-            return $existingRecord; // Return existing record if payment is still pending
-        } elseif ($existingRecord['status'] == PAYMENT_STATUS::FAILED) {
-            // If the last transaction failed, proceed to insert a new record
-        } else {
-            return false; // Return false if payment is already completed or another status
-        }
-    }
-
-    // Insert the new transaction
-    $inserted = $this->db->insert('transaction', $result);
-
-    if ($inserted) {
-        // Update the payment_status in publish_requests table
-        $this->db->where('pr_id', $result['pr_id'])
-                 ->update('publish_requests', ['payment_status' => PAYMENT_STATUS::PENDING]);
-
-        // Fetch the newly inserted transaction
-        return $this->db->where('pr_id', $result['pr_id'])
-                        ->order_by('id', 'DESC')
-                        ->get('transaction')
-                        ->row_array();
-    }
-
-    return false; // Insertion failed
-}
 
 
     public function getTransactionDetails($id)
