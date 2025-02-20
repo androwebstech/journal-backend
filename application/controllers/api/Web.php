@@ -360,10 +360,16 @@ class Web extends RestController
                         // $this->mailer_lib->send_mail($booking['email'], 'Appointment Scheduled', appointment_template($booking));
                     }
                     $finalResult .=  "success:Order-".$order['id'];
-                } else {
+                }
+                 else {
                     $finalResult .=  "failed:Order-".$order['id'].'status:'.$order['status'];
                 }
-            } else {
+            }else if ($res['event'] == 'payment.failed') {
+                $payment = $res['payload']['payment']['entity'];
+                $this->UserModel->markTransactionFailed($payment['order_id']);
+                $finalResult .=  "Failed:Order-".$payment['order_id'];
+            } 
+            else {
                 $finalResult .= 'Failed: event->> '.$res['event'];
             }
         } else {
@@ -374,7 +380,6 @@ class Web extends RestController
         log_message('debug', $raw);
         log_message('debug', $finalResult);
     }
-
 
 
 }

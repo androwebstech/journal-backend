@@ -1106,6 +1106,23 @@ class UserModel extends CI_model
         return $query->result_array();
     }
 
+    public function markTransactionFailed($order_id)
+    {
+        $this->db->where('order_id', $order_id);
+        $this->db->update('transaction', [
+            'status' => PAYMENT_STATUS::FAILED,
+            // 'gateway_response'   => $payment_data,
+            'updated_at'     => get_datetime()
+        ]);
+
+        if ($this->db->affected_rows() > 0) {
+            return true;
+        }
+        return true;
+
+    }
+
+
 
 
 
