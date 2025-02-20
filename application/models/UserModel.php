@@ -1031,7 +1031,7 @@ class UserModel extends CI_model
             $query = $this->db->where('pr_id', $id)->get('transaction');
             if ($query->num_rows() > 0) {
                 $existingRecord = $query->row_array();
-                if ($existingRecord['status'] == APPROVAL_STATUS::PENDING) {
+                if ($existingRecord['status'] == PAYMENT_STATUS::PENDING) {
                     return $existingRecord; //Status Pending -> Record
                 } else {
                     return false; // Not pending -> Record
