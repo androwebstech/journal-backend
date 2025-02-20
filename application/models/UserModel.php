@@ -632,6 +632,8 @@ class UserModel extends CI_model
             research_papers.paper_title, 
             users.name,
             journals.journal_name,
+            research_papers.subjects,
+            research_papers.keywords,
             (Select name from users where users.id = publish_requests.assigned_reviewer) AS reviewer_name
         ');
         $this->db->from('publish_requests');
@@ -994,7 +996,7 @@ class UserModel extends CI_model
 
     public function get_request_by_id($id)
     {
-        $this->db->select('publish_requests.* , journals.journal_name ,research_papers.paper_title,research_papers.author_name,research_papers.abstract', );
+        $this->db->select('publish_requests.* , journals.journal_name ,research_papers.paper_title,research_papers.author_name,research_papers.abstract,research_papers.subjects,', );
         $this->db->where('assigned_reviewer', $id);
         $this->db->where('pr_status', PR_STATUS::ACCEPT);
         $this->db->join('journals', 'journals.journal_id = publish_requests.journal_id');
@@ -1095,7 +1097,7 @@ class UserModel extends CI_model
     }
     public function get_reviews_by_reviewer_id($reviewer_id)
     {
-        $this->db->select('publish_requests.reviewer_remarks , journals.journal_name ,research_papers.paper_title,research_papers.author_name,research_papers.abstract,research_papers.keywords', );
+        $this->db->select('publish_requests.reviewer_remarks , journals.journal_name ,research_papers.paper_title,research_papers.author_name,research_papers.abstract,research_papers.keywords,research_papers.subjects', );
         $this->db->from('publish_requests');
         $this->db->where('assigned_Reviewer', $reviewer_id);
         $this->db->where('pr_status!=', PR_STATUS::ACCEPT);
