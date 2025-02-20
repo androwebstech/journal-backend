@@ -1685,58 +1685,70 @@ public function update_personal_details_post()
 
 
     public function init_payment_post($pr_id = null)
-    {
-        if (empty($pr_id)) {
-            return $this->response(
-                ['status' => 400, 'message' => 'Please enter a valid Request ID.'], 
-                RestController::HTTP_OK
-            );
-        }
-        $this->load->library('Payment_Lib');
-        $data = $this->UserModel->getPublishRequestsById($pr_id);
-        if (empty($data)) {
-            return $this->response(
-                ['status' => 404, 'message' => 'Publish Request not found.'], 
-                RestController::HTTP_OK
-            );
-        }
-        $amount = intval($data['amount']) * 100; 
-        $this->payment_lib->activate(Payment_Lib::RAZORPAY);
-        $paymentResponse = $this->payment_lib->create_payment(new PaymentParams($amount, $data['pr_id']));
+{
+    if (empty($pr_id)) {
+        return $this->response(
+            ['status' => 400, 'message' => 'Please enter a valid Request ID.'], 
+            RestController::HTTP_OK
+        );
+    }
     
-        if ($paymentResponse['status'] === true) {
-            $data['order_id'] = $paymentResponse['data']->id;
-            $result = [
-                'pr_id' => $data['pr_id'],
-                'order_id' => $data['order_id']
-            ];
-            $dbResponse = $this->UserModel->addData($result);
-            // print_r($dbResponse);
-            // exit;
-            if ($dbResponse) {
-                return $this->response(
-                    [
-                        'status' => 200,
-                        'message' => 'Payment initiated successfully.',
-                        'data' => $dbResponse
-                    ],
-                    RestController::HTTP_OK
-                );
-            } else {
-                return $this->response(
-                    [
-                        'status' => 500,
-                        'message' => 'Payment Already Initiated.',
-                    ],
-                    RestController::HTTP_OK
-                );
-            }
-        } else {
+    $this->load->library('Payment_Lib');
+    $data = $this->UserModel->getPublishRequestsById($pr_id);
+    
+    if (empty($data)) {
+        return $this->response(
+            ['status' => 404, 'message' => 'Publish Request not found.'], 
+            RestController::HTTP_OK
+        );
+    }
+    
+    $amount = intval($data['amount'])*100;
+    // Check if an existing transaction exists for the pr_id
+    $existingTransaction = $this->db->where('pr_id', $pr_id)
+                                    ->order_by('id', 'DESC')
+                                    ->get('transaction')
+                                    ->row_array();
+
+    if (!empty($existingTransaction) && $existingTransaction['status'] !== 'failed') {
+        // Reuse the existing order_id
+        $order_id = $existingTransaction['order_id'];
+    } else {
+        // Create a new order if no transaction exists or the status is 'failed'
+        $this->payment_lib->activate(Payment_Lib::RAZORPAY);
+        $paymentResponse = $this->payment_lib->create_payment(new PaymentParams($amount, $pr_id));
+
+        if ($paymentResponse['status'] !== true) {
             return $this->response(
                 ['status' => 500, 'message' => $paymentResponse['message']], 
                 RestController::HTTP_OK
             );
         }
+
+        $order_id = $paymentResponse['data']->id;
+        
+        // Insert the new payment record
+        $transactionData = [
+            'pr_id' => $pr_id,
+            'order_id' => $order_id,
+            // 'paid_amount' => $amount,
+            'status' => 'pending',
+            'created_at' => get_datetime()
+        ];
+        $this->UserModel->addData($transactionData);
+    }
+
+    return $this->response(
+        [
+            'status' => 200,
+            'message' => 'Payment initiated successfully.',
+            'data' => [
+                'pr_id' => $pr_id,
+                'order_id' => $order_id
+            ]
+        ],
+        RestController::HTTP_OK
+    );
 
                         // }
                         // else{
