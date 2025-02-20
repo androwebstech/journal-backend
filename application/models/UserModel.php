@@ -1113,7 +1113,7 @@ class UserModel extends CI_model
         $this->db->where('order_id', $order_id);
         $this->db->update('transaction', [
             'status' => PAYMENT_STATUS::FAILED,
-            // 'gateway_response'   => $payment_data,
+            'gateway_response'   => $payment_data,
             'updated_at'     => get_datetime()
         ]);
 
