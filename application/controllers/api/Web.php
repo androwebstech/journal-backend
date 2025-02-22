@@ -326,6 +326,48 @@ class Web extends RestController
         return $this->response($result, RestController::HTTP_OK);
     }
 
+    public function forgot_password_post()
+    {
+        $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
+        if ($this->form_validation->run()) {
+            $email = $this->input->post("email", true);
+
+            $token = $this->UserModel->forgot_password($email);
+            if ($token) {
+                $this->load->library('Mailer_lib');
+                $mail_template =  password_reset_request_mail($token);
+                $this->mailer_lib->send_mail($email, 'Password Reset Request', $mail_template);
+            }
+            $result = ['status' => 200,'message' => 'Password reset email has been sent. You will get the reset mail if email is registered with us'];
+        } else {
+            $result = ['status' => 400,'message' => strip_tags(validation_errors())];
+        }
+        return $this->response($result, RestController::HTTP_OK);
+    }
+    public function reset_password_post()
+    {
+        $this->form_validation->set_rules('new_password', 'New Password', 'required');
+        if ($this->form_validation->run()) {
+            $resetToken = $this->input->post("reset_token");
+            $newPassword = password_hash($this->input->post("new_password"), PASSWORD_BCRYPT);
+            $this->load->library('Authorization_token');
+            $decodedToken = $this->authorization_token->validateToken();
+            if ($decodedToken['status']) {
+                $resetData = (array)$decodedToken['data'];
+                if (strtotime('now') <= $resetData['reset_expire']) {
+                    $this->db->where('email', $resetData['email'])->set('password', $newPassword)->update('users');
+                    $result = ['status' => 200,'message' => 'Password has been reset successfully.'];
+                } else {
+                    $result = ['status' => 401,'message' => 'Reset Token is expired.'];
+                }
+            } else {
+                $result = ['status' => 401,'message' => $decodedToken['message']];
+            }
+        } else {
+            $result = ['status' => 400,'message' => strip_tags(validation_errors())];
+        }
+        return $this->response($result, RestController::HTTP_OK);
+    }
 
     public function razorpay_webhook_post()
     {
@@ -351,7 +393,7 @@ class Web extends RestController
                 $order   = $res['payload']['order']['entity'];
                 if ($order['status'] == 'paid') {
                     $transaction = $this->UserModel->getTransactionDetails($order['id']);
-                    if (!empty($transaction) && ($transaction['status'] == PAYMENT_STATUS::PENDING || $transaction['status'] == PAYMENT_STATUS::FAILED )) {
+                    if (!empty($transaction) && ($transaction['status'] == PAYMENT_STATUS::PENDING || $transaction['status'] == PAYMENT_STATUS::FAILED)) {
                         $this->UserModel->markTransactionPaid($order['id'], json_encode($payment));
                         $this->UserModel->changePaymentStatus($order['id']);
                         //send mail
@@ -360,16 +402,14 @@ class Web extends RestController
                         // $this->mailer_lib->send_mail($booking['email'], 'Appointment Scheduled', appointment_template($booking));
                     }
                     $finalResult .=  "success:Order-".$order['id'];
-                }
-                 else {
+                } else {
                     $finalResult .=  "failed:Order-".$order['id'].'status:'.$order['status'];
                 }
-            }else if ($res['event'] == 'payment.failed') {
+            } elseif ($res['event'] == 'payment.failed') {
                 $payment = $res['payload']['payment']['entity'];
                 $this->UserModel->markTransactionFailed($payment['order_id']);
                 $finalResult .=  "Failed:Order-".$payment['order_id'];
-            } 
-            else {
+            } else {
                 $finalResult .= 'Failed: event->> '.$res['event'];
             }
         } else {

@@ -1029,19 +1029,19 @@ class UserModel extends CI_model
         if (empty($result)) {
             return false;
         }
-    
+
         $id = $result['pr_id'];
-    
+
         // Insert the new transaction
         $inserted = $this->db->insert('transaction', $result);
-    
+
         if ($inserted) {
             // Update the payment_status in publish_requests table
             $this->db->where('pr_id', $result['pr_id'])
                      ->update('publish_requests', ['payment_status' => PAYMENT_STATUS::PENDING]);
             return true;
         }
-    
+
         return false;
     }
 
@@ -1119,7 +1119,20 @@ class UserModel extends CI_model
 
     }
 
-
+    public function forgot_password($email = null)
+    {
+        if (!empty($email)) {
+            $user = $this->db->where('email', $email)->get('users')->row_array();
+            // $existing = $this->db->where('email', $email)->where('status', 'pending')->get('password_reset')->row_array();
+            if (!empty($user)) {
+                $this->load->library('Authorization_token');
+                $resetData = ['email' => $user['email'],'reset_expire' => strtotime('now') + (10 * 60) ];
+                $token = $this->authorization_token->generateToken($resetData);
+                return $token;
+            }
+        }
+        return false;
+    }
 
 
 
