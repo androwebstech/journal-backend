@@ -157,6 +157,8 @@ class UserModel extends CI_model
     public function register($user)
     {
         if (in_array($user['type'], [USER_TYPE::REVIEWER, USER_TYPE::PUBLISHER])) {
+            $user['approval_status'] = APPROVAL_STATUS::PENDING;
+        } else {
             $user['approval_status'] = APPROVAL_STATUS::APPROVED;
         }
 
