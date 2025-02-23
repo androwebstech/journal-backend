@@ -334,7 +334,7 @@ class Web extends RestController
 
             $token = $this->UserModel->forgot_password($email);
             if ($token) {
-                $this->load->library('Mailer_lib');
+                $this->load->library('Mailer_Lib');
                 $mail_template =  password_reset_request_mail($token);
                 $this->mailer_lib->send_mail($email, 'Password Reset Request', $mail_template);
             }
@@ -354,7 +354,7 @@ class Web extends RestController
         if ($this->form_validation->run()) {
             $resetToken = $this->input->post("reset_token");
             $newPassword = password_hash($this->input->post("new_password"), PASSWORD_BCRYPT);
-            $this->load->library('Authorization_token');
+            $this->load->library('Authorization_Token');
             $decodedToken = $this->authorization_token->validateToken();
             if ($decodedToken['status']) {
                 $resetData = (array)$decodedToken['data'];
