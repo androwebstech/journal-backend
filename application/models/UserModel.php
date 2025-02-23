@@ -1125,7 +1125,7 @@ class UserModel extends CI_model
             $user = $this->db->where('email', $email)->get('users')->row_array();
             // $existing = $this->db->where('email', $email)->where('status', 'pending')->get('password_reset')->row_array();
             if (!empty($user)) {
-                $this->load->library('Authorization_token');
+                $this->load->library('Authorization_Token');
                 $resetData = ['email' => $user['email'],'reset_expire' => strtotime('now') + (10 * 60) ];
                 $token = $this->authorization_token->generateToken($resetData);
                 return $token;
