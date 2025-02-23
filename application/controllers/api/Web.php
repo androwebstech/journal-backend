@@ -13,7 +13,7 @@ class Web extends RestController
     {
         parent::__construct();
         header('Access-Control-Allow-Origin: *');
-        header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
+        header("Access-Control-Allow-Headers: X-API-KEY, Origin, Authorization, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
         header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
         $method = $_SERVER['REQUEST_METHOD'];
         if ($method == "OPTIONS") {
@@ -344,9 +344,13 @@ class Web extends RestController
         }
         return $this->response($result, RestController::HTTP_OK);
     }
+    public function test_mail_get()
+    {
+        echo password_reset_request_mail('asddf');
+    }
     public function reset_password_post()
     {
-        $this->form_validation->set_rules('new_password', 'New Password', 'required');
+        $this->form_validation->set_rules('new_password', 'New Password', 'required|min_length[6]');
         if ($this->form_validation->run()) {
             $resetToken = $this->input->post("reset_token");
             $newPassword = password_hash($this->input->post("new_password"), PASSWORD_BCRYPT);
@@ -358,7 +362,7 @@ class Web extends RestController
                     $this->db->where('email', $resetData['email'])->set('password', $newPassword)->update('users');
                     $result = ['status' => 200,'message' => 'Password has been reset successfully.'];
                 } else {
-                    $result = ['status' => 401,'message' => 'Reset Token is expired.'];
+                    $result = ['status' => 401,'message' => 'Reset Token has been expired.'];
                 }
             } else {
                 $result = ['status' => 401,'message' => $decodedToken['message']];

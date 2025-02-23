@@ -55,15 +55,21 @@ function getUniqueCode($n = 6)
 
 function password_reset_request_mail($token)
 {
-    $frontend = 'https://localhost:8000';
-    $link = $frontend.'/reset-password';
+
+    $frontend = isDevEnv() ? 'http://localhost:3000' : 'http://ifrj-app.solutionspool.in';
+
+    $link = $frontend.'/password-reset/' . base64_encode($token);
     return <<<EMAIL
-	<html>
-	<head><title>Password Reset Request</title></head>
-	<body>
-	Change you password using the below link.</br>
-	<a href="$link">$link</a>
-	</body>
-	</html>
-	EMAIL;
+<html>
+<head><title>Password Reset Request</title></head><body>
+<div>Please reset your password using below link.</div>
+<div><i><strong>Note:</strong> Link is valid only for 10 minute(s).</i></div>
+<div><a href="$link">$link</a></div>
+</body>
+</html>
+EMAIL;
+}
+function isDevEnv()
+{
+    return $_SERVER['HTTP_HOST'] == 'localhost';
 }
