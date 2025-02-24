@@ -238,6 +238,8 @@ class Web extends RestController
 
 
         if ($reviewer) {
+            $this->db->where('id', $id);
+            $this->db->where('type', 'reviewer')->set('view_count', 'view_count+1', false)->update('users');
             $result = [
                 'status' => 200,
                 'message' => 'reviewer fetched successfully',
