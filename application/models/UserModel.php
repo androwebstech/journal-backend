@@ -221,9 +221,20 @@ class UserModel extends CI_model
     }
     public function get_reviewer_by_id($id)
     {
+        $controller = ($this->uri->segment(isDevEnv() ? 2 : 1));
+        if ($controller == 'web') {
+            $select[] = 'id,profile_image,name,department,designation,maximum_qualification,profile_link,research_area,about,approval_status,university_name,view_count';
+        } else {
+            $select[] = '*,"" as password';
+        }
+        $select[] = '(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name';
+        $select[] = '(SELECT count(*) from publish_requests where assigned_reviewer ="'.$id.'" and reviewer_remarks !="") as total_reviews';
+        $select[] = 'CONCAT("'.base_url().'",profile_image) as profile_image';
+        $select[] = '(SELECT count(*) from published_papers where user_id ="'.$id.'" and approval_status = "'.APPROVAL_STATUS::APPROVED.'") as total_publications';
+
         $this->db->where('id', $id);
         $this->db->where('type', 'reviewer');
-        $this->db->select('*, "" as password, CONCAT("'.base_url().'",profile_image) as profile_image,(Select count(*) from publish_requests where assigned_reviewer ="'.$id.'" and reviewer_remarks !="") as total_reviews,(Select count(*) from published_papers where user_id ="'.$id.'" and approval_status = "'.APPROVAL_STATUS::APPROVED.'") as total_publications');
+        $this->db->select(implode(',', $select));
         $query = $this->db->get('users');
         if ($query->num_rows() > 0) {
             return $query->row_array();
