@@ -298,5 +298,97 @@ public function get_publish_requests_get()
         ], RestController::HTTP_OK);
     }
 
+    public function delete_reviewer_get($id = 0)
+    {
+        // $this->load->database();
+
+        $id = intval($id);
+        if ($id > 0) {
+            $result = $this->Admin_model->deleteReviewer($id);
+        } else {
+            $result = ['status' => 400, 'message' => 'Valid ID is required.'];
+        }
+
+
+        $this->response($result, RestController::HTTP_OK);
+    }
+
+
+    public function delete_journal_get($id = 0)
+    {
+        // $this->load->database();
+
+        $id = intval($id);
+        if ($id > 0) {
+            $result = $this->Admin_model->deleteJournal($id);
+        } else {
+            $result = ['status' => 400, 'message' => 'Valid ID is required.'];
+        }
+
+
+        $this->response($result, RestController::HTTP_OK);
+    }
+    
+
+    public function delete_author_get($id = 0)
+    {
+        // $this->load->database();
+
+        $id = intval($id);
+        if ($id > 0) {
+            $result = $this->Admin_model->deleteAuthor($id);
+        } else {
+            $result = ['status' => 400, 'message' => 'Valid ID is required.'];
+        }
+
+
+        $this->response($result, RestController::HTTP_OK);
+    }
+
+    public function delete_publication_get($id = 0)
+    {
+        // $this->load->database();
+
+        $id = intval($id);
+        if ($id > 0) {
+            $result = $this->Admin_model->deletePublication($id);
+        } else {
+            $result = ['status' => 400, 'message' => 'Valid ID is required.'];
+        }
+
+
+        $this->response($result, RestController::HTTP_OK);
+    }
+
+    public function delete_research_paper_get($id = 0)
+    {
+        // $this->load->database();
+
+        $id = intval($id);
+        if ($id > 0) {
+            $result = $this->Admin_model->deleteResearchPaper($id);
+        } else {
+            $result = ['status' => 400, 'message' => 'Valid ID is required.'];
+        }
+
+
+        $this->response($result, RestController::HTTP_OK);
+    }
+
+    public function delete_contact_us_get($id = 0)
+    {
+        // $this->load->database();
+
+        $id = intval($id);
+        if ($id > 0) {
+            $result = $this->Admin_model->deleteContactUs($id);
+        } else {
+            $result = ['status' => 400, 'message' => 'Valid ID is required.'];
+        }
+
+
+        $this->response($result, RestController::HTTP_OK);
+    }
+
 
 }

@@ -191,4 +191,124 @@ public function getResearchPaperRequests()
         return false;
     }
 
+    public function deleteReviewer($id)
+    {
+        $this->db->where('id', $id);
+        $this->db->where('type', USER_TYPE::REVIEWER);
+        $query = $this->db->get('users');
+
+        if ($query->num_rows() > 0) {
+            $this->db->where('id', $id);
+            $this->db->where('type', USER_TYPE::REVIEWER);
+            $this->db->delete('users');
+
+            if ($this->db->affected_rows() > 0) {
+                return ['status' => 200, 'message' => 'Reviewer deleted successfully!'];
+            } else {
+                return ['status' => 500, 'message' => 'Failed to delete the reviewer.'];
+            }
+        } else {
+            return ['status' => 404, 'message' => 'No Reviewer found with the provided ID.'];
+        }
+    }
+
+
+    public function deleteJournal($id)
+    {
+        $this->db->where('journal_id', $id);
+        $query = $this->db->get('journals');
+
+        if ($query->num_rows() > 0) {
+            $this->db->where('journal_id', $id);
+            $this->db->delete('journals');
+
+            if ($this->db->affected_rows() > 0) {
+                return ['status' => 200, 'message' => 'Journal deleted successfully!'];
+            } else {
+                return ['status' => 500, 'message' => 'Failed to delete the Journal.'];
+            }
+        } else {
+            return ['status' => 404, 'message' => 'No Journal found with the provided ID.'];
+        }
+    }
+
+    public function deleteAuthor($id)
+    {
+        $this->db->where('id', $id);
+        $this->db->where('type', USER_TYPE::AUTHOR);
+        $query = $this->db->get('users');
+
+        if ($query->num_rows() > 0) {
+            $this->db->where('id', $id);
+            $this->db->where('type', USER_TYPE::AUTHOR);
+            $this->db->delete('users');
+
+            if ($this->db->affected_rows() > 0) {
+                return ['status' => 200, 'message' => 'Author deleted successfully!'];
+            } else {
+                return ['status' => 500, 'message' => 'Failed to delete the author.'];
+            }
+        } else {
+            return ['status' => 404, 'message' => 'No Author found with the provided ID.'];
+        }
+    }
+
+    public function deletePublication($id)
+    {
+        $this->db->where('ppuid', $id);
+        $query = $this->db->get('published_papers');
+
+        if ($query->num_rows() > 0) {
+            $this->db->where('ppuid', $id);
+            $this->db->delete('published_papers');
+
+            if ($this->db->affected_rows() > 0) {
+                return ['status' => 200, 'message' => 'Publication deleted successfully!'];
+            } else {
+                return ['status' => 500, 'message' => 'Failed to delete the Publication.'];
+            }
+        } else {
+            return ['status' => 404, 'message' => 'No Publication found with the provided ID.'];
+        }
+    }
+
+    public function deleteResearchPaper($id)
+    {
+        $this->db->where('paper_id', $id);
+        $query = $this->db->get('research_papers');
+
+        if ($query->num_rows() > 0) {
+            $this->db->where('paper_id', $id);
+            $this->db->delete('research_papers');
+
+            if ($this->db->affected_rows() > 0) {
+                return ['status' => 200, 'message' => 'Research Paper deleted successfully!'];
+            } else {
+                return ['status' => 500, 'message' => 'Failed to delete the Research Paper.'];
+            }
+        } else {
+            return ['status' => 404, 'message' => 'No Research Paper found with the provided ID.'];
+        }
+    }
+
+    public function deleteContactUs($id)
+    {
+        $this->db->where('id', $id);
+        $query = $this->db->get('contact_table');
+
+        if ($query->num_rows() > 0) {
+            $this->db->where('id', $id);
+            $this->db->delete('contact_table');
+
+            if ($this->db->affected_rows() > 0) {
+                return ['status' => 200, 'message' => 'Contact deleted successfully!'];
+            } else {
+                return ['status' => 500, 'message' => 'Failed to delete the Contact.'];
+            }
+        } else {
+            return ['status' => 404, 'message' => 'No Contact found with the provided ID.'];
+        }
+    }
+
+
 }
