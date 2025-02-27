@@ -638,17 +638,26 @@ class UserModel extends CI_model
         return $this->db->where(['publisher_id' => $pid])->get('publish_requests')->result_array();
     }
 
-    public function getResearchPaperRequests($where = [])
+    public function getResearchPaperRequests($where = [], $userType = null)
     {
-        $this->db->select('
-        publish_requests.*,
+        $select = [];
+        $select[] = 'publish_requests.*';
+        $select[] = '
             research_papers.paper_title, 
+            IF(research_papers.file="","",CONCAT("' . base_url('') . '", research_papers.file)) as file,
             users.name,
             journals.journal_name,
             research_papers.subjects,
             research_papers.keywords,
-            (Select name from users where users.id = publish_requests.assigned_reviewer) AS reviewer_name
-        ');
+        ';
+
+        if ($userType == USER_TYPE::AUTHOR) {
+            $select[] = 'IF(assigned_reviewer>0,"yes",null) as assigned_reviewer, "" as reviewer_remarks ';
+        } else {
+            $select[] = '(SELECT name from users where users.id = publish_requests.assigned_reviewer) AS reviewer_name';
+        }
+
+        $this->db->select(implode(',', $select));
         $this->db->from('publish_requests');
         $this->db->join('users', 'publish_requests.author_id = users.id');
         $this->db->join('journals', 'publish_requests.journal_id = journals.journal_id');
@@ -1009,12 +1018,12 @@ class UserModel extends CI_model
 
     public function get_request_by_id($id)
     {
-        $this->db->select('publish_requests.* , journals.journal_name ,research_papers.paper_title,research_papers.author_name,research_papers.abstract,research_papers.subjects,', );
+        $this->db->select('PR.pr_id,PR.reviewer_remarks, journals.journal_name,IF(research_papers.file="","",CONCAT("' . base_url('') . '", research_papers.file)) as file, research_papers.paper_title,research_papers.author_name,research_papers.abstract,research_papers.subjects,');
         $this->db->where('assigned_reviewer', $id);
         $this->db->where('pr_status', PR_STATUS::ACCEPT);
-        $this->db->join('journals', 'journals.journal_id = publish_requests.journal_id');
-        $this->db->join('research_papers', 'research_papers.paper_id = publish_requests.paper_id');
-        $query = $this->db->get('publish_requests');
+        $this->db->join('journals', 'journals.journal_id = PR.journal_id');
+        $this->db->join('research_papers', 'research_papers.paper_id = PR.paper_id');
+        $query = $this->db->get('publish_requests as PR');
         if ($query->num_rows() > 0) {
             return $query->result_array();
         }
@@ -1105,7 +1114,7 @@ class UserModel extends CI_model
     }
     public function get_reviews_by_reviewer_id($reviewer_id)
     {
-        $this->db->select('publish_requests.reviewer_remarks , journals.journal_name ,research_papers.paper_title,research_papers.author_name,research_papers.abstract,research_papers.keywords,research_papers.subjects', );
+        $this->db->select('publish_requests.reviewer_remarks , journals.journal_name ,research_papers.paper_title,research_papers.author_name,research_papers.abstract,research_papers.keywords,research_papers.subjects');
         $this->db->from('publish_requests');
         $this->db->where('assigned_Reviewer', $reviewer_id);
         $this->db->where('pr_status!=', PR_STATUS::ACCEPT);

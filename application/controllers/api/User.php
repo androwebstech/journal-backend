@@ -673,8 +673,8 @@ class User extends RestController
         $this->form_validation->set_rules('affiliation', 'Affiliation', 'trim');
         $this->form_validation->set_rules('department', 'Department', 'trim');
         $this->form_validation->set_rules('paper_title', 'Paper Title', 'trim|required');
-        $this->form_validation->set_rules('abstract', 'Abstract', 'trim|required');
-        $this->form_validation->set_rules('keywords', 'Keywords', 'trim|required');
+        // $this->form_validation->set_rules('abstract', 'Abstract', 'trim|required');
+        // $this->form_validation->set_rules('keywords', 'Keywords', 'trim|required');
         $this->form_validation->set_rules('subjects', 'Subjects', 'trim|required');
 
 
@@ -1209,7 +1209,7 @@ class User extends RestController
             $where['publish_requests.publisher_id'] = $userId;
         }
 
-        $journals = $this->UserModel->getResearchPaperRequests($where);
+        $journals = $this->UserModel->getResearchPaperRequests($where, $this->user['type']);
         if ($journals) {
             $result = [
                 'status' => 200,
