@@ -466,7 +466,7 @@ class User extends RestController
         $this->form_validation->set_rules('publication_year', 'Publication Year', 'trim|integer|required');
         $this->form_validation->set_rules('paper_type', 'Paper Type', 'trim|required|in_list[Journal,Patent,Book]');
         $this->form_validation->set_rules('authors', 'Author Name', 'trim|required');
-        $this->form_validation->set_rules('issn', 'Issn Number', 'trim|integer|required');
+        $this->form_validation->set_rules('issn', 'Issn Number', 'trim|required');
         $this->form_validation->set_rules('volume', 'Volume', 'trim|integer|required');
         $this->form_validation->set_rules('issue', 'Issue', 'trim|integer|required');
         $this->form_validation->set_rules('live_url', 'Live Url', 'trim|valid_url');
