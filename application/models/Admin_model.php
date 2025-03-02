@@ -353,7 +353,7 @@ public function getPublications($filters = [], $limit = 500, $offset = 0, $searc
     
     $this->db->select('*');
     
-    $this->db->order_by('id', 'ASC');
+    $this->db->order_by('ppuid', 'ASC');
     $this->db->limit($limit, $offset);
     return $this->db->get('published_papers')->result_array();
 }
@@ -361,7 +361,7 @@ public function getPublications($filters = [], $limit = 500, $offset = 0, $searc
 public function applyPublicationSearchFilter($filters = [], $searchString = '')
 {
     $searchColumns = ['paper_title', 'indexing_with', 'publication_year'];
-    $filterColumns = ['paper_type', 'designation', 'country', 'state'];
+    $filterColumns = ['paper_type'];
     
     if (!empty($searchString)) {
         $this->db->or_group_start();
