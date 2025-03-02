@@ -360,8 +360,8 @@ public function getPublications($filters = [], $limit = 500, $offset = 0, $searc
 
 public function applyPublicationSearchFilter($filters = [], $searchString = '')
 {
-    $searchColumns = ['paper_title', 'indexing_with', 'publication_year'];
-    $filterColumns = ['paper_type'];
+    $searchColumns = ['paper_title', 'indexing_with', 'publication_year','authors','issn'];
+    $filterColumns = ['paper_type',  'approval_status'];
     
     if (!empty($searchString)) {
         $this->db->or_group_start();
