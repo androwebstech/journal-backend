@@ -56,23 +56,23 @@ public function insert_contact($data)
     
 
 
-public function getAuthors()
-{
+// public function getAuthors()
+// {
     
-    $this->db->select('
-        users.*, 
-        CONCAT("' . base_url('') . '", users.profile_image) AS profile_image
-    ');
-    $this->db->from('users');
-    $this->db->where('type', USER_TYPE::AUTHOR);
-    $query = $this->db->get();
+//     $this->db->select('
+//         users.*, 
+//         CONCAT("' . base_url('') . '", users.profile_image) AS profile_image
+//     ');
+//     $this->db->from('users');
+//     $this->db->where('type', USER_TYPE::AUTHOR);
+//     $query = $this->db->get();
 
-    if ($query->num_rows() > 0) {
-        return $query->result_array();
-    } else {
-        return null;
-    }
-}
+//     if ($query->num_rows() > 0) {
+//         return $query->result_array();
+//     } else {
+//         return null;
+//     }
+// }
    
 
 public function getPublishers()
@@ -309,6 +309,55 @@ public function getResearchPaperRequests()
             return ['status' => 404, 'message' => 'No Contact found with the provided ID.'];
         }
     }
+public function getAuthors($filters = [], $limit = 500, $offset = 0, $searchString = '')
+{
+    $this->applyAuthorSearchFilter($filters, $searchString);
+    
+    $this->db->select('*,"" as password,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name,
+        IF(profile_image="","",CONCAT("' . base_url('') . '", profile_image)) as profile_image,
+        IF(doc1="","",CONCAT("' . base_url('') . '", doc1)) as doc1,
+        IF(doc2="","",CONCAT("' . base_url('') . '", doc2)) as doc2,
+        IF(doc3="","",CONCAT("' . base_url('') . '", doc3)) as doc3
+    ');
+    
+    $this->db->order_by('id', 'ASC');
+    $this->db->limit($limit, $offset);
+    return $this->db->get('users')->result_array();
+}
 
+public function applyAuthorSearchFilter($filters = [], $searchString = '')
+{
+    $searchColumns = ['name', 'research_area'];
+    $filterColumns = ['department', 'designation', 'country', 'state', 'approval_status'];
+    
+    if (!empty($searchString)) {
+        $this->db->or_group_start();
+        foreach ($searchColumns as $column) {
+            $this->db->or_like($column, $searchString);
+        }
+        $this->db->group_end();
+    }
+    
+    if (!empty($filters) && is_array($filters)) {
+        foreach ($filters as $key => $value) {
+            if (!in_array($key, $filterColumns) || empty($value)) {
+                continue;
+            }
+            if (is_numeric($value)) {
+                $this->db->where($key, $value);
+            } elseif (is_string($value)) {
+                $this->db->like($key, $value);
+            }
+        }
+    }
+    
+    $this->db->where('type', USER_TYPE::AUTHOR);
+}
+
+public function getAuthorsCount($filters = [], $searchString = '')
+{
+    $this->applyAuthorSearchFilter($filters, $searchString);
+    return $this->db->count_all_results('users');
+}
 
 }
