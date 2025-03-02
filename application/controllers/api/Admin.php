@@ -400,7 +400,6 @@ public function get_publish_requests_get()
     $page = abs($page) < 1 ? 1 : abs($page);
     $offset = ($page - 1) * $limit;
     
-    $filters['approval_status'] = APPROVAL_STATUS::APPROVED;
       $res = $this->Admin_model->getPublications($filters, $limit, $offset, $searchString);
     $count = $this->Admin_model->getPublicationsCount($filters, $searchString);
     $this->response([
