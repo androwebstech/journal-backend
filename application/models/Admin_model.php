@@ -141,19 +141,7 @@ public function approveRejectJournal($journalId,$status){
 
 
 
-public function getPublications()
-{
-    $this->db->select('*');
-      $this->db->order_by('ppuid', 'DESC');
-    $this->db->from('published_papers');
-    $query = $this->db->get();
 
-    if ($query->num_rows() > 0) {
-        return $query->result_array();
-    } else {
-        return null;
-    }
-}
 
 
 
@@ -359,5 +347,49 @@ public function getAuthorsCount($filters = [], $searchString = '')
     $this->applyAuthorSearchFilter($filters, $searchString);
     return $this->db->count_all_results('users');
 }
+public function getPublicationns($filters = [], $limit = 500, $offset = 0, $searchString = '')
+{
+    $this->applyPublicationSearchFilter($filters, $searchString);
+    
+    $this->db->select('*,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name,
+    ');
+    
+    $this->db->order_by('id', 'ASC');
+    $this->db->limit($limit, $offset);
+    return $this->db->get('published_papers')->result_array();
+}
 
+public function applyPublicationSearchFilter($filters = [], $searchString = '')
+{
+    $searchColumns = ['paper_title', 'indexing_with', 'publication_year'];
+    $filterColumns = ['paper_type', 'designation', 'country', 'state'];
+    
+    if (!empty($searchString)) {
+        $this->db->or_group_start();
+        foreach ($searchColumns as $column) {
+            $this->db->or_like($column, $searchString);
+        }
+        $this->db->group_end();
+    }
+    
+    if (!empty($filters) && is_array($filters)) {
+        foreach ($filters as $key => $value) {
+            if (!in_array($key, $filterColumns) || empty($value)) {
+                continue;
+            }
+            if (is_numeric($value)) {
+                $this->db->where($key, $value);
+            } elseif (is_string($value)) {
+                $this->db->like($key, $value);
+            }
+        }
+    }
+
+}
+
+public function getPublicationsCount($filters = [], $searchString = '')
+{
+    $this->applyPublicationSearchFilter($filters, $searchString);
+    return $this->db->count_all_results('published_papers');
+}
 }

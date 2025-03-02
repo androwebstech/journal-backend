@@ -223,24 +223,7 @@ public function approve_reject_publication_post(){
 }
 
 
-    public function get_publications_get()
-{
-    $this->load->model('Admin_model');
-    $requests = $this->Admin_model->getPublications();
-    if ($requests) {
-        $result = [
-            'status' => 200,
-            'message' => 'Publications fetched successfully',
-            'data' => $requests];
-    } else {
-        $result = [
-            'status' => 404, 'message' => 'No Publication found',
-            'data' => []
-        ];
-    }
 
-    $this->response($result, RestController::HTTP_OK);
-}
 public function get_publish_requests_get()
     {
         $journals = $this->Admin_model->getResearchPaperRequests();
@@ -409,5 +392,24 @@ public function get_publish_requests_get()
 
         $this->response($result, RestController::HTTP_OK);
     }
+    public function publications_search_get($limit = 10, $page = 1)
+{
+    $filters = $this->input->get() ?? [];
+    $searchString = $this->input->get('search', true) ?? '';
+    $limit = abs($limit) < 1 ? 10 : abs($limit);
+    $page = abs($page) < 1 ? 1 : abs($page);
+    $offset = ($page - 1) * $limit;
+    
+    $filters['approval_status'] = APPROVAL_STATUS::APPROVED;
+      $res = $this->Admin_model->getPublications($filters, $limit, $offset, $searchString);
+    $count = $this->Admin_model->getPublicationsCount($filters, $searchString);
+    $this->response([
+        'status' => 200,
+        'message' => 'Success',
+        'data' => $res,
+        'totalPages' => ceil($count / $limit),
+        'currentPage' => $page,
+    ], RestController::HTTP_OK);
+}
 
 }
