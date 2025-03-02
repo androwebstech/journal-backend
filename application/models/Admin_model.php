@@ -351,8 +351,7 @@ public function getPublications($filters = [], $limit = 500, $offset = 0, $searc
 {
     $this->applyPublicationSearchFilter($filters, $searchString);
     
-    $this->db->select('*,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name,
-    ');
+    $this->db->select('*');
     
     $this->db->order_by('id', 'ASC');
     $this->db->limit($limit, $offset);
