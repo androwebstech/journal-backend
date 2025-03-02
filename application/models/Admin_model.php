@@ -347,7 +347,7 @@ public function getAuthorsCount($filters = [], $searchString = '')
     $this->applyAuthorSearchFilter($filters, $searchString);
     return $this->db->count_all_results('users');
 }
-public function getPublicationns($filters = [], $limit = 500, $offset = 0, $searchString = '')
+public function getPublications($filters = [], $limit = 500, $offset = 0, $searchString = '')
 {
     $this->applyPublicationSearchFilter($filters, $searchString);
     
