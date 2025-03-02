@@ -49,10 +49,8 @@ public function authors_search_get($limit = 10, $page = 1)
     $limit = abs($limit) < 1 ? 10 : abs($limit);
     $page = abs($page) < 1 ? 1 : abs($page);
     $offset = ($page - 1) * $limit;
-    
-    $filters['approval_status'] = APPROVAL_STATUS::APPROVED;
-    $res = $this->Admin_Model->getAuthors($filters, $limit, $offset, $searchString);
-    $count = $this->Admin_Model->getAuthorsCount($filters, $searchString);
+    $res = $this->Admin_model->getAuthors($filters, $limit, $offset, $searchString);
+    $count = $this->Admin_model->getAuthorsCount($filters, $searchString);
     
     $this->response([
         'status' => 200,
