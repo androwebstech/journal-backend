@@ -1,143 +1,154 @@
 <?php
+
 defined('BASEPATH') or exit('No Access');
 class Admin_model extends CI_model
 {
-	function __construct()
-	{
-		parent::__construct();
-		$this->load->database();
-		$this->load->helper(['common_helper']);
+    public function __construct()
+    {
+        parent::__construct();
+        $this->load->database();
+        $this->load->helper(['common_helper']);
         $this->load->helper('url');
 
-	}
-// 	public function register($data)
-// {
-//     $this->db->insert('users', $data);
-//     if ($this->db->affected_rows()>0) {
-//         $inserted_id = $this->db->insert_id();
-//         return $this->db->where('id', $this->db->insert_id())->get('users')->row_array();
-//     }
-//     return false;
-// }
-
-function validate_login($email, $password) {
-    $user = $this->db->select('*')->where('email', $email)->get('admin')->row_array();
-    if (!empty($user) && password_verify($password,$user['password'])) { 
-        unset($user['password']);
-        return $user; 
     }
-    
-    return false;
-}
+    // 	public function register($data)
+    // {
+    //     $this->db->insert('users', $data);
+    //     if ($this->db->affected_rows()>0) {
+    //         $inserted_id = $this->db->insert_id();
+    //         return $this->db->where('id', $this->db->insert_id())->get('users')->row_array();
+    //     }
+    //     return false;
+    // }
 
-public function register($data)
-{
-    $this->db->insert('admin', $data);
-    if ($this->db->affected_rows() > 0) {
-        $insert_id = $this->db->insert_id();
-        return $this->db->where('admin_id', $insert_id)->get('admin')->row_array();
+    public function validate_login($email, $password)
+    {
+        $user = $this->db->select('*')->where('email', $email)->get('admin')->row_array();
+        if (!empty($user) && password_verify($password, $user['password'])) {
+            unset($user['password']);
+            return $user;
+        }
+
+        return false;
     }
 
-    return false;
-}
+    public function register($data)
+    {
+        $this->db->insert('admin', $data);
+        if ($this->db->affected_rows() > 0) {
+            $insert_id = $this->db->insert_id();
+            return $this->db->where('admin_id', $insert_id)->get('admin')->row_array();
+        }
+
+        return false;
+    }
 
 
 
-public function insert_contact($data)
+    public function insert_contact($data)
     {
         $this->db->insert('contact_table', $data);
         if ($this->db->affected_rows() > 0) {
             return $this->db->insert_id();
         }
         return false;
-    } 
+    }
 
 
-    
 
 
-// public function getAuthors()
-// {
-    
-//     $this->db->select('
-//         users.*, 
-//         CONCAT("' . base_url('') . '", users.profile_image) AS profile_image
-//     ');
-//     $this->db->from('users');
-//     $this->db->where('type', USER_TYPE::AUTHOR);
-//     $query = $this->db->get();
 
-//     if ($query->num_rows() > 0) {
-//         return $query->result_array();
-//     } else {
-//         return null;
-//     }
-// }
-   
+    // public function getAuthors()
+    // {
 
-public function getPublishers()
-{
-    $this->db->select('
+    //     $this->db->select('
+    //         users.*,
+    //         CONCAT("' . base_url('') . '", users.profile_image) AS profile_image
+    //     ');
+    //     $this->db->from('users');
+    //     $this->db->where('type', USER_TYPE::AUTHOR);
+    //     $query = $this->db->get();
+
+    //     if ($query->num_rows() > 0) {
+    //         return $query->result_array();
+    //     } else {
+    //         return null;
+    //     }
+    // }
+
+
+    public function getPublishers()
+    {
+        $this->db->select('
         users.*, 
         CONCAT("' . base_url() . '", users.profile_image) AS profile_image
     ');
-    $this->db->from('users');
-    $this->db->where('type', USER_TYPE::PUBLISHER);
-    $query = $this->db->get();
+        $this->db->from('users');
+        $this->db->where('type', USER_TYPE::PUBLISHER);
+        $query = $this->db->get();
 
-    if ($query->num_rows() > 0) {
-        return $query->result_array();
-    } else {
-        return null;
+        if ($query->num_rows() > 0) {
+            return $query->result_array();
+        } else {
+            return null;
+        }
     }
-}
 
-public function getReviewers()
-{
-    $this->db->select('*');
-    $this->db->from('users');
-    $this->db->where('type', USER_TYPE::REVIEWER);
-    $query = $this->db->get();
+    public function getReviewers()
+    {
+        $this->db->select('*');
+        $this->db->from('users');
+        $this->db->where('type', USER_TYPE::REVIEWER);
+        $query = $this->db->get();
 
-    if ($query->num_rows() > 0) {
-        return $query->result_array();
-    } else {
-        return null;
+        if ($query->num_rows() > 0) {
+            return $query->result_array();
+        } else {
+            return null;
+        }
     }
-}
 
-public function getReviewerDetail($userId){
-    $this->db->select('*');
-    $this->db->from('users');
-    $this->db->where('id', $userId);
-    $this->db->where('type', USER_TYPE::REVIEWER);
-    $query = $this->db->get();
-    if ($query->num_rows() > 0) {
-        return $query->row_array();
-    } else {
-        return null;
+    public function getReviewerDetail($userId)
+    {
+        $this->db->select('*');
+        $this->db->from('users');
+        $this->db->where('id', $userId);
+        $this->db->where('type', USER_TYPE::REVIEWER);
+        $query = $this->db->get();
+        if ($query->num_rows() > 0) {
+            return $query->row_array();
+        } else {
+            return null;
+        }
     }
-}
 
-public function approveRejectReviewer($userId,$status){
-
-    $this->db->where('id', $userId);
-    $this->db->where('type', USER_TYPE::REVIEWER);
-    $this->db->update('users', ['approval_status' => $status]);
-    if ($this->db->affected_rows() > 0) {
-        return true;
+    public function approveRejectReviewer($userId, $status)
+    {
+        $this->db->where('id', $userId);
+        $this->db->where('type', USER_TYPE::REVIEWER);
+        $this->db->update('users', ['approval_status' => $status]);
+        if ($this->db->affected_rows() > 0) {
+            if ($status == APPROVAL_STATUS::APPROVED) {
+                $user = $this->db->where('id', $userId)->get('users')->row_array();
+                $user['linked_ac'] = $user['id'];
+                $user['id'] = null;
+                $user['type'] = USER_TYPE::AUTHOR;
+                $this->db->insert('users', $user);
+            }
+            return true;
+        }
+        return false;
     }
-    return false;
-}
 
-public function approveRejectJournal($journalId,$status){
-    $this->db->where('journal_id', $journalId);
-    $this->db->update('journals', ['approval_status' => $status]);
-    if ($this->db->affected_rows() > 0) {
-        return true;
+    public function approveRejectJournal($journalId, $status)
+    {
+        $this->db->where('journal_id', $journalId);
+        $this->db->update('journals', ['approval_status' => $status]);
+        if ($this->db->affected_rows() > 0) {
+            return true;
+        }
+        return false;
     }
-    return false;
-}
 
 
 
@@ -146,15 +157,16 @@ public function approveRejectJournal($journalId,$status){
 
 
 
-public function approveRejectPublication($ppuid,$status){
-    $this->db->where('ppuid', $ppuid);
-    $this->db->update('published_papers', ['approval_status' => $status]);
-    if ($this->db->affected_rows() > 0) {
-        return true;
+    public function approveRejectPublication($ppuid, $status)
+    {
+        $this->db->where('ppuid', $ppuid);
+        $this->db->update('published_papers', ['approval_status' => $status]);
+        if ($this->db->affected_rows() > 0) {
+            return true;
+        }
+        return false;
     }
-    return false;
-}
-public function getResearchPaperRequests()
+    public function getResearchPaperRequests()
     {
         $this->db->select('
         publish_requests.*,
@@ -297,98 +309,98 @@ public function getResearchPaperRequests()
             return ['status' => 404, 'message' => 'No Contact found with the provided ID.'];
         }
     }
-public function getAuthors($filters = [], $limit = 500, $offset = 0, $searchString = '')
-{
-    $this->applyAuthorSearchFilter($filters, $searchString);
-    
-    $this->db->select('*,"" as password,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name,
+    public function getAuthors($filters = [], $limit = 500, $offset = 0, $searchString = '')
+    {
+        $this->applyAuthorSearchFilter($filters, $searchString);
+
+        $this->db->select('*,"" as password,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name,
         IF(profile_image="","",CONCAT("' . base_url('') . '", profile_image)) as profile_image,
         IF(doc1="","",CONCAT("' . base_url('') . '", doc1)) as doc1,
         IF(doc2="","",CONCAT("' . base_url('') . '", doc2)) as doc2,
         IF(doc3="","",CONCAT("' . base_url('') . '", doc3)) as doc3
     ');
-    
-    $this->db->order_by('id', 'ASC');
-    $this->db->limit($limit, $offset);
-    return $this->db->get('users')->result_array();
-}
 
-public function applyAuthorSearchFilter($filters = [], $searchString = '')
-{
-    $searchColumns = ['name', 'research_area'];
-    $filterColumns = ['department', 'designation', 'country', 'state', 'approval_status'];
-    
-    if (!empty($searchString)) {
-        $this->db->or_group_start();
-        foreach ($searchColumns as $column) {
-            $this->db->or_like($column, $searchString);
-        }
-        $this->db->group_end();
-    }
-    
-    if (!empty($filters) && is_array($filters)) {
-        foreach ($filters as $key => $value) {
-            if (!in_array($key, $filterColumns) || empty($value)) {
-                continue;
-            }
-            if (is_numeric($value)) {
-                $this->db->where($key, $value);
-            } elseif (is_string($value)) {
-                $this->db->like($key, $value);
-            }
-        }
-    }
-    
-    $this->db->where('type', USER_TYPE::AUTHOR);
-}
-
-public function getAuthorsCount($filters = [], $searchString = '')
-{
-    $this->applyAuthorSearchFilter($filters, $searchString);
-    return $this->db->count_all_results('users');
-}
-public function getPublications($filters = [], $limit = 500, $offset = 0, $searchString = '')
-{
-    $this->applyPublicationSearchFilter($filters, $searchString);
-    
-    $this->db->select('*');
-    
-    $this->db->order_by('ppuid', 'ASC');
-    $this->db->limit($limit, $offset);
-    return $this->db->get('published_papers')->result_array();
-}
-
-public function applyPublicationSearchFilter($filters = [], $searchString = '')
-{
-    $searchColumns = ['paper_title', 'indexing_with', 'publication_year','authors','issn'];
-    $filterColumns = ['paper_type',  'approval_status'];
-    
-    if (!empty($searchString)) {
-        $this->db->or_group_start();
-        foreach ($searchColumns as $column) {
-            $this->db->or_like($column, $searchString);
-        }
-        $this->db->group_end();
-    }
-    
-    if (!empty($filters) && is_array($filters)) {
-        foreach ($filters as $key => $value) {
-            if (!in_array($key, $filterColumns) || empty($value)) {
-                continue;
-            }
-            if (is_numeric($value)) {
-                $this->db->where($key, $value);
-            } elseif (is_string($value)) {
-                $this->db->like($key, $value);
-            }
-        }
+        $this->db->order_by('id', 'ASC');
+        $this->db->limit($limit, $offset);
+        return $this->db->get('users')->result_array();
     }
 
-}
+    public function applyAuthorSearchFilter($filters = [], $searchString = '')
+    {
+        $searchColumns = ['name', 'research_area'];
+        $filterColumns = ['department', 'designation', 'country', 'state', 'approval_status'];
 
-public function getPublicationsCount($filters = [], $searchString = '')
-{
-    $this->applyPublicationSearchFilter($filters, $searchString);
-    return $this->db->count_all_results('published_papers');
-}
+        if (!empty($searchString)) {
+            $this->db->or_group_start();
+            foreach ($searchColumns as $column) {
+                $this->db->or_like($column, $searchString);
+            }
+            $this->db->group_end();
+        }
+
+        if (!empty($filters) && is_array($filters)) {
+            foreach ($filters as $key => $value) {
+                if (!in_array($key, $filterColumns) || empty($value)) {
+                    continue;
+                }
+                if (is_numeric($value)) {
+                    $this->db->where($key, $value);
+                } elseif (is_string($value)) {
+                    $this->db->like($key, $value);
+                }
+            }
+        }
+
+        $this->db->where('type', USER_TYPE::AUTHOR);
+    }
+
+    public function getAuthorsCount($filters = [], $searchString = '')
+    {
+        $this->applyAuthorSearchFilter($filters, $searchString);
+        return $this->db->count_all_results('users');
+    }
+    public function getPublications($filters = [], $limit = 500, $offset = 0, $searchString = '')
+    {
+        $this->applyPublicationSearchFilter($filters, $searchString);
+
+        $this->db->select('*');
+
+        $this->db->order_by('ppuid', 'ASC');
+        $this->db->limit($limit, $offset);
+        return $this->db->get('published_papers')->result_array();
+    }
+
+    public function applyPublicationSearchFilter($filters = [], $searchString = '')
+    {
+        $searchColumns = ['paper_title', 'indexing_with', 'publication_year','authors','issn'];
+        $filterColumns = ['paper_type',  'approval_status'];
+
+        if (!empty($searchString)) {
+            $this->db->or_group_start();
+            foreach ($searchColumns as $column) {
+                $this->db->or_like($column, $searchString);
+            }
+            $this->db->group_end();
+        }
+
+        if (!empty($filters) && is_array($filters)) {
+            foreach ($filters as $key => $value) {
+                if (!in_array($key, $filterColumns) || empty($value)) {
+                    continue;
+                }
+                if (is_numeric($value)) {
+                    $this->db->where($key, $value);
+                } elseif (is_string($value)) {
+                    $this->db->like($key, $value);
+                }
+            }
+        }
+
+    }
+
+    public function getPublicationsCount($filters = [], $searchString = '')
+    {
+        $this->applyPublicationSearchFilter($filters, $searchString);
+        return $this->db->count_all_results('published_papers');
+    }
 }

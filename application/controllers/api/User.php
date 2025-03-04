@@ -388,6 +388,7 @@ class User extends RestController
                 'about' => $this->input->post('about', true),
                 'university_name' => $this->input->post('university_name', true),
                 'maximum_qualification' => $this->input->post('maximum_qualification', true),
+                'profile_link' => $this->input->post('profile_link', true),
             ];
 
             $id = $this->user['id'];
@@ -681,7 +682,7 @@ class User extends RestController
         if ($this->form_validation->run()) {
             $config['upload_path'] = './uploads/';
             $config['allowed_types'] = 'png|pdf|doc|docx';
-            $config['max_size'] = 2048;
+            $config['max_size'] = 5242880; //5MB
 
             $this->upload->initialize($config);
 
@@ -917,7 +918,6 @@ class User extends RestController
             // Update password
             $updateData = ['password' => password_hash($newPassword, PASSWORD_BCRYPT)];
             $updated = $this->UserModel->updateUser($this->user['id'], $updateData);
-
             if ($updated) {
                 $result = [
                     'status' => 200,

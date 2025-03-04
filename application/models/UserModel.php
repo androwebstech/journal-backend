@@ -1144,7 +1144,7 @@ class UserModel extends CI_model
     public function forgot_password($email = null)
     {
         if (!empty($email)) {
-            $user = $this->db->where('email', $email)->get('users')->row_array();
+            $user = $this->db->where('email', $email)->where('linked_ac', 0)->get('users')->row_array();
             // $existing = $this->db->where('email', $email)->where('status', 'pending')->get('password_reset')->row_array();
             if (!empty($user)) {
                 $this->load->library('Authorization_Token');
