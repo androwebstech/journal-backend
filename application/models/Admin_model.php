@@ -195,18 +195,14 @@ class Admin_model extends CI_model
     {
         $this->db->where('id', $id);
         $this->db->where('type', USER_TYPE::REVIEWER);
-        $query = $this->db->get('users');
+        $user = $this->db->get('users')->row_array();
 
-        if ($query->num_rows() > 0) {
+        if (!empty($user)) {
             $this->db->where('id', $id);
             $this->db->where('type', USER_TYPE::REVIEWER);
             $this->db->delete('users');
-
-            if ($this->db->affected_rows() > 0) {
-                return ['status' => 200, 'message' => 'Reviewer deleted successfully!'];
-            } else {
-                return ['status' => 500, 'message' => 'Failed to delete the reviewer.'];
-            }
+            $this->db->where('linked_ac', $user['id'])->delete('users');
+            return ['status' => 200, 'message' => 'Reviewer deleted successfully!'];
         } else {
             return ['status' => 404, 'message' => 'No Reviewer found with the provided ID.'];
         }
