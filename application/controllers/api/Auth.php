@@ -49,13 +49,22 @@ class Auth extends RestController
             if (!empty($res)) {
                 $tokenData = get_token_data($res);
                 $token = $this->authorization_token->generateToken($tokenData);
-
+                if ($res['type'] == USER_TYPE::REVIEWER) {
+                    $linkedAccount = $this->db->where('linked_ac', $res['id'])->get('users')->row_array();
+                    if (!empty($linkedAccount)) {
+                        $linkedData = get_token_data($linkedAccount);
+                        $linkedToken = $this->authorization_token->generateToken($linkedData);
+                    }
+                }
                 $result = [
                     'status' => 200,
                     'message' => 'Login Successful!',
                     'user' =>  $res,
                     'auth_token' => $token
                 ];
+                if (!empty($linkedToken)) {
+                    $result['linked_token'] = $linkedToken;
+                }
             } else {
                 $result = ['status' => 403, 'message' => 'Invalid Credentials'];
             }
