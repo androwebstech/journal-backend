@@ -1160,4 +1160,93 @@ class UserModel extends CI_model
 
 
 
+
+    public function getTransaction($filters = [], $limit = 500, $offset = 0, $searchString = '')
+    {
+
+        $this->applytransactionListingFilter($filters, $searchString);
+
+        $this->db->select('transaction.*');
+
+       
+
+        $this->db->order_by('pr_id', 'DESC');
+        $this->db->limit($limit, $offset);
+        return $this->db->get('transaction')->result_array();
+    }
+    public function applytransactionListingFilter($filters = [], $searchString = '')
+    {
+        $searchColumns = ['status','order_id'];
+        // $filterColumns = ['country'];
+
+        if (!empty($searchString)) {
+            $this->db->or_group_start();
+            foreach ($searchColumns as $column) {
+                $this->db->or_like($column, $searchString);
+            }
+            $this->db->group_end();
+        }
+
+        if (!empty($filters) &&  is_array($filters)) {
+            foreach ($filters as $key => $value) {
+                if (!in_array($key, $filterColumns) || empty($value)) {
+                    continue;
+                }
+                if (is_numeric($value)) {
+                    $this->db->where($key, $value);
+                } elseif (is_string($value)) {
+                    $this->db->like($key, $value);
+                }
+            }
+        }
+
+       
+    }
+    public function getTransactionCount($filters = [], $searchString = '')
+    {
+        $this->applytransactionListingFilter($filters, $searchString);
+        return $this->db->count_all_results('transaction');
+    }
+
+
+
+
+
+    public function getContacts($filters = [], $limit = 500, $offset = 0, $searchString = '')
+    {
+        $this->applyContactListingFilter($filters, $searchString);
+        
+        $this->db->select('contact_table.*');
+        $this->db->order_by('id', 'DESC');
+        $this->db->limit($limit, $offset);
+        
+        return $this->db->get('contact_table')->result_array();
+    }
+    
+    public function applyContactListingFilter($filters = [], $searchString = '')
+    {
+        $searchColumns = ['name', 'email'];
+        $filterColumns = [];
+    
+        if (!empty($searchString)) {
+            $this->db->group_start();
+            foreach ($searchColumns as $column) {
+                $this->db->or_like($column, $searchString);
+            }
+            $this->db->group_end();
+        }
+    }
+    
+    public function getContactCount($filters = [], $searchString = '')
+    {
+        $this->applyContactListingFilter($filters, $searchString);
+        return $this->db->count_all_results('contact_table');
+    }
+    
+
+
+
+
+
+
 }

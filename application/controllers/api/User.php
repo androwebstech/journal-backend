@@ -462,6 +462,7 @@ class User extends RestController
         $user_id = $this->user['id'];
 
         // Validation rules
+        $this->form_validation->set_rules('journal_name', 'Journal Name', 'trim|required');
         $this->form_validation->set_rules('paper_title', 'Title', 'trim|required');
         $this->form_validation->set_rules('publication_year', 'Publication Year', 'trim|integer|required');
         $this->form_validation->set_rules('paper_type', 'Paper Type', 'trim|required|in_list[Journal,Patent,Book]');
@@ -470,13 +471,14 @@ class User extends RestController
         $this->form_validation->set_rules('volume', 'Volume', 'trim|integer|required');
         $this->form_validation->set_rules('issue', 'Issue', 'trim|integer|required');
         $this->form_validation->set_rules('live_url', 'Live Url', 'trim|valid_url');
-        $this->form_validation->set_rules('indexing_with[]', 'Indexing Partner', 'trim|required');
-        $this->form_validation->set_rules('publication_date', 'Publication Date', 'trim|required');
+        $this->form_validation->set_rules('indexing_with[]', 'Indexing Partner', 'trim');
+        $this->form_validation->set_rules('publication_date', 'Publication Date', 'trim');
         $this->form_validation->set_rules('description', 'Description', 'trim');
 
         if ($this->form_validation->run()) {
             $indexing_with = $this->input->post('indexing_with[]');
             $data = [
+                'journal_name' => $this->input->post('journal_name'),
                 'paper_title' => $this->input->post('paper_title'),
                 'user_id' => $user_id,
                 'publication_year' => $this->input->post('publication_year'),
@@ -1813,6 +1815,59 @@ class User extends RestController
 
         return $this->response($result, RestController::HTTP_OK);
     }
+
+
+
+    public function transactionListing_get($limit = 10, $page = 1)
+    {
+        $filters = $this->input->get() ?? [];
+        $searchString = $this->input->get('search', true) ?? '';
+        $limit = abs($limit) < 1 ? 10 : abs($limit) ;
+        $page = abs($page) < 1 ? 1 : abs($page);
+
+        $offset = ($page - 1) * $limit;
+        $res = $this->UserModel->getTransaction($filters, $limit, $offset, $searchString);
+        $count = $this->UserModel->getTransactionCount($filters, $searchString);
+
+        $this->response([
+            'status' => 200,
+            'message' => 'Success',
+            'data' => $res,
+            'totalPages' => ceil($count / $limit),
+            'currentPage' => $page,
+        ], RestController::HTTP_OK);
+    }
+
+
+
+
+
+
+
+
+
+
+    public function contactListing_get($limit = 10, $page = 1)
+{
+    $filters = $this->input->get() ?? [];
+    $searchString = $this->input->get('search', true) ?? '';
+    $limit = abs($limit) < 1 ? 10 : abs($limit);
+    $page = abs($page) < 1 ? 1 : abs($page);
+
+    $offset = ($page - 1) * $limit;
+    $res = $this->UserModel->getContacts($filters, $limit, $offset, $searchString);
+    $count = $this->UserModel->getContactCount($filters, $searchString);
+
+    $this->response([
+        'status' => 200,
+        'message' => 'Success',
+        'data' => $res,
+        'totalPages' => ceil($count / $limit),
+        'currentPage' => $page,
+    ], RestController::HTTP_OK);
+}
+
+
 
 
 
