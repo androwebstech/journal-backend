@@ -1209,7 +1209,19 @@ class UserModel extends CI_model
     }
 
 
+private function applyContactListingFilter($filters = [], $searchString = '')
+{
+    if (!empty($searchString)) {
+        $this->db->group_start();
+        $this->db->like('name', $searchString);
+        $this->db->or_like('email', $searchString);
+        $this->db->group_end();
+    }
 
+    if (!empty($filters)) {
+        $this->db->where($filters);
+    }
+}
 
 
     public function getContacts($filters = [], $limit = 500, $offset = 0, $searchString = '')
@@ -1223,19 +1235,8 @@ class UserModel extends CI_model
         return $this->db->get('contact_table')->result_array();
     }
     
-    public function applyContactListingFilter($filters = [], $searchString = '')
-    {
-        $searchColumns = ['name', 'email'];
-        $filterColumns = [];
-    
-        if (!empty($searchString)) {
-            $this->db->group_start();
-            foreach ($searchColumns as $column) {
-                $this->db->or_like($column, $searchString);
-            }
-            $this->db->group_end();
-        }
-    }
+
+
     
     public function getContactCount($filters = [], $searchString = '')
     {
@@ -1244,6 +1245,7 @@ class UserModel extends CI_model
     }
     
 
+    
 
 
 

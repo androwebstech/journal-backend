@@ -460,4 +460,51 @@ public function get_publish_requests_get()
     ], RestController::HTTP_OK);
 }
 
+
+
+    public function transaction_listing_get($limit = 10, $page = 1)
+    {
+        $filters = $this->input->get() ?? [];
+        $searchString = $this->input->get('search', true) ?? '';
+        $limit = abs($limit) < 1 ? 10 : abs($limit) ;
+        $page = abs($page) < 1 ? 1 : abs($page);
+
+        $offset = ($page - 1) * $limit;
+        $res = $this->UserModel->getTransaction($filters, $limit, $offset, $searchString);
+        $count = $this->UserModel->getTransactionCount($filters, $searchString);
+
+        $this->response([
+            'status' => 200,
+            'message' => 'Success',
+            'data' => $res,
+            'totalPages' => ceil($count / $limit),
+            'currentPage' => $page,
+        ], RestController::HTTP_OK);
+    }
+
+
+    
+    public function contact_listing_get($limit = 10, $page = 1)
+{
+    $filters = $this->input->get() ?? [];
+    $searchString = $this->input->get('search', true) ?? '';
+    $limit = abs($limit) < 1 ? 10 : abs($limit);
+    $page = abs($page) < 1 ? 1 : abs($page);
+
+    $offset = ($page - 1) * $limit;
+    $res = $this->UserModel->getContacts($filters, $limit, $offset, $searchString);
+    $count = $this->UserModel->getContactCount($filters, $searchString);
+
+    $this->response([
+        'status' => 200,
+        'message' => 'Success',
+        'data' => $res,
+        'totalPages' => ceil($count / $limit),
+        'currentPage' => $page,
+    ], RestController::HTTP_OK);
+}
+
+
+
+
 }
