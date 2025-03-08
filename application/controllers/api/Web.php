@@ -13,7 +13,7 @@ class Web extends RestController
     {
         parent::__construct();
         header('Access-Control-Allow-Origin: *');
-        header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
+        header("Access-Control-Allow-Headers: X-API-KEY, Origin, Authorization, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
         header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
         $method = $_SERVER['REQUEST_METHOD'];
         if ($method == "OPTIONS") {
@@ -238,6 +238,8 @@ class Web extends RestController
 
 
         if ($reviewer) {
+            $this->db->where('id', $id);
+            $this->db->where('type', 'reviewer')->set('view_count', 'view_count+1', false)->update('users');
             $result = [
                 'status' => 200,
                 'message' => 'reviewer fetched successfully',
@@ -326,6 +328,52 @@ class Web extends RestController
         return $this->response($result, RestController::HTTP_OK);
     }
 
+    public function forgot_password_post()
+    {
+        $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
+        if ($this->form_validation->run()) {
+            $email = $this->input->post("email", true);
+
+            $token = $this->UserModel->forgot_password($email);
+            if ($token) {
+                $this->load->library('Mailer_Lib');
+                $mail_template =  password_reset_request_mail($token);
+                $this->mailer_lib->send_mail($email, 'Password Reset Request', $mail_template);
+            }
+            $result = ['status' => 200,'message' => 'Password reset email has been sent. You will get the reset mail if email is registered with us'];
+        } else {
+            $result = ['status' => 400,'message' => strip_tags(validation_errors())];
+        }
+        return $this->response($result, RestController::HTTP_OK);
+    }
+    public function test_mail_get()
+    {
+        echo password_reset_request_mail('asddf');
+    }
+    public function reset_password_post()
+    {
+        $this->form_validation->set_rules('new_password', 'New Password', 'required|min_length[6]');
+        if ($this->form_validation->run()) {
+            $resetToken = $this->input->post("reset_token");
+            $newPassword = password_hash($this->input->post("new_password"), PASSWORD_BCRYPT);
+            $this->load->library('Authorization_Token');
+            $decodedToken = $this->authorization_token->validateToken();
+            if ($decodedToken['status']) {
+                $resetData = (array)$decodedToken['data'];
+                if (strtotime('now') <= $resetData['reset_expire']) {
+                    $this->db->where('email', $resetData['email'])->set('password', $newPassword)->update('users');
+                    $result = ['status' => 200,'message' => 'Password has been reset successfully.'];
+                } else {
+                    $result = ['status' => 401,'message' => 'Reset Token has been expired.'];
+                }
+            } else {
+                $result = ['status' => 401,'message' => $decodedToken['message']];
+            }
+        } else {
+            $result = ['status' => 400,'message' => strip_tags(validation_errors())];
+        }
+        return $this->response($result, RestController::HTTP_OK);
+    }
 
     public function razorpay_webhook_post()
     {
@@ -351,7 +399,7 @@ class Web extends RestController
                 $order   = $res['payload']['order']['entity'];
                 if ($order['status'] == 'paid') {
                     $transaction = $this->UserModel->getTransactionDetails($order['id']);
-                    if (!empty($transaction) && $transaction['payment_status'] == PAYMENT_STATUS::PENDING) {
+                    if (!empty($transaction) && ($transaction['status'] == PAYMENT_STATUS::PENDING || $transaction['status'] == PAYMENT_STATUS::FAILED)) {
                         $this->UserModel->markTransactionPaid($order['id'], json_encode($payment));
                         $this->UserModel->changePaymentStatus($order['id']);
                         //send mail
@@ -363,16 +411,21 @@ class Web extends RestController
                 } else {
                     $finalResult .=  "failed:Order-".$order['id'].'status:'.$order['status'];
                 }
+            } elseif ($res['event'] == 'payment.failed') {
+                $payment = $res['payload']['payment']['entity'];
+                $this->UserModel->markTransactionFailed($payment['order_id']);
+                $finalResult .=  "Failed:Order-".$payment['order_id'];
             } else {
-                $finalResult .= 'Failed: event-'.$res['event'];
+                $finalResult .= 'Failed: event->> '.$res['event'];
             }
         } else {
             $finalResult .= "Signature Mismatch";
         }
         echo $finalResult;
+        $raw = 'CompleteData => event ['.$res["event"].'] | '.$jsonString;
+        log_message('debug', $raw);
         log_message('debug', $finalResult);
     }
-
 
 
 }

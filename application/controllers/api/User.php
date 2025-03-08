@@ -72,7 +72,11 @@ class User extends RestController
         $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|integer');
         $this->form_validation->set_rules('review_type', 'Review Type', 'trim|required|in_list[Single-Blind,Double-Blind,Open Peer Review,Collaborative]');
         $this->form_validation->set_rules('review_time', 'Review Time', 'trim');
-         $this->form_validation->set_rules('description', 'Description', 'trim');
+        // New fields validation
+        $this->form_validation->set_rules('impact_factor', 'Impact Factor', 'trim');
+        $this->form_validation->set_rules('language', 'Language', 'trim|required');
+        $this->form_validation->set_rules('doi', 'DOI', 'trim');
+        $this->form_validation->set_rules('description', 'Description', 'trim');
         if (empty($_FILES['image']['name'])) {
             $this->form_validation->set_rules('image', 'Image', 'required');
         }
@@ -114,9 +118,12 @@ class User extends RestController
                 'review_type' => $this->input->post('review_type'),
                 'review_time' => $this->input->post('review_time'),
                 'description' => $this->input->post('description'),
-                'user_id' => $this->user['id'], 
+                'user_id' => $this->user['id'],
                 'image' => $uploaded_image,
-                'approval_status' => APPROVAL_STATUS::PENDING, 
+                'approval_status' => APPROVAL_STATUS::PENDING,
+                 'impact_factor' => $this->input->post('impact_factor'), // New Field
+            'language' => $this->input->post('language'), // New Field
+            'doi' => $this->input->post('doi'), // New Field
             ];
 
             $res = $this->UserModel->insert_journal($data);
@@ -172,7 +179,10 @@ class User extends RestController
         $this->form_validation->set_rules('usd_publication_charge', 'Publication Charge', 'trim|integer');
         $this->form_validation->set_rules('review_type', 'Review Type', 'trim|in_list[Single-Blind,Double-Blind,Open Peer Review,Collaborative]');
         $this->form_validation->set_rules('review_time', 'Review Time', 'trim');
-         $this->form_validation->set_rules('description', 'Description', 'trim');
+        $this->form_validation->set_rules('impact_factor', 'Impact Factor', 'trim');
+        $this->form_validation->set_rules('language', 'Language', 'trim');
+        $this->form_validation->set_rules('doi', 'DOI', 'trim');
+        $this->form_validation->set_rules('description', 'Description', 'trim');
 
         if ($this->form_validation->run()) {
             $uploaded_image = null;
@@ -211,6 +221,9 @@ class User extends RestController
                 'usd_publication_charge' => $this->input->post('usd_publication_charge'),
                 'review_type' => $this->input->post('review_type'),
                 'review_time' => $this->input->post('review_time'),
+                    'impact_factor' => $this->input->post('impact_factor'),
+    'language' => $this->input->post('language'),
+    'doi' => $this->input->post('doi'),
                 'description' => $this->input->post('description'),
             ];
             if ($uploaded_image) {
@@ -347,89 +360,98 @@ class User extends RestController
     }
 
 
-public function update_personal_details_post()
-{
-    $this->form_validation->set_rules('name', 'Name', 'trim|required');
-    $this->form_validation->set_rules('contact', 'Mobile No', 'trim|required');
-    $this->form_validation->set_rules('department', 'Department', 'trim|required');
-    $this->form_validation->set_rules('designation', 'Designation', 'trim|required');
-    $this->form_validation->set_rules('maximum_qualification', 'Maximum Qualification', 'trim');
-    $this->form_validation->set_rules('country', 'Country', 'trim|required|numeric');
-    $this->form_validation->set_rules('state', 'State', 'trim|required|numeric');
-    $this->form_validation->set_rules('profile_link', 'Profile Link', 'trim');
-    $this->form_validation->set_rules('research_area', 'Research Area', 'trim|required');
-    $this->form_validation->set_rules('dob', 'DOB', 'trim|required');
-    $this->form_validation->set_rules('about', 'About', 'trim');
-    $this->form_validation->set_rules('university_name', 'University name', 'trim');
+    public function update_personal_details_post()
+    {
+        $this->form_validation->set_rules('name', 'Name', 'trim|required');
+        $this->form_validation->set_rules('contact', 'Mobile No', 'trim|required');
+        $this->form_validation->set_rules('department', 'Department', 'trim|required');
+        $this->form_validation->set_rules('designation', 'Designation', 'trim|required');
+        $this->form_validation->set_rules('maximum_qualification', 'Maximum Qualification', 'trim');
+        $this->form_validation->set_rules('country', 'Country', 'trim|required|numeric');
+        $this->form_validation->set_rules('state', 'State', 'trim|required|numeric');
+        $this->form_validation->set_rules('profile_link', 'Profile Link', 'trim');
+        $this->form_validation->set_rules('research_area', 'Research Area', 'trim|required');
+        $this->form_validation->set_rules('dob', 'DOB', 'trim|required');
+        $this->form_validation->set_rules('about', 'About', 'trim');
+        $this->form_validation->set_rules('university_name', 'University name', 'trim');
 
-    if ($this->form_validation->run()) {
-        $data = [
-            'name' => $this->input->post('name', true),
-            'contact' => $this->input->post('contact', true),
-            'department' => $this->input->post('department', true),
-            'designation' => $this->input->post('designation', true),
-            'country' => $this->input->post('country', true),
-            'state' => $this->input->post('state', true),
-            'research_area' => $this->input->post('research_area', true),
-            'dob' => $this->input->post('dob', true),
-            'about' => $this->input->post('about', true),
-            'university_name' => $this->input->post('university_name', true),
-            'maximum_qualification' => $this->input->post('maximum_qualification', true),
-        ];
-        
-        $id = $this->user['id'];
+        if ($this->form_validation->run()) {
+            $data = [
+                'name' => $this->input->post('name', true),
+                'contact' => $this->input->post('contact', true),
+                'department' => $this->input->post('department', true),
+                'designation' => $this->input->post('designation', true),
+                'country' => $this->input->post('country', true),
+                'state' => $this->input->post('state', true),
+                'research_area' => $this->input->post('research_area', true),
+                'dob' => $this->input->post('dob', true),
+                'about' => $this->input->post('about', true),
+                'university_name' => $this->input->post('university_name', true),
+                'maximum_qualification' => $this->input->post('maximum_qualification', true),
+                'profile_link' => $this->input->post('profile_link', true),
+            ];
 
-       
-        $upload_config = [
-            'upload_path'   => './uploads/',
-            'allowed_types' => 'jpg|jpeg|png|gif|pdf|doc|docx',
-            'max_size'      => 2048, 
-            'encrypt_name'  => true
-        ];
-        $this->upload->initialize($upload_config);
+            $id = $this->user['id'];
 
-       
-        function uploadFile($field_name)
-        {
-            if (!empty($_FILES[$field_name]) && $_FILES[$field_name]['error'] === UPLOAD_ERR_OK) {
-                $ci = &get_instance(); 
-                if ($ci->upload->do_upload($field_name)) {
-                    $uploadData = $ci->upload->data();
-                    return 'uploads/' . $uploadData['file_name'];
-                } else {
-                    $result = [
-                        'status' => 400,
-                        'message' => ucfirst(str_replace('_', ' ', $field_name)) . ' upload failed: ' . $ci->upload->display_errors('', '')
-                    ];
-                    return $ci->response($result, RestController::HTTP_OK);
+
+            $upload_config = [
+                'upload_path'   => './uploads/',
+                'allowed_types' => 'jpg|jpeg|png|gif|pdf|doc|docx',
+                'max_size'      => 2048,
+                'encrypt_name'  => true
+            ];
+            $this->upload->initialize($upload_config);
+
+
+            function uploadFile($field_name)
+            {
+                if (!empty($_FILES[$field_name]) && $_FILES[$field_name]['error'] === UPLOAD_ERR_OK) {
+                    $ci = &get_instance();
+                    if ($ci->upload->do_upload($field_name)) {
+                        $uploadData = $ci->upload->data();
+                        return 'uploads/' . $uploadData['file_name'];
+                    } else {
+                        $result = [
+                            'status' => 400,
+                            'message' => ucfirst(str_replace('_', ' ', $field_name)) . ' upload failed: ' . $ci->upload->display_errors('', '')
+                        ];
+                        return $ci->response($result, RestController::HTTP_OK);
+                    }
                 }
+                return null;
             }
-            return null;
+
+            // Upload files
+            $profile_image = uploadFile('profile_image');
+            $doc1 = uploadFile('doc1');
+            $doc2 = uploadFile('doc2');
+            $doc3 = uploadFile('doc3');
+
+            // Add uploaded file paths to $data array
+            if ($profile_image) {
+                $data['profile_image'] = $profile_image;
+            }
+            if ($doc1) {
+                $data['doc1'] = $doc1;
+            }
+            if ($doc2) {
+                $data['doc2'] = $doc2;
+            }
+            if ($doc3) {
+                $data['doc3'] = $doc3;
+            }
+
+            $update = $this->UserModel->updateUserById($id, $data);
+            $result = [
+                'status' => 200,
+                'message' => 'User details updated successfully',
+                'data' => $update,
+            ];
+        } else {
+            $result = ['status' => 400, 'message' => strip_tags(validation_errors())];
         }
-
-        // Upload files
-        $profile_image = uploadFile('profile_image');
-        $doc1 = uploadFile('doc1');
-        $doc2 = uploadFile('doc2');
-        $doc3 = uploadFile('doc3');
-
-        // Add uploaded file paths to $data array
-        if ($profile_image) $data['profile_image'] = $profile_image;
-        if ($doc1) $data['doc1'] = $doc1;
-        if ($doc2) $data['doc2'] = $doc2;
-        if ($doc3) $data['doc3'] = $doc3;
-
-        $update = $this->UserModel->updateUserById($id, $data);
-        $result = [
-            'status' => 200,
-            'message' => 'User details updated successfully',
-            'data' => $update,
-        ];
-    } else {
-        $result = ['status' => 400, 'message' => strip_tags(validation_errors())];
+        $this->response($result, RestController::HTTP_OK);
     }
-    $this->response($result, RestController::HTTP_OK);
-}
 
 
     // ----------------Add Publication API----------------------
@@ -441,21 +463,23 @@ public function update_personal_details_post()
         $user_id = $this->user['id'];
 
         // Validation rules
+        $this->form_validation->set_rules('journal_name', 'Journal Name', 'trim|required');
         $this->form_validation->set_rules('paper_title', 'Title', 'trim|required');
         $this->form_validation->set_rules('publication_year', 'Publication Year', 'trim|integer|required');
         $this->form_validation->set_rules('paper_type', 'Paper Type', 'trim|required|in_list[Journal,Patent,Book]');
         $this->form_validation->set_rules('authors', 'Author Name', 'trim|required');
-        $this->form_validation->set_rules('issn', 'Issn Number', 'trim|integer|required');
+        $this->form_validation->set_rules('issn', 'Issn Number', 'trim|required');
         $this->form_validation->set_rules('volume', 'Volume', 'trim|integer|required');
         $this->form_validation->set_rules('issue', 'Issue', 'trim|integer|required');
         $this->form_validation->set_rules('live_url', 'Live Url', 'trim|valid_url');
-        $this->form_validation->set_rules('indexing_with[]', 'Indexing Partner', 'trim|required');
-        $this->form_validation->set_rules('publication_date', 'Publication Date', 'trim|required');
+        $this->form_validation->set_rules('indexing_with[]', 'Indexing Partner', 'trim');
+        $this->form_validation->set_rules('publication_date', 'Publication Date', 'trim');
         $this->form_validation->set_rules('description', 'Description', 'trim');
 
         if ($this->form_validation->run()) {
             $indexing_with = $this->input->post('indexing_with[]');
             $data = [
+                'journal_name' => $this->input->post('journal_name'),
                 'paper_title' => $this->input->post('paper_title'),
                 'user_id' => $user_id,
                 'publication_year' => $this->input->post('publication_year'),
@@ -652,14 +676,15 @@ public function update_personal_details_post()
         $this->form_validation->set_rules('affiliation', 'Affiliation', 'trim');
         $this->form_validation->set_rules('department', 'Department', 'trim');
         $this->form_validation->set_rules('paper_title', 'Paper Title', 'trim|required');
-        $this->form_validation->set_rules('abstract', 'Abstract', 'trim|required');
-        $this->form_validation->set_rules('keywords', 'Keywords', 'trim|required');
+        // $this->form_validation->set_rules('abstract', 'Abstract', 'trim|required');
+        // $this->form_validation->set_rules('keywords', 'Keywords', 'trim|required');
+        $this->form_validation->set_rules('subjects', 'Subjects', 'trim|required');
 
 
         if ($this->form_validation->run()) {
             $config['upload_path'] = './uploads/';
             $config['allowed_types'] = 'png|pdf|doc|docx';
-            $config['max_size'] = 2048;
+            $config['max_size'] = 5242880; //5MB
 
             $this->upload->initialize($config);
 
@@ -699,6 +724,7 @@ public function update_personal_details_post()
                   'paper_title' => $this->input->post('paper_title'),
                   'abstract' => $this->input->post('abstract'),
                   'keywords' => $this->input->post('keywords'),
+                  'subjects' => $this->input->post('subjects'),
                   'co_authors' => $co_author_data,
 
                   'file' => 'uploads/' . $file_data['file_name'],
@@ -894,7 +920,6 @@ public function update_personal_details_post()
             // Update password
             $updateData = ['password' => password_hash($newPassword, PASSWORD_BCRYPT)];
             $updated = $this->UserModel->updateUser($this->user['id'], $updateData);
-
             if ($updated) {
                 $result = [
                     'status' => 200,
@@ -1186,7 +1211,7 @@ public function update_personal_details_post()
             $where['publish_requests.publisher_id'] = $userId;
         }
 
-        $journals = $this->UserModel->getResearchPaperRequests($where);
+        $journals = $this->UserModel->getResearchPaperRequests($where, $this->user['type']);
         if ($journals) {
             $result = [
                 'status' => 200,
@@ -1429,6 +1454,7 @@ public function update_personal_details_post()
             'paper_title',
             'abstract',
             'keywords',
+            'subjects',
         ];
 
         $update_data = [];
@@ -1614,7 +1640,7 @@ public function update_personal_details_post()
     {
         $id = $this->user['id'];
 
-        if($this->user['type']!=USER_TYPE::REVIEWER){
+        if ($this->user['type'] != USER_TYPE::REVIEWER) {
             return $this->response(['status' => 401, 'message' => 'You are not authorized'], RestController::HTTP_OK);
         }
 
@@ -1628,7 +1654,7 @@ public function update_personal_details_post()
             ];
         } else {
             $result = [
-                'status' => 404,
+                'status' => 200,
                 'message' => 'No Requests found with the given ID',
                 'data' => []
             ];
@@ -1649,7 +1675,7 @@ public function update_personal_details_post()
 
         $this->form_validation->set_rules('remarks', 'Remarks', 'trim|required');
 
-        if($this->user['type']!=USER_TYPE::REVIEWER){
+        if ($this->user['type'] != USER_TYPE::REVIEWER) {
             return $this->response(['status' => 401, 'message' => 'You are not authorized'], RestController::HTTP_OK);
         }
 
@@ -1657,7 +1683,7 @@ public function update_personal_details_post()
             $remarks = $this->input->post('remarks');
 
             $id = $this->user['id'];
-            $update = $this->UserModel->update_remarks($pr_id,$id,$remarks);
+            $update = $this->UserModel->update_remarks($pr_id, $id, $remarks);
 
             if ($update) {
                 $result = [
@@ -1685,100 +1711,163 @@ public function update_personal_details_post()
     {
         if (empty($pr_id)) {
             return $this->response(
-                ['status' => 400, 'message' => 'Please enter a valid Request ID.'], 
+                ['status' => 400, 'message' => 'Please enter a valid Request ID.'],
                 RestController::HTTP_OK
             );
         }
+
         $this->load->library('Payment_Lib');
         $data = $this->UserModel->getPublishRequestsById($pr_id);
+
         if (empty($data)) {
             return $this->response(
-                ['status' => 404, 'message' => 'Publish Request not found.'], 
+                ['status' => 404, 'message' => 'Publish Request not found.'],
                 RestController::HTTP_OK
             );
         }
-        $amount = intval($data['amount']) * 100; 
-        $this->payment_lib->activate(Payment_Lib::RAZORPAY);
-        $paymentResponse = $this->payment_lib->create_payment(new PaymentParams($amount, $data['pr_id']));
-    
-        if ($paymentResponse['status'] === true) {
-            $data['order_id'] = $paymentResponse['data']->id;
-            $result = [
-                'pr_id' => $data['pr_id'],
-                'order_id' => $data['order_id']
-            ];
-            $dbResponse = $this->UserModel->addData($result); // mark pending when started in publish request
-            // print_r($dbResponse);
-            // exit;
-            if ($dbResponse) {
+
+        $amount = intval($data['amount']) * 100;
+        // Check if an existing transaction exists for the pr_id
+        $existingTransaction = $this->db->where('pr_id', $pr_id)
+                                        ->order_by('id', 'DESC')
+                                        ->get('transaction')
+                                        ->row_array();
+
+        if (!empty($existingTransaction) && $existingTransaction['status'] !== 'failed') {
+            // Reuse the existing order_id
+            $order_id = $existingTransaction['order_id'];
+        } else {
+            // Create a new order if no transaction exists or the status is 'failed'
+            $this->payment_lib->activate(Payment_Lib::RAZORPAY);
+            $paymentResponse = $this->payment_lib->create_payment(new PaymentParams($amount, $pr_id));
+
+            if ($paymentResponse['status'] !== true) {
                 return $this->response(
-                    [
-                        'status' => 200,
-                        'message' => 'Payment initiated successfully.',
-                        'data' => $dbResponse
-                    ],
-                    RestController::HTTP_OK
-                );
-            } else {
-                return $this->response(
-                    [
-                        'status' => 500,
-                        'message' => 'Payment Already Initiated.',
-                    ],
+                    ['status' => 500, 'message' => $paymentResponse['message']],
                     RestController::HTTP_OK
                 );
             }
-        } else {
-            return $this->response(
-                ['status' => 500, 'message' => $paymentResponse['message']], 
-                RestController::HTTP_OK
-            );
+
+            $order_id = $paymentResponse['data']->id;
+
+            // Insert the new payment record
+            $transactionData = [
+                'pr_id' => $pr_id,
+                'order_id' => $order_id,
+                // 'paid_amount' => $amount,
+                'status' => 'pending',
+                'created_at' => get_datetime()
+            ];
+            $this->UserModel->addData($transactionData);
         }
 
-                        // }
-                        // else{
-                        //     $amount = intval($data['fees']);
-                        //     $this->payment_lib->activate(Payment_Lib::PAYPAL);
-                        //     $res = $this->payment_lib->create_payment(new PaymentParams($amount,$bookingCode));
-                        //     if($res['status'] == true){
-                        //         $data['order_id'] = $res['data']['paymentId'];
-                        //         $data['redirectURL'] = $res['data']['redirectURL'];
-                        //     }else{
-                        //         $result = ['status'=>500,'message'=>$res['message']];
-                        //         $this->response($result,RestController::HTTP_OK);
-                        //     }
-                        // }
+        return $this->response(
+            [
+                'status' => 200,
+                'message' => 'Payment initiated successfully.',
+                'data' => [
+                    'pr_id' => $pr_id,
+                    'order_id' => $order_id
+                ]
+            ],
+            RestController::HTTP_OK
+        );
+
+        // }
+        // else{
+        //     $amount = intval($data['fees']);
+        //     $this->payment_lib->activate(Payment_Lib::PAYPAL);
+        //     $res = $this->payment_lib->create_payment(new PaymentParams($amount,$bookingCode));
+        //     if($res['status'] == true){
+        //         $data['order_id'] = $res['data']['paymentId'];
+        //         $data['redirectURL'] = $res['data']['redirectURL'];
+        //     }else{
+        //         $result = ['status'=>500,'message'=>$res['message']];
+        //         $this->response($result,RestController::HTTP_OK);
+        //     }
+        // }
     }
     public function get_my_reviews_get()
-{
-    $id = $this->user['id'];
+    {
+        $id = $this->user['id'];
 
-    if ($this->user['type'] != USER_TYPE::REVIEWER) {
-        return $this->response([
-            'status' => 401,
-            'message' => 'You are not authorized'
+        if ($this->user['type'] != USER_TYPE::REVIEWER) {
+            return $this->response([
+                'status' => 401,
+                'message' => 'You are not authorized'
+            ], RestController::HTTP_OK);
+        }
+        $reviews = $this->UserModel->get_reviews_by_reviewer_id($id);
+
+        if ($reviews) {
+            $result = [
+                'status' => 200,
+                'message' => 'Reviews fetched successfully',
+                'data' => $reviews
+            ];
+        } else {
+            $result = [
+                'status' => 404,
+                'message' => 'No reviews found for the given reviewer',
+                'data' => []
+            ];
+        }
+
+        return $this->response($result, RestController::HTTP_OK);
+    }
+
+
+
+    public function transactionListing_get($limit = 10, $page = 1)
+    {
+        $filters = $this->input->get() ?? [];
+        $searchString = $this->input->get('search', true) ?? '';
+        $limit = abs($limit) < 1 ? 10 : abs($limit) ;
+        $page = abs($page) < 1 ? 1 : abs($page);
+
+        $offset = ($page - 1) * $limit;
+        $res = $this->UserModel->getTransaction($filters, $limit, $offset, $searchString);
+        $count = $this->UserModel->getTransactionCount($filters, $searchString);
+
+        $this->response([
+            'status' => 200,
+            'message' => 'Success',
+            'data' => $res,
+            'totalPages' => ceil($count / $limit),
+            'currentPage' => $page,
         ], RestController::HTTP_OK);
     }
 
-    // Fetch reviews assigned to the reviewer where pr_status is not 'accept'
-    $reviews = $this->UserModel->get_reviews_by_reviewer_id($id);
 
-    if ($reviews) {
-        $result = [
-            'status' => 200,
-            'message' => 'Reviews fetched successfully',
-            'data' => $reviews
-        ];
-    } else {
-        $result = [
-            'status' => 404,
-            'message' => 'No reviews found for the given reviewer',
-            'data' => []
-        ];
-    }
 
-    return $this->response($result, RestController::HTTP_OK);
+
+
+
+
+
+
+
+    public function contactListing_get($limit = 10, $page = 1)
+{
+    $filters = $this->input->get() ?? [];
+    $searchString = $this->input->get('search', true) ?? '';
+    $limit = abs($limit) < 1 ? 10 : abs($limit);
+    $page = abs($page) < 1 ? 1 : abs($page);
+
+    $offset = ($page - 1) * $limit;
+    $res = $this->UserModel->getContacts($filters, $limit, $offset, $searchString);
+    $count = $this->UserModel->getContactCount($filters, $searchString);
+
+    $this->response([
+        'status' => 200,
+        'message' => 'Success',
+        'data' => $res,
+        'totalPages' => ceil($count / $limit),
+        'currentPage' => $page,
+    ], RestController::HTTP_OK);
 }
+
+
 
 
 

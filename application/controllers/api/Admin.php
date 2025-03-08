@@ -42,25 +42,26 @@ class Admin extends RestController {
 
 	}
 
-    
-    public function get_authors_get()
+public function authors_search_get($limit = 10, $page = 1)
 {
-    $this->load->model('Admin_model');
-    $requests = $this->Admin_model->getAuthors();
-    if ($requests) {
-        $result = [
-            'status' => 200,
-            'message' => 'Authors fetched successfully',
-            'data' => $requests];
-    } else {
-        $result = [
-            'status' => 404, 'message' => 'No Authors found',
-            'data' => []
-        ];
-    }
-
-    $this->response($result, RestController::HTTP_OK);
+    $filters = $this->input->get() ?? [];
+    $searchString = $this->input->get('search', true) ?? '';
+    $limit = abs($limit) < 1 ? 10 : abs($limit);
+    $page = abs($page) < 1 ? 1 : abs($page);
+    $offset = ($page - 1) * $limit;
+    
+    $filters['approval_status'] = APPROVAL_STATUS::APPROVED;
+      $res = $this->Admin_model->getAuthors($filters, $limit, $offset, $searchString);
+    $count = $this->Admin_model->getAuthorsCount($filters, $searchString);
+    $this->response([
+        'status' => 200,
+        'message' => 'Success',
+        'data' => $res,
+        'totalPages' => ceil($count / $limit),
+        'currentPage' => $page,
+    ], RestController::HTTP_OK);
 }
+
 
 // public function get_publisher_get()
 // {
@@ -222,24 +223,6 @@ public function approve_reject_publication_post(){
 }
 
 
-    public function get_publications_get()
-{
-    $this->load->model('Admin_model');
-    $requests = $this->Admin_model->getPublications();
-    if ($requests) {
-        $result = [
-            'status' => 200,
-            'message' => 'Publications fetched successfully',
-            'data' => $requests];
-    } else {
-        $result = [
-            'status' => 404, 'message' => 'No Publication found',
-            'data' => []
-        ];
-    }
-
-    $this->response($result, RestController::HTTP_OK);
-}
 
 
 
@@ -347,6 +330,134 @@ public function get_publish_requests_get()
             'currentPage' => $page,
         ], RestController::HTTP_OK);
     }
+ public function research_paper_search_get($limit = 10, $page = 1)
+    {
+        $filters = $this->input->get() ?? [];
+        $searchString = $this->input->get('search', true) ?? '';
+        $limit = abs($limit) < 1 ? 10 : abs($limit) ;
+        $page = abs($page) < 1 ? 1 : abs($page);
 
+        $offset = ($page - 1) * $limit;
+        $res = $this->UserModel->getResearchPaper($filters, $limit, $offset, $searchString);
+        $count = $this->UserModel->getResearchPaperCount($filters, $searchString);
+
+        $this->response([
+            'status' => 200,
+            'message' => 'Success',
+            'data' => $res,
+            'totalPages' => ceil($count / $limit),
+            'currentPage' => $page,
+        ], RestController::HTTP_OK);
+    }
+
+    public function delete_reviewer_get($id = 0)
+    {
+        // $this->load->database();
+
+        $id = intval($id);
+        if ($id > 0) {
+            $result = $this->Admin_model->deleteReviewer($id);
+        } else {
+            $result = ['status' => 400, 'message' => 'Valid ID is required.'];
+        }
+
+
+        $this->response($result, RestController::HTTP_OK);
+    }
+
+
+    public function delete_journal_get($id = 0)
+    {
+        // $this->load->database();
+
+        $id = intval($id);
+        if ($id > 0) {
+            $result = $this->Admin_model->deleteJournal($id);
+        } else {
+            $result = ['status' => 400, 'message' => 'Valid ID is required.'];
+        }
+
+
+        $this->response($result, RestController::HTTP_OK);
+    }
+    
+
+    public function delete_author_get($id = 0)
+    {
+        // $this->load->database();
+
+        $id = intval($id);
+        if ($id > 0) {
+            $result = $this->Admin_model->deleteAuthor($id);
+        } else {
+            $result = ['status' => 400, 'message' => 'Valid ID is required.'];
+        }
+
+
+        $this->response($result, RestController::HTTP_OK);
+    }
+
+    public function delete_publication_get($id = 0)
+    {
+        // $this->load->database();
+
+        $id = intval($id);
+        if ($id > 0) {
+            $result = $this->Admin_model->deletePublication($id);
+        } else {
+            $result = ['status' => 400, 'message' => 'Valid ID is required.'];
+        }
+
+
+        $this->response($result, RestController::HTTP_OK);
+    }
+
+    public function delete_research_paper_get($id = 0)
+    {
+        // $this->load->database();
+
+        $id = intval($id);
+        if ($id > 0) {
+            $result = $this->Admin_model->deleteResearchPaper($id);
+        } else {
+            $result = ['status' => 400, 'message' => 'Valid ID is required.'];
+        }
+
+
+        $this->response($result, RestController::HTTP_OK);
+    }
+
+    public function delete_contact_us_get($id = 0)
+    {
+        // $this->load->database();
+
+        $id = intval($id);
+        if ($id > 0) {
+            $result = $this->Admin_model->deleteContactUs($id);
+        } else {
+            $result = ['status' => 400, 'message' => 'Valid ID is required.'];
+        }
+
+
+        $this->response($result, RestController::HTTP_OK);
+    }
+    public function publications_search_get($limit = 10, $page = 1)
+{
+    $filters = $this->input->get() ?? [];
+    $searchString = $this->input->get('search', true) ?? '';
+    $limit = abs($limit) < 1 ? 10 : abs($limit);
+    $page = abs($page) < 1 ? 1 : abs($page);
+    $offset = ($page - 1) * $limit;
+    
+      $res = $this->Admin_model->getPublications($filters, $limit, $offset, $searchString);
+    $count = $this->Admin_model->getPublicationsCount($filters, $searchString);
+    $this->response([
+        'status' => 200,
+        'message' => 'Success',
+        'data' => $res,
+        'totalPages' => ceil($count / $limit),
+        'currentPage' => $page,
+    ], RestController::HTTP_OK);
+}
 
 }
