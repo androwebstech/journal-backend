@@ -729,7 +729,6 @@ class User extends RestController
 
                   'file' => 'uploads/' . $file_data['file_name'],
                   'user_id' => $this->user['id'],
-                  'submission_status' => 0,
         ];
 
                 $res = $this->UserModel->insert_research_submission($data);
