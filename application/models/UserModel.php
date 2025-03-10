@@ -96,7 +96,7 @@ class UserModel extends CI_model
                 if (is_numeric($value)) {
                     $this->db->where($key, $value);
                 } elseif (is_string($value)) {
-                    $this->db->like($key, $value);
+                    $this->db->where($key, $value);
                 }
             }
         }
