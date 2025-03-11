@@ -1209,24 +1209,39 @@ class UserModel extends CI_model
     }
 
 
-private function applyContactListingFilter($filters = [], $searchString = '')
-{
-    if (!empty($searchString)) {
-        $this->db->group_start();
-        $this->db->like('name', $searchString);
-        $this->db->or_like('email', $searchString);
-        $this->db->group_end();
-    }
 
-    if (!empty($filters)) {
-        $this->db->where($filters);
-    }
-}
+    public function applyContactFilter($filters = [], $searchString = '')
+    {
+        $searchColumns = ['name','email' , 'message'];
+      
 
+        if (!empty($searchString)) {
+            $this->db->or_group_start();
+            foreach ($searchColumns as $column) {
+                $this->db->or_like($column, $searchString);
+            }
+            $this->db->group_end();
+        }
+
+        if (!empty($filters) &&  is_array($filters)) {
+            foreach ($filters as $key => $value) {
+                if (!in_array($key, $filterColumns) || empty($value)) {
+                    continue;
+                }
+                if (is_numeric($value)) {
+                    $this->db->where($key, $value);
+                } elseif (is_string($value)) {
+                    $this->db->like($key, $value);
+                }
+            }
+        }
+
+       
+    }
 
     public function getContacts($filters = [], $limit = 500, $offset = 0, $searchString = '')
     {
-        $this->applyContactListingFilter($filters, $searchString);
+        $this->applyContactFilter($filters, $searchString);
         
         $this->db->select('contact_table.*');
         $this->db->order_by('id', 'DESC');
@@ -1240,7 +1255,7 @@ private function applyContactListingFilter($filters = [], $searchString = '')
     
     public function getContactCount($filters = [], $searchString = '')
     {
-        $this->applyContactListingFilter($filters, $searchString);
+        $this->applyContactFilter($filters, $searchString);
         return $this->db->count_all_results('contact_table');
     }
     

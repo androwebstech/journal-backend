@@ -455,65 +455,94 @@ class User extends RestController
 
 
     // ----------------Add Publication API----------------------
+
     public function add_publication_post()
-    {
-        $this->load->model('UserModel');
-        $this->load->helper('url');
+{
+    $this->load->model('UserModel');
+    $this->load->helper('url');
 
-        $user_id = $this->user['id'];
+    $user_id = $this->user['id'];
 
-        // Validation rules
-        $this->form_validation->set_rules('journal_name', 'Journal Name', 'trim|required');
-        $this->form_validation->set_rules('paper_title', 'Title', 'trim|required');
-        $this->form_validation->set_rules('publication_year', 'Publication Year', 'trim|integer|required');
-        $this->form_validation->set_rules('paper_type', 'Paper Type', 'trim|required|in_list[Journal,Patent,Book]');
-        $this->form_validation->set_rules('authors', 'Author Name', 'trim|required');
-        $this->form_validation->set_rules('issn', 'Issn Number', 'trim|required');
-        $this->form_validation->set_rules('volume', 'Volume', 'trim|integer|required');
-        $this->form_validation->set_rules('issue', 'Issue', 'trim|integer|required');
-        $this->form_validation->set_rules('live_url', 'Live Url', 'trim|valid_url');
-        $this->form_validation->set_rules('indexing_with[]', 'Indexing Partner', 'trim');
-        $this->form_validation->set_rules('publication_date', 'Publication Date', 'trim');
-        $this->form_validation->set_rules('description', 'Description', 'trim');
+    // Validation rules
+    $this->form_validation->set_rules('journal_name', 'Journal Name', 'trim|required');
+    $this->form_validation->set_rules('paper_title', 'Title', 'trim|required');
+    $this->form_validation->set_rules('publication_year', 'Publication Year', 'trim|integer|required');
+    $this->form_validation->set_rules('paper_type', 'Paper Type', 'trim|in_list[Journal,Patent,Book]');
+    $this->form_validation->set_rules('authors', 'Author Name', 'trim|required');
+    $this->form_validation->set_rules('issn', 'Issn Number', 'trim|required');
+    $this->form_validation->set_rules('volume', 'Volume', 'trim|integer|required');
+    $this->form_validation->set_rules('issue', 'Issue', 'trim|integer|required');
+    $this->form_validation->set_rules('live_url', 'Live Url', 'trim|valid_url');
+    $this->form_validation->set_rules('indexing_with[]', 'Indexing Partner', 'trim');
+    $this->form_validation->set_rules('publication_date', 'Publication Date', 'trim');
+    $this->form_validation->set_rules('description', 'Description', 'trim');
 
-        if ($this->form_validation->run()) {
-            $indexing_with = $this->input->post('indexing_with[]');
-            $data = [
-                'journal_name' => $this->input->post('journal_name'),
-                'paper_title' => $this->input->post('paper_title'),
-                'user_id' => $user_id,
-                'publication_year' => $this->input->post('publication_year'),
-                'paper_type' => $this->input->post('paper_type'),
-                'authors' => $this->input->post('authors'),
-                'issn' => $this->input->post('issn'),
-                'volume' => $this->input->post('volume'),
-                'issue' => $this->input->post('issue'),
-                'live_url' => $this->input->post('live_url'),
-                'indexing_with' => implode(',', $indexing_with),
-                'publication_date' => $this->input->post('publication_date'),
-                'description' => $this->input->post('description'),
-                'approval_status' => APPROVAL_STATUS::PENDING,
-            ];
-
-            $res = $this->UserModel->insert_publication($data);
-
-            $id = $this->db->insert_id();
-            if ($res) {
-                $result = [
-                    'status' => 200,
-                    'message' => 'Publication submitted successfully!',
-                    'data' => array_merge($data, ['ppuid' => $id]),
-                ];
-            } else {
-                $result = ['status' => 500, 'message' => 'Failed to submit the Publication!'];
-            }
-        } else {
-            $result = ['status' => 400, 'message' => strip_tags(validation_errors())];
-        }
-
-        // Return the response
-        $this->response($result, RestController::HTTP_OK);
+    // Check if validation fails
+    if ($this->form_validation->run() == false) {
+        $result = [
+            'status' => 400,
+            'message' => strip_tags(validation_errors())
+        ];
+        return $this->response($result, RestController::HTTP_BAD_REQUEST);
     }
+
+  $indexing_with = $this->input->post('indexing_with');
+
+// Ensure $indexing_with is always a valid string
+if (is_array($indexing_with) && !empty($indexing_with)) {
+    $indexing_with = implode(',', $indexing_with);
+} elseif (is_string($indexing_with) && !empty($indexing_with)) {
+    // If it's already a string and not empty, use it as-is
+    $indexing_with = strval($indexing_with);
+} else {
+    // If it's null, empty, or invalid, set it to an empty string or handle it differently
+    $indexing_with = '';
+}
+
+
+    // Prepare data array
+    $data = [
+        'journal_name' => $this->input->post('journal_name'),
+        'paper_title' => $this->input->post('paper_title'),
+        'user_id' => $user_id,
+        'publication_year' => $this->input->post('publication_year'),
+        'paper_type' => $this->input->post('paper_type'),
+        'authors' => $this->input->post('authors'),
+        'issn' => $this->input->post('issn'),
+        'volume' => $this->input->post('volume'),
+        'issue' => $this->input->post('issue'),
+        'live_url' => $this->input->post('live_url'),
+        'indexing_with' => $indexing_with,
+        'publication_date' => $this->input->post('publication_date'),
+        'description' => $this->input->post('description'),
+        'approval_status' => APPROVAL_STATUS::PENDING,
+    ];
+
+    // Remove null and empty values
+    $filteredData = array_filter($data, function ($value) {
+        return $value !== null && $value !== '';
+    });
+
+    // Insert data into the database
+    $res = $this->UserModel->insert_publication($filteredData);
+    $id = $this->db->insert_id();
+
+    if ($res) {
+        $result = [
+            'status' => 200,
+            'message' => 'Publication submitted successfully!',
+            'data' => array_merge($filteredData, ['ppuid' => $id]),
+        ];
+    } else {
+        $result = [
+            'status' => 500,
+            'message' => 'Failed to submit the Publication!'
+        ];
+    }
+
+    // Return the response
+    return $this->response($result, RestController::HTTP_OK);
+}
 
 
     public function get_publication_get()
