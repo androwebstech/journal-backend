@@ -758,7 +758,6 @@ if (is_array($indexing_with) && !empty($indexing_with)) {
 
                   'file' => 'uploads/' . $file_data['file_name'],
                   'user_id' => $this->user['id'],
-                  'submission_status' => 0,
         ];
 
                 $res = $this->UserModel->insert_research_submission($data);
