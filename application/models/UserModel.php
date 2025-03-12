@@ -96,7 +96,7 @@ class UserModel extends CI_model
                 if (is_numeric($value)) {
                     $this->db->where($key, $value);
                 } elseif (is_string($value)) {
-                    $this->db->like($key, $value);
+                    $this->db->where($key, $value);
                 }
             }
         }
@@ -732,7 +732,7 @@ class UserModel extends CI_model
 
     public function get_joined_journals($where = [])
     {
-        $this->db->select('journal_reviewer_link.*,journals.journal_name,journals.eissn_no,journals.pissn_no,journals.website_link,journals.publication_type, users.*, "" as password, CONCAT("' . base_url() . '", profile_image) as profile_image, (SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name');
+        $this->db->select('journal_reviewer_link.*,journals.journal_name,journals.eissn_no,journals.pissn_no,journals.website_link,journals.publication_type, users.*, "" as password, CONCAT("' . base_url() . '", profile_image) as profile_image, (SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name,(SELECT name from countries where id = journals.country) as publisher_country_name, (SELECT name from states where id = journals.state) as publisher_state_name,journals.broad_research_area,journals.publisher_name');
         $this->db->from('journal_reviewer_link');
 
 
@@ -1150,6 +1150,112 @@ class UserModel extends CI_model
         }
         return false;
     }
+
+
+
+
+
+
+    public function getTransaction($filters = [], $limit = 500, $offset = 0, $searchString = '')
+    {
+
+        $this->applytransactionListingFilter($filters, $searchString);
+
+        $this->db->select('transaction.*');
+
+       
+
+        $this->db->order_by('pr_id', 'DESC');
+        $this->db->limit($limit, $offset);
+        return $this->db->get('transaction')->result_array();
+    }
+    public function applytransactionListingFilter($filters = [], $searchString = '')
+    {
+        $searchColumns = ['status','order_id'];
+        // $filterColumns = ['country'];
+
+        if (!empty($searchString)) {
+            $this->db->or_group_start();
+            foreach ($searchColumns as $column) {
+                $this->db->or_like($column, $searchString);
+            }
+            $this->db->group_end();
+        }
+
+        if (!empty($filters) &&  is_array($filters)) {
+            foreach ($filters as $key => $value) {
+                if (!in_array($key, $filterColumns) || empty($value)) {
+                    continue;
+                }
+                if (is_numeric($value)) {
+                    $this->db->where($key, $value);
+                } elseif (is_string($value)) {
+                    $this->db->like($key, $value);
+                }
+            }
+        }
+
+       
+    }
+    public function getTransactionCount($filters = [], $searchString = '')
+    {
+        $this->applytransactionListingFilter($filters, $searchString);
+        return $this->db->count_all_results('transaction');
+    }
+
+
+
+    public function applyContactFilter($filters = [], $searchString = '')
+    {
+        $searchColumns = ['name','email' , 'message'];
+      
+
+        if (!empty($searchString)) {
+            $this->db->or_group_start();
+            foreach ($searchColumns as $column) {
+                $this->db->or_like($column, $searchString);
+            }
+            $this->db->group_end();
+        }
+
+        if (!empty($filters) &&  is_array($filters)) {
+            foreach ($filters as $key => $value) {
+                if (!in_array($key, $filterColumns) || empty($value)) {
+                    continue;
+                }
+                if (is_numeric($value)) {
+                    $this->db->where($key, $value);
+                } elseif (is_string($value)) {
+                    $this->db->like($key, $value);
+                }
+            }
+        }
+
+       
+    }
+
+    public function getContacts($filters = [], $limit = 500, $offset = 0, $searchString = '')
+    {
+        $this->applyContactFilter($filters, $searchString);
+        
+        $this->db->select('contact_table.*');
+        $this->db->order_by('id', 'DESC');
+        $this->db->limit($limit, $offset);
+        
+        return $this->db->get('contact_table')->result_array();
+    }
+    
+
+
+    
+    public function getContactCount($filters = [], $searchString = '')
+    {
+        $this->applyContactFilter($filters, $searchString);
+        return $this->db->count_all_results('contact_table');
+    }
+    
+
+    
 
 
 

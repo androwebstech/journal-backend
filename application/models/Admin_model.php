@@ -191,6 +191,25 @@ class Admin_model extends CI_model
         return false;
     }
 
+
+   public function getAdminId($adminId)
+    {
+        $query = $this->db->get_where('admin', ['admin_id' => $adminId]);
+        if ($query->num_rows() > 0) {
+            return $query->row_array();
+        }
+        return null;
+    }
+
+
+        public function updateAdmin($adminId, $data)
+    {
+        $this->db->where('admin_id', $adminId);
+        return $this->db->update('admin', $data);
+    }
+
+
+
     public function deleteReviewer($id)
     {
         $this->db->where('id', $id);
@@ -398,5 +417,7 @@ class Admin_model extends CI_model
     {
         $this->applyPublicationSearchFilter($filters, $searchString);
         return $this->db->count_all_results('published_papers');
+    
     }
 }
+

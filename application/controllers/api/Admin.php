@@ -224,6 +224,55 @@ public function approve_reject_publication_post(){
 
 
 
+
+
+    public function change_password_post()
+    {
+        // Input validation
+        $this->form_validation->set_rules('old_password', 'Old Password', 'trim|required');
+        $this->form_validation->set_rules('new_password', 'New Password', 'trim|required|min_length[6]');
+        $this->form_validation->set_rules('confirm_password', 'Confirm Password', 'trim|required|matches[new_password]');
+
+        if ($this->form_validation->run()) {
+            $oldPassword = $this->input->post('old_password');
+            $newPassword = $this->input->post('new_password');
+
+            // Verify old password
+            $user = $this->Admin_model->getAdminId($this->user['admin_id']);
+            if (!$user || !password_verify($oldPassword, $user['password'])) {
+                $result = [
+                    'status' => 400,
+                    'message' => 'Old password is incorrect'
+                ];
+                $this->response($result, RestController::HTTP_OK);
+                exit;
+            }
+
+            // Update password
+            $updateData = ['password' => password_hash($newPassword, PASSWORD_BCRYPT)];
+            $updated = $this->Admin_model->updateAdmin($this->user['admin_id'], $updateData);
+
+            if ($updated) {
+                $result = [
+                    'status' => 200,
+                    'message' => 'Password changed successfully'
+                ];
+            } else {
+                $result = [
+                    'status' => 500,
+                    'message' => 'Failed to change password'
+                ];
+            }
+        } else {
+            $result = [
+                'status' => 400,
+                'message' => strip_tags(validation_errors())
+            ];
+        }
+
+        $this->response($result, RestController::HTTP_OK);
+    }
+
 public function get_publish_requests_get()
     {
         $journals = $this->Admin_model->getResearchPaperRequests();
@@ -410,5 +459,52 @@ public function get_publish_requests_get()
         'currentPage' => $page,
     ], RestController::HTTP_OK);
 }
+
+
+
+    public function transaction_listing_get($limit = 10, $page = 1)
+    {
+        $filters = $this->input->get() ?? [];
+        $searchString = $this->input->get('search', true) ?? '';
+        $limit = abs($limit) < 1 ? 10 : abs($limit) ;
+        $page = abs($page) < 1 ? 1 : abs($page);
+
+        $offset = ($page - 1) * $limit;
+        $res = $this->UserModel->getTransaction($filters, $limit, $offset, $searchString);
+        $count = $this->UserModel->getTransactionCount($filters, $searchString);
+
+        $this->response([
+            'status' => 200,
+            'message' => 'Success',
+            'data' => $res,
+            'totalPages' => ceil($count / $limit),
+            'currentPage' => $page,
+        ], RestController::HTTP_OK);
+    }
+
+
+    
+    public function contact_listing_get($limit = 10, $page = 1)
+{
+    $filters = $this->input->get() ?? [];
+    $searchString = $this->input->get('search', true) ?? '';
+    $limit = abs($limit) < 1 ? 10 : abs($limit);
+    $page = abs($page) < 1 ? 1 : abs($page);
+
+    $offset = ($page - 1) * $limit;
+    $res = $this->UserModel->getContacts($filters, $limit, $offset, $searchString);
+    $count = $this->UserModel->getContactCount($filters, $searchString);
+
+    $this->response([
+        'status' => 200,
+        'message' => 'Success',
+        'data' => $res,
+        'totalPages' => ceil($count / $limit),
+        'currentPage' => $page,
+    ], RestController::HTTP_OK);
+}
+
+
+
 
 }
