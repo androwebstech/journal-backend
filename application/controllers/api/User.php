@@ -996,6 +996,13 @@ class User extends RestController
                 ], RestController::HTTP_OK);
             }
 
+            if ($status != PR_STATUS::REJECT && $this->UserModel->isPaperPublished($request['paper_id'])) {
+                $this->response([
+                    'status' => 400,
+                    'message' => 'This paper has already been published.',
+                ], RestController::HTTP_OK);
+            }
+
             if ($this->user['id'] == $request['author_id'] && $request['pr_status'] == PR_STATUS::PENDING && $request['sender'] == USER_TYPE::PUBLISHER) {
                 $this->UserModel->update_publish_request_status($id, $status);
                 $result = [

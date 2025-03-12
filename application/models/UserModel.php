@@ -774,22 +774,13 @@ class UserModel extends CI_model
 
     public function leaveJoinedJournal($requestId)
     {
-
-
-
         $this->db->where('request_id', $requestId);
         $delete = $this->db->delete('journal_reviewer_link');
-
-
     }
-
-
-
-
-
 
     public function getresearchpapersByUserId($user_id)
     {
+        $this->db->select('*,(SELECT name from countries where id = research_papers.country) as country_name');
         $this->db->where("user_id", $user_id);
         $this->db->order_by('paper_id', 'DESC');
         $query = $this->db->get('research_papers');
@@ -797,6 +788,10 @@ class UserModel extends CI_model
     }
 
 
+    public function isPaperPublished($paper_id)
+    {
+        return $this->db->where(['paper_id' => $paper_id,'pr_status' => PR_STATUS::PUBLISHED])->count_all_results('publish_requests');
+    }
 
     public function deleteResearchPaperById($id, $user_id)
     {
