@@ -70,7 +70,7 @@ class UserModel extends CI_model
 
         $this->applyJournalSearchFilter($filters, $searchString);
 
-        $this->db->select('*,"" as password,(SELECT name from countries where id = journals.country) as country_name, (SELECT name from states where id = journals.state) as state_name,CONCAT("' . base_url() . '", image) as image');
+        $this->db->select('*,(SELECT name from countries where id = journals.country) as country_name, (SELECT name from states where id = journals.state) as state_name,CONCAT("' . base_url() . '", image) as image');
         $this->db->order_by('journal_id', 'ASC');
         $this->db->limit($limit, $offset);
         return $this->db->get('journals')->result_array();
