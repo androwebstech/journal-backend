@@ -12,7 +12,7 @@ class UserModel extends CI_model
 
     public function getReviewers($filters = [], $limit = 500, $offset = 0, $searchString = '')
     {
-        $controller = ($this->uri->segment(isDevEnv() ? 2 : 2));
+        $controller = ($this->uri->segment(2));
         if ($controller == 'web') {
             $select[] = 'id,profile_image,name,department,designation,maximum_qualification,profile_link,research_area,about,approval_status,university_name,view_count';
         } elseif ($controller == 'user') {
@@ -550,7 +550,7 @@ class UserModel extends CI_model
         $this->applyResearchPaperFilter($filters, $searchString);
 
 
-        $controller = ($this->uri->segment(isDevEnv() ? 2 : 1));
+        $controller = $this->uri->segment(2);
         if ($controller != 'admin') {
             $select = 'paper_id,country,department,paper_title,abstract,keywords,subjects,created_at';
         } else {
