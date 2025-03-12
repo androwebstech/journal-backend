@@ -1810,7 +1810,7 @@ class User extends RestController
                 'pr_id' => $pr_id,
                 'order_id' => $order_id,
                 // 'paid_amount' => $amount,
-                'status' => 'pending',
+                'status' => PR_STATUS::PENDING,
                 'created_at' => get_datetime()
             ];
             $this->UserModel->addData($transactionData);
