@@ -224,7 +224,7 @@ class UserModel extends CI_model
     }
     public function get_reviewer_by_id($id)
     {
-        $controller = ($this->uri->segment(isDevEnv() ? 2 : 1));
+        $controller = ($this->uri->segment(2));
         if ($controller == 'web') {
             $select[] = 'id,profile_image,name,department,designation,maximum_qualification,profile_link,research_area,about,approval_status,university_name,view_count';
         } else {
