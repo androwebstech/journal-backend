@@ -10,20 +10,20 @@ class UserModel extends CI_model
         $this->load->helper(['common_helper']);
     }
 
-
-
-
-
     public function getReviewers($filters = [], $limit = 500, $offset = 0, $searchString = '')
     {
-
+        $controller = ($this->uri->segment(isDevEnv() ? 2 : 1));
+        if ($controller == 'web') {
+            $select[] = 'id,profile_image,name,department,designation,maximum_qualification,profile_link,research_area,about,approval_status,university_name,view_count';
+        } elseif ($controller == 'user') {
+            $select[] = 'id,profile_image,name,department,designation,maximum_qualification,profile_link,research_area,about,approval_status,university_name,view_count,email,contact';
+        } elseif ($controller == 'admin') {
+            $select[] = '*';
+        }
         $this->applyReviewerSearchFilter($filters, $searchString);
 
-        $this->db->select('*,"" as password,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name,
-        IF(profile_image="","",CONCAT("' . base_url('') . '", profile_image)) as profile_image,
-        IF(doc1="","",CONCAT("' . base_url('') . '", doc1)) as doc1,
-        IF(doc2="","",CONCAT("' . base_url('') . '", doc2)) as doc2,
-        IF(doc3="","",CONCAT("' . base_url('') . '", doc3)) as doc3
+        $this->db->select(implode(',', $select) . ',(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name,
+        IF(profile_image="","",CONCAT("' . base_url('') . '", profile_image)) as profile_image
     ');
         $this->db->order_by('id', 'ASC');
         $this->db->limit($limit, $offset);
@@ -174,6 +174,9 @@ class UserModel extends CI_model
     {
         $this->db->select('*,"" as password,(SELECT name from countries where id = users.country) as country_name, (SELECT name from states where id = users.state) as state_name');
         $user = $this->db->where('id', $id)->get('users')->row_array();
+        if (empty($user)) {
+            return null;
+        }
         if (isset($user['password'])) {
             unset($user['password']);
         }
@@ -546,7 +549,14 @@ class UserModel extends CI_model
 
         $this->applyResearchPaperFilter($filters, $searchString);
 
-        $this->db->select('*,(SELECT name from countries where id = research_papers.country) as country_name');
+
+        $controller = ($this->uri->segment(isDevEnv() ? 2 : 1));
+        if ($controller != 'admin') {
+            $select = 'paper_id,country,department,paper_title,abstract,keywords,subjects,created_at';
+        } else {
+            $select = '*';
+        }
+        $this->db->select($select . ',(SELECT name from countries where id = research_papers.country) as country_name');
         $this->db->order_by('paper_id', 'DESC');
         $this->db->limit($limit, $offset);
         return $this->db->get('research_papers')->result_array();
@@ -1163,7 +1173,7 @@ class UserModel extends CI_model
 
         $this->db->select('transaction.*');
 
-       
+
 
         $this->db->order_by('pr_id', 'DESC');
         $this->db->limit($limit, $offset);
@@ -1195,7 +1205,7 @@ class UserModel extends CI_model
             }
         }
 
-       
+
     }
     public function getTransactionCount($filters = [], $searchString = '')
     {
@@ -1208,7 +1218,7 @@ class UserModel extends CI_model
     public function applyContactFilter($filters = [], $searchString = '')
     {
         $searchColumns = ['name','email' , 'message'];
-      
+
 
         if (!empty($searchString)) {
             $this->db->or_group_start();
@@ -1231,31 +1241,31 @@ class UserModel extends CI_model
             }
         }
 
-       
+
     }
 
     public function getContacts($filters = [], $limit = 500, $offset = 0, $searchString = '')
     {
         $this->applyContactFilter($filters, $searchString);
-        
+
         $this->db->select('contact_table.*');
         $this->db->order_by('id', 'DESC');
         $this->db->limit($limit, $offset);
-        
+
         return $this->db->get('contact_table')->result_array();
     }
-    
 
 
-    
+
+
     public function getContactCount($filters = [], $searchString = '')
     {
         $this->applyContactFilter($filters, $searchString);
         return $this->db->count_all_results('contact_table');
     }
-    
 
-    
+
+
 
 
 
