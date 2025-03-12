@@ -335,7 +335,7 @@ class Admin_model extends CI_model
         IF(doc3="","",CONCAT("' . base_url('') . '", doc3)) as doc3
     ');
 
-        $this->db->order_by('id', 'ASC');
+        $this->db->order_by('id', 'DESC');
         $this->db->limit($limit, $offset);
         return $this->db->get('users')->result_array();
     }
