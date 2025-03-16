@@ -55,8 +55,12 @@ function getUniqueCode($n = 6)
 
 function password_reset_request_mail($token)
 {
-
-    $frontend = isDevEnv() ? 'http://localhost:3000' : 'http://ifrj-app.solutionspool.in';
+    $frontend = 'http://localhost:3000';
+    if (ENVIRONMENT == 'testing') {
+        $frontend = 'http://ifrj-app.solutionspool.in';
+    } elseif (ENVIRONMENT == 'production') {
+        $frontend = 'https://ifrjindex.com';
+    }
 
     $link = $frontend.'/password-reset/' . base64_encode($token);
     return <<<EMAIL
@@ -68,8 +72,4 @@ function password_reset_request_mail($token)
 </body>
 </html>
 EMAIL;
-}
-function isDevEnv()
-{
-    return $_SERVER['HTTP_HOST'] == 'localhost';
 }

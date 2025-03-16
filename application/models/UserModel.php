@@ -17,6 +17,7 @@ class UserModel extends CI_model
         $controller = ($this->uri->segment(isDevEnv() ? 2 : 1));
         echo $controller;
         exit;
+        $controller = ($this->uri->segment(2));
         if ($controller == 'web') {
             $select[] = 'id,profile_image,name,department,designation,maximum_qualification,profile_link,research_area,about,approval_status,university_name,view_count';
         } elseif ($controller == 'user') {
@@ -74,7 +75,7 @@ class UserModel extends CI_model
 
         $this->applyJournalSearchFilter($filters, $searchString);
 
-        $this->db->select('*,"" as password,(SELECT name from countries where id = journals.country) as country_name, (SELECT name from states where id = journals.state) as state_name,CONCAT("' . base_url() . '", image) as image');
+        $this->db->select('*,(SELECT name from countries where id = journals.country) as country_name, (SELECT name from states where id = journals.state) as state_name,CONCAT("' . base_url() . '", image) as image');
         $this->db->order_by('journal_id', 'ASC');
         $this->db->limit($limit, $offset);
         return $this->db->get('journals')->result_array();
@@ -228,7 +229,7 @@ class UserModel extends CI_model
     }
     public function get_reviewer_by_id($id)
     {
-        $controller = ($this->uri->segment(isDevEnv() ? 2 : 1));
+        $controller = ($this->uri->segment(2));
         if ($controller == 'web') {
             $select[] = 'id,profile_image,name,department,designation,maximum_qualification,profile_link,research_area,about,approval_status,university_name,view_count';
         } else {
@@ -554,7 +555,7 @@ class UserModel extends CI_model
         $this->applyResearchPaperFilter($filters, $searchString);
 
 
-        $controller = ($this->uri->segment(isDevEnv() ? 2 : 1));
+        $controller = $this->uri->segment(2);
         if ($controller != 'admin') {
             $select = 'paper_id,country,department,paper_title,abstract,keywords,subjects,created_at';
         } else {
