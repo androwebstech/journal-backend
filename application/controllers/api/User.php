@@ -146,9 +146,53 @@ class User extends RestController
         $this->response($result, RestController::HTTP_OK);
     }
 
+    public function update_pr_document_post()
+    {
+        $this->form_validation->set_rules('prId', 'PR Id', 'trim|required|integer');
+        if (empty($_FILES['file']['size'])) {
+            $this->form_validation->set_rules('file', 'Updated Document', 'trim|required');
+        }
+        if ($this->user['type'] != USER_TYPE::PUBLISHER) {
+            $this->response(['status' => 400,'message' => 'Only publishers are allowed this action.'], RestController::HTTP_OK);
+            exit;
+        }
+        if ($this->form_validation->run()) {
+            $prId = intval($this->input->post('prId'));
+            $request = $this->UserModel->getPublishRequestsById($prId);
+            if ($request['publisher_id'] == $this->user['id']) {
+
+                $config['upload_path'] = './uploads/';
+                $config['allowed_types'] = 'png|pdf|doc|docx';
+                $config['max_size'] = 5242880; //5MB
+                $config['encrypt_name'] = true;
+                $this->upload->initialize($config);
+
+                if (!$this->upload->do_upload('file')) {
+                    $result = [
+                        'status' => 400,
+                        'message' => $this->upload->display_errors('', ''),
+                    ];
+                } else {
+                    $file_data = $this->upload->data();
+                    $newfile = 'uploads/'.$file_data['file_name'];
+                    $this->db->where('paper_id', $request['paper_id'])->set('file', $newfile)->limit(1)->update('research_papers');
+                    $result = [
+                        'status' => 200,
+                        'message' => 'Document updated successfully.',
+                    ];
+                }
+
+            } else {
+                $result = ['status' => 401,'message' => 'Not authorized'];
+            }
+        } else {
+            $result = ['status' => 400, 'message' => strip_tags(validation_errors())];
+        }
+        $this->response($result, RestController::HTTP_OK);
+    }
+
 
     //-----------Update Jounal API------------------------------
-
 
     public function update_journal_post($journal_id = null)
     {
@@ -274,7 +318,7 @@ class User extends RestController
             ];
         } else {
             $result = [
-                'status' => 404,
+                'status' => 200,
                 'message' => 'No journals found',
                 'data' => []
             ];
@@ -557,7 +601,7 @@ class User extends RestController
             ];
         } else {
             $result = [
-                'status' => 404,
+                'status' => 200,
                 'message' => 'No journals found',
                 'data' => []
             ];
@@ -714,7 +758,7 @@ class User extends RestController
             $config['upload_path'] = './uploads/';
             $config['allowed_types'] = 'png|pdf|doc|docx';
             $config['max_size'] = 5242880; //5MB
-
+            $config['encrypt_name'] = true;
             $this->upload->initialize($config);
 
             if (!$this->upload->do_upload('file')) {
@@ -724,23 +768,6 @@ class User extends RestController
                 ];
             } else {
                 $file_data = $this->upload->data();
-
-                // Fetch co-authors data from input
-                //   $co_authors = $this->input->post('co_authors[]');
-                //   $co_author_data = [];
-                //   if (is_array($co_authors)) {
-                //       foreach ($co_authors as $co_author) {
-                //           $co_author_data[] = [
-                //               'name' => $co_author['co_author_name'] ?? '',
-                //               'contact' => $co_author['co_author_contact'] ?? '',
-                //               'email' => $co_author['co_author_email'] ?? '',
-                //               'country' => $co_author['co_author_country'] ?? '',
-                //               'affiliation' => $co_author['co_author_affiliation'] ?? '',
-                //               'department' => $co_author['co_author_department'] ?? '',
-                //           ];
-                //       }
-                //   }
-
                 $co_author_data = $this->input->post('co_authors') ?? '[]';
 
                 $data = [
@@ -755,7 +782,6 @@ class User extends RestController
                   'keywords' => $this->input->post('keywords'),
                   'subjects' => $this->input->post('subjects'),
                   'co_authors' => $co_author_data,
-
                   'file' => 'uploads/' . $file_data['file_name'],
                   'user_id' => $this->user['id'],
         ];
@@ -812,7 +838,7 @@ class User extends RestController
             ];
         } else {
             $result = [
-                'status' => 404,
+                'status' => 200,
                 'message' => 'No journals found',
                 'data' => []
             ];
@@ -968,30 +994,6 @@ class User extends RestController
 
         $this->response($result, RestController::HTTP_OK);
     }
-
-
-
-
-
-    //     public function get_publish_requests_get()
-    // {
-    //     $this->load->model('UserModel');
-    //     $requests = $this->UserModel->getPublishRequestsByUserId($this->user['id']);
-    //     if ($requests) {
-    //         $result = [
-    //             'status' => 200,
-    //             'message' => 'Published Requests fetched successfully',
-    //             'data' => $requests];
-    //     } else {
-    //         $result = [
-    //             'status' => 404, 'message' => 'No Published Requests found',
-    //             'data' => []
-    //         ];
-    //     }
-
-    //     $this->response($result, RestController::HTTP_OK);
-    // }
-
 
 
 
@@ -1255,7 +1257,7 @@ class User extends RestController
             ];
         } else {
             $result = [
-                'status' => 404,
+                'status' => 200,
                 'message' => 'No Requests found',
                 'data' => []
             ];
@@ -1392,7 +1394,7 @@ class User extends RestController
             ];
         } else {
             $result = [
-                'status' => 404,
+                'status' => 200,
                 'message' => 'No journals found',
                 'data' => []
             ];
@@ -1461,7 +1463,7 @@ class User extends RestController
             ];
         } else {
             $result = [
-                'status' => 404,
+                'status' => 200,
                 'message' => 'No journals found',
                 'data' => []
             ];
@@ -1544,52 +1546,6 @@ class User extends RestController
         }
     }
 
-    // public function get_joined_reviewers_get()
-    // {
-    //     $userId = $this->user['id'];
-    //     if ($this->user['type'] != USER_TYPE::PUBLISHER) {
-    //         $this->response([
-    //             'status' => 403,
-    //             'message' => 'Access denied. Only publishers can view reviewers.',
-    //             'data' => []
-    //         ], RestController::HTTP_OK);
-    //         return;
-    //     }
-    //     $journals = $this->UserModel->getPublisherJournals($userId);
-    //     $journalIds = array_column($journals, 'journal_id');
-
-    //     if (empty($journalIds)) {
-    //         $this->response([
-    //             'status' => 200,
-    //             'message' => 'No journals found for this publisher.',
-    //             'data' => []
-    //         ], RestController::HTTP_OK);
-    //         return;
-    //     }
-    //     $this->db->select('users.id, users.name, users.email, journal_reviewer_link.journal_id');
-    //     $this->db->from('journal_reviewer_link');
-    //     $this->db->join('users', 'journal_reviewer_link.reviewer_id = users.id');
-    //     $this->db->where_in('journal_reviewer_link.journal_id', $journalIds);
-
-    //     $reviewers = $this->db->get()->result_array();
-
-    //     if (!empty($reviewers)) {
-    //         $this->response([
-    //             'status' => 200,
-    //             'message' => 'Reviewers fetched successfully.',
-    //             'data' => $reviewers
-    //         ], RestController::HTTP_OK);
-    //     } else {
-    //         $this->response([
-    //             'status' => 404,
-    //             'message' => 'No reviewers found for your journals.',
-    //             'data' => []
-    //         ], RestController::HTTP_OK);
-    //     }
-    // }
-
-
-
     public function get_research_by_id_get($id = null)
     {
 
@@ -1617,7 +1573,7 @@ class User extends RestController
             ];
         } else {
             $result = [
-                'status' => 404,
+                'status' => 200,
                 'message' => 'No Research paper found with the given ID',
                 'data' => null
             ];
@@ -1862,7 +1818,7 @@ class User extends RestController
             ];
         } else {
             $result = [
-                'status' => 404,
+                'status' => 200,
                 'message' => 'No reviews found for the given reviewer',
                 'data' => []
             ];
@@ -1892,15 +1848,6 @@ class User extends RestController
             'currentPage' => $page,
         ], RestController::HTTP_OK);
     }
-
-
-
-
-
-
-
-
-
 
     public function contactListing_get($limit = 10, $page = 1)
     {
