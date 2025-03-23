@@ -166,7 +166,7 @@ class Admin_model extends CI_model
         }
         return false;
     }
-    public function getResearchPaperRequests($onlyPublished = false)
+    public function getResearchPaperRequests($status = 'all')
     {
         $this->db->select('
         publish_requests.*,
@@ -182,9 +182,9 @@ class Admin_model extends CI_model
         $this->db->join('users', 'publish_requests.author_id = users.id');
         $this->db->join('journals', 'publish_requests.journal_id = journals.journal_id');
         $this->db->join('research_papers', 'publish_requests.paper_id = research_papers.paper_id');
-        if ($onlyPublished) {
+        if ($status == 'published') {
             $this->db->where('publish_requests.pr_status', 'published');
-        } else {
+        } elseif ($status == 'non-published') {
             $this->db->where('publish_requests.pr_status!=', 'published');
         }
         $query = $this->db->get();

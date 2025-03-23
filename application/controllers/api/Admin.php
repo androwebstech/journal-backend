@@ -279,8 +279,9 @@ class Admin extends RestController
 
     public function get_publish_requests_get()
     {
-        $onlyPublished = $this->input->get('onlyPublished') ? true : false;
-        $journals = $this->Admin_model->getResearchPaperRequests($onlyPublished);
+        $status = $this->input->get('status') ;
+
+        $journals = $this->Admin_model->getResearchPaperRequests($status);
         if ($journals) {
             $result = [
                 'status' => 200,

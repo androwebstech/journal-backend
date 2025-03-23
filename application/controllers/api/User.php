@@ -1247,7 +1247,12 @@ class User extends RestController
         } else {
             $where['publish_requests.publisher_id'] = $userId;
         }
-
+        $status = $this->input->get('status') ;
+        if ($status == 'published') {
+            $where['publish_requests.pr_status'] = 'published';
+        } elseif ($status == 'non-published') {
+            $where['publish_requests.pr_status!='] = 'published';
+        }
         $journals = $this->UserModel->getResearchPaperRequests($where, $this->user['type']);
         if ($journals) {
             $result = [
