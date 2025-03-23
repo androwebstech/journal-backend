@@ -166,7 +166,7 @@ class Admin_model extends CI_model
         }
         return false;
     }
-    public function getResearchPaperRequests()
+    public function getResearchPaperRequests($onlyPublished = false)
     {
         $this->db->select('
         publish_requests.*,
@@ -182,6 +182,11 @@ class Admin_model extends CI_model
         $this->db->join('users', 'publish_requests.author_id = users.id');
         $this->db->join('journals', 'publish_requests.journal_id = journals.journal_id');
         $this->db->join('research_papers', 'publish_requests.paper_id = research_papers.paper_id');
+        if ($onlyPublished) {
+            $this->db->where('publish_requests.pr_status', 'published');
+        } else {
+            $this->db->where('publish_requests.pr_status!=', 'published');
+        }
         $query = $this->db->get();
 
         if ($query->num_rows() > 0) {
@@ -192,7 +197,7 @@ class Admin_model extends CI_model
     }
 
 
-   public function getAdminId($adminId)
+    public function getAdminId($adminId)
     {
         $query = $this->db->get_where('admin', ['admin_id' => $adminId]);
         if ($query->num_rows() > 0) {
@@ -202,7 +207,7 @@ class Admin_model extends CI_model
     }
 
 
-        public function updateAdmin($adminId, $data)
+    public function updateAdmin($adminId, $data)
     {
         $this->db->where('admin_id', $adminId);
         return $this->db->update('admin', $data);
@@ -417,7 +422,6 @@ class Admin_model extends CI_model
     {
         $this->applyPublicationSearchFilter($filters, $searchString);
         return $this->db->count_all_results('published_papers');
-    
+
     }
 }
-
