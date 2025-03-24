@@ -1639,6 +1639,9 @@ class User extends RestController
         if ($request['publisher_id'] !== $this->user['id']) {
             return $this->response(['status' => 401, 'message' => 'You are not authorized to assign a reviewer to this request.'], RestController::HTTP_OK);
         }
+        if ($request['assigned_reviewer'] == $reviewer_id) {
+            return $this->response(['status' => 400, 'message' => 'Request already assigned to this reviewer.'], RestController::HTTP_OK);
+        }
         $update_data = [
             'assigned_reviewer' => $reviewer_id,
             'reviewer_remarks' => ''
